@@ -5,6 +5,7 @@ export enum BaseType {
     BYTE = 'BYTE',
     INT = 'INT',
     FLOAT = 'FLOAT',
+    DOUBLE = 'DOUBLE',
     STRING = 'STRING',
     CHARS = 'CHARS',
 }
@@ -14,6 +15,7 @@ export type BaseTypeMap = {
     [BaseType.BYTE]: number,
     [BaseType.INT]: number,
     [BaseType.FLOAT]: number,
+    [BaseType.DOUBLE]: number,
     [BaseType.STRING]: string,
     [BaseType.CHARS]: string,
 };

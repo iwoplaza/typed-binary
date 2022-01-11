@@ -1,5 +1,5 @@
 import { isBigEndian } from '../util';
-import { ISerialInput, ISerialOutput } from './types';
+import { ISerialOutput } from './types';
 
 export class BufferWriter implements ISerialOutput {
     private readonly uint8View: Uint8Array;
