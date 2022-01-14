@@ -1,6 +1,6 @@
 import { ISerialInput, ISerialOutput } from '../io';
 import { Parsed } from '../parsed';
-import { BaseType, BaseTypeDescription } from './baseTypes';
+import { BaseType, BaseTypeDescription, readBaseType, writeBaseType } from './baseTypes';
 
 export enum CompoundType {
     NULLABLE = 'NULLABLE',
@@ -113,6 +113,10 @@ export function readObject<T extends ObjectDescription, C extends ISubTypeContex
 
         const subTypeKey = description.keyedBy === SubTypeKey.ENUM ? input.readByte() : input.readString();
         subTypeDescription = subTypeCategory[subTypeKey] || null;
+        
+        // Making the sub type key available to the result object.
+        result.subType = subTypeKey;
+
         if (subTypeDescription === null) {
             throw new Error(`Unknown sub-type '${subTypeKey}' in '${description.subTypeCategory}' category`);
         }

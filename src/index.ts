@@ -1,3 +1,3 @@
 export * from './structure';
-export * from './propDefaults';
+export * from './describe';
 export * from './io';
