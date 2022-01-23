@@ -10,7 +10,7 @@ export class BufferReader implements ISerialInput {
 
     private byteOffset: number = 0;
 
-    constructor(buffer: ArrayBuffer) {
+    constructor(buffer: Buffer) {
         this.uint8View = new Uint8Array(buffer, 0);
         this.byteOffset = 0;
         

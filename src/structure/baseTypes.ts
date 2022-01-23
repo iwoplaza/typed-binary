@@ -1,4 +1,4 @@
-import { TypeKey } from './_internal';
+import { TypeKey } from './types';
 
 export type BaseType = TypeKey.BOOL | TypeKey.BYTE | TypeKey.INT | TypeKey.FLOAT | TypeKey.STRING;
 

@@ -1,7 +1,7 @@
 import { ISerialInput, ISerialOutput } from '../io';
 import { Parsed } from '../parsed';
 
-import type { ISubTypeContext, ReadContext, SizeContext, WriteContext } from './types';
+import type { ISubTypeContext, ReadContext, SizeContext, TupleDescription, TypeDescription, WriteContext } from './types';
 import {
     TypeKey,
     ArrayDescription,
@@ -21,8 +21,8 @@ import {
     sizeOfNullable,
     sizeOfObject,
 } from './_internal';
+import { readTuple, writeTuple } from './tuple';
 
-export type TypeDescription = ObjectDescription | ArrayDescription | NullableDescription | CharsDescription | BaseTypeDescription;
 
 type SchemaMap = {
     [TypeKey.BOOL]: BaseTypeDescription,
@@ -33,6 +33,7 @@ type SchemaMap = {
     [TypeKey.NULLABLE]: NullableDescription,
     [TypeKey.OBJECT]: ObjectDescription,
     [TypeKey.ARRAY]: ArrayDescription,
+    [TypeKey.TUPLE]: TupleDescription,
     [TypeKey.CHARS]: CharsDescription,
 };
 
@@ -57,6 +58,7 @@ export const typeReaderMap: {[key in TypeKey]: (ctx: ReadContext, input: ISerial
     [TypeKey.NULLABLE]: readNullable,
     [TypeKey.OBJECT]: readObject,
     [TypeKey.ARRAY]: readArray,
+    [TypeKey.TUPLE]: readTuple,
     [TypeKey.CHARS]: readChars,
 } as const;
 
@@ -69,33 +71,38 @@ export const typeWriterMap: {[key in TypeKey]: (ctx: WriteContext, output: ISeri
     [TypeKey.NULLABLE]: writeNullable,
     [TypeKey.OBJECT]: writeObject,
     [TypeKey.ARRAY]: writeArray,
+    [TypeKey.TUPLE]: writeTuple,
     [TypeKey.CHARS]: writeChars,
 } as const;
 
-export function sizeOf<T extends TypeDescription, C extends ISubTypeContext = {}>(subTypeContext: C, desc: T, value: Parsed<T, C>): number {
+export function sizeOf<T extends TypeDescription, C extends ISubTypeContext = {}>(desc: T, value: Parsed<T, C>, subTypeContext?: C): number {
+    subTypeContext = subTypeContext || {} as C;
+
     const sizeContext: SizeContext = {
         subTypes: subTypeContext,
-        sizeOfAny: (desc, value) => sizeOf(subTypeContext, desc, value),
+        sizeOfAny: (desc, value) => sizeOf(desc, value, subTypeContext),
     };
     // @ts-ignore
     return typeSizeMap[desc.type](sizeContext, desc, value as any);
 }
 
-export function readSerial<T extends PropertyDescription, C extends ISubTypeContext = {}>(subTypeContext: C, input: ISerialInput, description: T): Parsed<T, C> {
+export function readSerial<T extends PropertyDescription, C extends ISubTypeContext = {}>(input: ISerialInput, description: T, subTypeContext?: C): Parsed<T, C> {
+    subTypeContext = subTypeContext || {} as C;
+
     const readContext: ReadContext = {
         subTypes: subTypeContext,
-        readAny: (desc) => readSerial(subTypeContext, input, desc),
+        readAny: (desc) => readSerial(input, desc, subTypeContext),
     };
     return typeReaderMap[description.type](readContext, input, description as any);
 }
 
-export function writeSerial<T extends PropertyDescription, C extends ISubTypeContext = {}>(subTypeContext: C, output: ISerialOutput, description: T, value: Parsed<T, C>) {
+export function writeSerial<T extends PropertyDescription, C extends ISubTypeContext = {}>(output: ISerialOutput, description: T, value: Parsed<T, C>, subTypeContext?: C): void {
+    subTypeContext = subTypeContext || {} as C;
+
     const writeContext: WriteContext = {
         subTypes: subTypeContext,
-        writeAny: (desc, val) => writeSerial(subTypeContext, output, desc, val),
+        writeAny: (desc, val) => writeSerial(output, desc, val, subTypeContext),
     };
-    
-    console.log({ typeWriterMap });
 
     // @ts-ignore
     typeWriterMap[description.type](writeContext, output, description as any, value as any);

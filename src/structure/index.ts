@@ -3,6 +3,7 @@ export {
     BaseTypeMap,
     BaseTypeDescription,
     
+    TypeDescription,
     PropertyDescription,
     NullableDescription,
     ArrayDescription,
@@ -16,4 +17,5 @@ export {
 export {
     readSerial,
     writeSerial,
+    sizeOf,
 } from './general';

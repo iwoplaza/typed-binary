@@ -1,4 +1,4 @@
-import { ObjectDescription, TypeKey, SubTypeKey } from '../structure';;
+import { ObjectDescription, TypeKey, SubTypeKey } from '../structure';
 
 export const BOOL =        { type: TypeKey.BOOL as const };
 export const BYTE =        { type: TypeKey.BYTE as const };
@@ -39,6 +39,12 @@ export const arrayOf = <T>(elementType: T) => ({
     type: TypeKey.ARRAY as const,
     elementType,
 });
+export const tupleOf = <T, L extends number>(elementType: T, length: L) => ({
+    type: TypeKey.TUPLE as const,
+    elementType,
+    length
+});
+
 export const nullable = <T>(elementType: T) => ({
     type: TypeKey.NULLABLE as const,
     element: elementType,

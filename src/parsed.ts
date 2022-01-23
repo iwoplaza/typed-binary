@@ -1,5 +1,6 @@
 import type { ArrayDescription, CharsDescription, ISubTypeContext, BaseTypeDescription, NullableDescription, ObjectDescription } from './structure';
 import { TypeKey, BaseTypeMap } from './structure';
+import { TupleDescription } from './structure/types';
 
 type Values<T extends {[k in keyof T]: T[k]}> = T[keyof T];
 
@@ -23,15 +24,21 @@ export type ParsedArray<T extends ArrayDescription, C extends ISubTypeContext> =
     ? Parsed<ElementType, C>[]
     : never;
 
+export type ParsedTuple<T extends TupleDescription, C extends ISubTypeContext> =
+    T extends { type: TypeKey.TUPLE, elementType: infer ElementType }
+    ? Parsed<ElementType, C>[]
+    : never;
+
 export type ParsedNullable<T extends NullableDescription, C extends ISubTypeContext> =
-    T extends { type: TypeKey.NULLABLE, element: infer InnerType }
+    T extends { type: TypeKey.NULLABLE, elementType: infer InnerType }
     ? Parsed<InnerType, C> | undefined
     : never;
 
-export type Parsed<T, C extends ISubTypeContext> =
+export type Parsed<T, C extends ISubTypeContext = {}> =
     T extends BaseTypeDescription ? BaseTypeMap[T['type']] :
     T extends ObjectDescription ? ParsedObject<T, C> :
     T extends ArrayDescription ? ParsedArray<T, C> :
+    T extends TupleDescription ? ParsedTuple<T, C> :
     T extends NullableDescription ? ParsedNullable<T, C> :
     T extends CharsDescription ? string :
     T;

@@ -5,7 +5,7 @@ export function readNullable<T extends NullableDescription>(ctx: ReadContext, in
     const valueExists = input.readBool();
     
     if (valueExists) {
-        return ctx.readAny(description.element);
+        return ctx.readAny(description.elementType);
     }
 
     return undefined;
@@ -14,7 +14,7 @@ export function readNullable<T extends NullableDescription>(ctx: ReadContext, in
 export function writeNullable<T extends NullableDescription>(ctx: WriteContext, output: ISerialOutput, description: T, value: any): void {
     if (value !== undefined && value !== null) {
         output.writeBool(true);
-        ctx.writeAny(description.element, value);
+        ctx.writeAny(description.elementType, value);
     }
     else {
         output.writeBool(false);
@@ -25,5 +25,5 @@ export function sizeOfNullable<T extends NullableDescription>(ctx: SizeContext, 
     if (value === undefined)
         return 1;
     
-    return 1 + ctx.sizeOfAny(description.element, value);
+    return 1 + ctx.sizeOfAny(description.elementType, value);
 }

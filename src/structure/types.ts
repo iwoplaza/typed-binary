@@ -10,7 +10,10 @@ export enum TypeKey {
     NULLABLE = 'NULLABLE',
     OBJECT = 'OBJECT',
     ARRAY = 'ARRAY',
+    TUPLE = 'TUPLE',
 }
+
+export type TypeDescription = ObjectDescription | ArrayDescription | TupleDescription | NullableDescription | CharsDescription | BaseTypeDescription;
 
 ////
 // CONTEXT
@@ -46,7 +49,7 @@ export interface SizeContext {
 // OBJECT
 ////
 
-export type PropertyDescription = SimpleObjectDescription | GenericObjectDescription | ArrayDescription | NullableDescription | CharsDescription | BaseTypeDescription;
+export type PropertyDescription = SimpleObjectDescription | GenericObjectDescription | ArrayDescription | TupleDescription | NullableDescription | CharsDescription | BaseTypeDescription;
 
 export type SimpleObjectDescription = {
     type: TypeKey.OBJECT,
@@ -88,10 +91,20 @@ export type ArrayDescription = {
 }
 
 ////
+// TUPLE
+////
+
+export type TupleDescription = {
+    type: TypeKey.TUPLE,
+    elementType: PropertyDescription,
+    length: number,
+}
+
+////
 // NULLABLE
 ////
 
 export type NullableDescription = {
     type: TypeKey.NULLABLE,
-    element: PropertyDescription,
+    elementType: PropertyDescription,
 }
