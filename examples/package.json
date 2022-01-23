@@ -1,0 +1,10 @@
+{
+  "name": "typed-binary-examples",
+  "scripts": {
+    "example:binaryMesh": "ts-node binaryMesh/index.ts"
+  },
+  "devDependencies": {
+    "ts-node": "^10.4.0",
+    "typescript": "^4.5.4"
+  }
+}
