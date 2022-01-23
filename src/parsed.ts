@@ -1,5 +1,5 @@
 import { BaseTypeDescription, BaseTypeMap } from './structure/baseTypes';
-import { ArrayDescription, CompoundType, ISubTypeContext, NullableDescription, ObjectDescription } from './structure/compoundTypes';
+import { ArrayDescription, CharsDescription, CompoundType, ISubTypeContext, NullableDescription, ObjectDescription } from './structure/compoundTypes';
 
 type Values<T extends {[k in keyof T]: T[k]}> = T[keyof T];
 
@@ -34,5 +34,6 @@ export type Parsed<T, C extends ISubTypeContext> =
     T extends ObjectDescription ? ParsedObject<T, C> :
     T extends ArrayDescription ? ParsedArray<T, C> :
     T extends NullableDescription ? ParsedNullable<T, C> :
+    T extends CharsDescription ? string :
     T extends BaseTypeDescription ? ParsedBaseType<T> :
     T;

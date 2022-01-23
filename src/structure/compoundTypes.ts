@@ -1,23 +1,31 @@
 import { ISerialInput, ISerialOutput } from '../io';
 import { Parsed } from '../parsed';
-import { BaseType, BaseTypeDescription, readBaseType, writeBaseType } from './baseTypes';
+import { BaseTypeDescription, readBaseType, writeBaseType } from './baseTypes';
 
 export enum CompoundType {
     NULLABLE = 'NULLABLE',
     OBJECT = 'OBJECT',
     ARRAY = 'ARRAY',
+    CHARS = 'CHARS',
 }
 
-export type PropertyDescription = ObjectDescription | ArrayDescription | NullableDescription | BaseTypeDescription;
+export type PropertyDescription = ObjectDescription | ArrayDescription | NullableDescription | CharsDescription | BaseTypeDescription;
 
 export type ObjectDescription = {
     type: CompoundType.OBJECT,
     subTypeCategory?: string,
-    subType?: string | number,
     /**
      * @default SubTypeKey.STRING
      */
     keyedBy?: SubTypeKey,
+    properties: {
+        [key: string]: PropertyDescription,
+    },
+}
+
+export type ConcreteObjectDescription = {
+    type: CompoundType.OBJECT,
+    subType?: string | number,
     properties: {
         [key: string]: PropertyDescription,
     },
@@ -33,11 +41,17 @@ export type NullableDescription = {
     element: PropertyDescription,
 }
 
+export type CharsDescription = {
+    type: CompoundType.CHARS,
+    length: number,
+};
+
+
 /**
  * Sub Types
  */
 
-export type SubTypeCategory = {[key: string]: ObjectDescription};
+export type SubTypeCategory = {[key: string]: ConcreteObjectDescription};
 
 export interface ISubTypeContext {
     [key: string]: SubTypeCategory;
@@ -65,7 +79,7 @@ export function readSerial<T extends PropertyDescription, C extends ISubTypeCont
         // @ts-ignore
         return readNullable(subTypeContext, input, description);
     }
-    else if (description.type === BaseType.CHARS) {
+    else if (description.type === CompoundType.CHARS) {
         // @ts-ignore
         return readChars(input, description);
     }
@@ -142,6 +156,16 @@ export function readObject<T extends ObjectDescription, C extends ISubTypeContex
     return result;
 }
 
+export function readChars<T extends CharsDescription>(input: ISerialInput, description: T): string {
+    let content = '';
+
+    for (let i = 0; i < description.length; ++i) {
+        content += String.fromCharCode(input.readByte());
+    }
+
+    return content;
+}
+
 
 export function writeSerial<T extends PropertyDescription, C extends ISubTypeContext>(subTypeContext: C, output: ISerialOutput, description: T, value: Parsed<T, C>) {
     if (description.type === CompoundType.OBJECT) {
@@ -156,7 +180,7 @@ export function writeSerial<T extends PropertyDescription, C extends ISubTypeCon
         // @ts-ignore
         writeNullable(subTypeContext, output, description, value);
     }
-    else if (description.type === BaseType.CHARS) {
+    else if (description.type === CompoundType.CHARS) {
         // @ts-ignore
         writeChars(output, description, value);
     }
@@ -232,5 +256,15 @@ export function writeObject<T extends ObjectDescription, C extends ISubTypeConte
     
             writeSerial(subTypeContext, output, prop, value[key]);
         }
+    }
+}
+
+export function writeChars<T extends CharsDescription>(output: ISerialOutput, description: T, value: string): void {
+    if (value.length !== description.length) {
+        throw new Error(`Expected char-string of length ${description.length}, got ${value.length}`);
+    }
+
+    for (let i = 0; i < value.length; ++i) {
+        output.writeByte(value.charCodeAt(i));
     }
 }

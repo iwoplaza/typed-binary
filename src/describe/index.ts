@@ -8,7 +8,7 @@ export const FLOAT =       { type: BaseType.FLOAT as const };
 export const STRING =      { type: BaseType.STRING as const };
 
 export const chars = <T extends number>(length: T) => ({
-    type: BaseType.CHARS as const,
+    type: CompoundType.CHARS as const,
     length,
 });
 export const object = <P>(properties: P) => ({

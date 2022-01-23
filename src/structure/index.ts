@@ -2,13 +2,9 @@ export {
     BaseType,
     BaseTypeMap,
     BaseTypeDescription,
-    CharsDescription,
 
     readBaseType,
-    readChars,
-
     writeBaseType,
-    writeChars,
 } from './baseTypes';
 
 export {
@@ -17,6 +13,7 @@ export {
     NullableDescription,
     ArrayDescription,
     ObjectDescription,
+    CharsDescription,
     SubTypeCategory,
     ISubTypeContext,
     SubTypeKey,
@@ -25,9 +22,11 @@ export {
     readNullable,
     readArray,
     readObject,
+    readChars,
 
     writeSerial,
     writeNullable,
     writeArray,
     writeObject,
+    writeChars,
 } from './compoundTypes';

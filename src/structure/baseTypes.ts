@@ -7,7 +7,6 @@ export enum BaseType {
     FLOAT = 'FLOAT',
     DOUBLE = 'DOUBLE',
     STRING = 'STRING',
-    CHARS = 'CHARS',
 }
 
 export type BaseTypeMap = {
@@ -17,30 +16,15 @@ export type BaseTypeMap = {
     [BaseType.FLOAT]: number,
     [BaseType.DOUBLE]: number,
     [BaseType.STRING]: string,
-    [BaseType.CHARS]: string,
 };
 
 export type BaseTypeDescription = {
     type: BaseType,
 };
 
-export type CharsDescription = BaseTypeDescription & {
-    length: number,
-};
-
 /*
 * IO
 */
-
-export function readChars<T extends CharsDescription>(input: ISerialInput, description: T): string {
-    let content = '';
-
-    for (let i = 0; i < description.length; ++i) {
-        content += String.fromCharCode(input.readByte());
-    }
-
-    return content;
-}
 
 export function readBaseType<T extends BaseTypeDescription>(input: ISerialInput, desciprion: T): BaseTypeMap[T['type']] {
     if (desciprion.type === BaseType.BOOL) {
@@ -60,16 +44,6 @@ export function readBaseType<T extends BaseTypeDescription>(input: ISerialInput,
     }
     else {
         throw new Error(`Unknown base type: ${desciprion.type}`);
-    }
-}
-
-export function writeChars<T extends CharsDescription>(output: ISerialOutput, description: T, value: string): void {
-    if (value.length !== description.length) {
-        throw new Error(`Expected char-string of length ${description.length}, got ${value.length}`);
-    }
-
-    for (let i = 0; i < value.length; ++i) {
-        output.writeByte(value.charCodeAt(i));
     }
 }
 
