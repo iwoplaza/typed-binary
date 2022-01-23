@@ -7,12 +7,20 @@
     "types": "dist/index.d.ts",
     "scripts": {
         "build": "rollup -c",
+        "prepublishOnly": "npm run build",
+        "dryPublish": "npm publish --dry-run",
         "test": "cross-env TS_NODE_PROJECT=\"tsconfig.test.json\" mocha --reporter spec --require ts-node/register src/**/*.test.ts"
     },
     "keywords": [
-        "TypeScript",
-        "Binary",
-        "Structure"
+        "typescript",
+        "binary",
+        "structure"
+    ],
+    "files": [
+        "tsconfig.test.json",
+        "README.md",
+        "src",
+        "dist"
     ],
     "author": "Iwo Plaza <iwoplaza@gmail.com>",
     "license": "ISC",
@@ -32,8 +40,11 @@
         "ts-node": "^10.4.0",
         "typescript": "^4.5.4"
     },
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/iwoplaza/typed-binary.git"
+    },
     "bugs": {
         "url": "https://github.com/iwoplaza/typed-binary/issues"
-    },
-    "homepage": "https://github.com/iwoplaza/typed-binary"
+    }
 }
