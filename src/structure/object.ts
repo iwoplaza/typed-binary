@@ -8,8 +8,16 @@ import { SubTypeKey } from './types';
 
 
 export class ObjectSchema<T extends SchemaProperties, O extends InferedProperties<T> = InferedProperties<T>> extends Schema<O> {
-    constructor(public readonly properties: T) {
+    private cachedProperties?: T;
+
+    constructor(private readonly _properties: ValueOrProvider<T>) {
         super();
+    }
+
+    public get properties() {
+        return this.cachedProperties || (
+            this.cachedProperties = (typeof this._properties === 'function' ? this._properties() : this._properties)
+        );
     }
 
     write(output: ISerialOutput, value: O): void {
@@ -46,7 +54,7 @@ export class ObjectSchema<T extends SchemaProperties, O extends InferedPropertie
     }
 }
 
-type InferedSubTypes<T extends {[key in keyof T]: ObjectSchema<SchemaProperties>}> = {
+export type InferedSubTypes<T extends {[key in keyof T]: ObjectSchema<SchemaProperties>}> = {
     [Key in keyof T]: T[Key]['_infered'] & { type: Key }
 };
 
@@ -55,11 +63,12 @@ export type ObjectSchemaMap<S, SI extends {[key in keyof SI]: SI[key]}> = {[key 
 export class GenericObjectSchema<
     T extends SchemaProperties, // Base properties
     S extends {[Key in keyof S]: ObjectSchema<SchemaProperties>}, // Sub type map
-    K extends ((keyof S) extends string ? SubTypeKey.STRING : SubTypeKey.ENUM)
-> extends ObjectSchema<T, InferedProperties<T> & InferedSubTypes<S>[keyof S]> {
+    K extends string|number,
+    I extends InferedProperties<T> & InferedSubTypes<S>[keyof S] = InferedProperties<T> & InferedSubTypes<S>[keyof S]
+> extends ObjectSchema<T, I> {
     constructor(
         public readonly keyedBy: K,
-        properties: T,
+        properties: ValueOrProvider<T>,
         private readonly subTypeMap: ValueOrProvider<S>
     ) {
         super(properties);
@@ -69,7 +78,7 @@ export class GenericObjectSchema<
         return typeof this.subTypeMap === 'function' ? this.subTypeMap() : this.subTypeMap;
     }
 
-    write(output: ISerialOutput, value: InferedProperties<T> & InferedSubTypes<S>[keyof S]): void {
+    write(output: ISerialOutput, value: I): void {
         // Figuring out sub-types
         const subTypeDescription = this.getSubTypeMap()[value.type] || null;
         if (subTypeDescription === null) {
@@ -99,7 +108,7 @@ export class GenericObjectSchema<
         }
     }
 
-    read(input: ISerialInput): InferedProperties<T> & InferedSubTypes<S>[keyof S] {
+    read(input: ISerialInput): I {
         const subTypeMap = this.getSubTypeMap();
         const subTypeKey = this.keyedBy === SubTypeKey.ENUM ? input.readByte() : input.readString();
 
@@ -126,7 +135,7 @@ export class GenericObjectSchema<
         return result;
     }
 
-    sizeOf(value: InferedProperties<T> & InferedSubTypes<S>[keyof S]): number {
+    sizeOf(value: I): number {
         let size = super.sizeOf(value);
 
         // We're a generic object trying to encode a concrete value.
