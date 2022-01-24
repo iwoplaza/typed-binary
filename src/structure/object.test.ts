@@ -34,7 +34,7 @@ describe('(read/write)Object', () => {
         });
 
         const value = {
-            subType: 'concrete' as const,
+            type: 'concrete' as const,
             sharedValue: 100,
             extraValue: 10,
         };
@@ -56,7 +56,7 @@ describe('(read/write)Object', () => {
         });
 
         const value = {
-            subType: 0 as const,
+            type: 0 as const,
             sharedValue: 100,
             extraValue: 10,
         };

@@ -41,4 +41,3 @@ export const KeyframeNodeTemplate =
 
 type KeyframeNodeTemplate = Parsed<typeof KeyframeNodeTemplate>;
 const s = {} as KeyframeNodeTemplate;
-

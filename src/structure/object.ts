@@ -1,5 +1,5 @@
 import type { ISerialInput, ISerialOutput } from '../io';
-import { ValueOrProvider } from '../utilityTypes';
+import type { ValueOrProvider } from '../utilityTypes';
 import { STRING } from './baseTypes';
 import {
     Schema, InferedProperties, SchemaProperties
@@ -46,7 +46,7 @@ export class ObjectSchema<T extends SchemaProperties, O extends InferedPropertie
 }
 
 type InferedSubTypes<T extends {[key in keyof T]: ObjectSchema<any>}> = {
-    [Key in keyof T]: T[Key]['_infered'] & { subType: Key }
+    [Key in keyof T]: T[Key]['_infered'] & { type: Key }
 };
 
 export type ObjectSchemaMap<S, SI extends {[key in keyof SI]: SI[key]}> = {[key in keyof S]: ObjectSchema<SI[key]>};
@@ -70,17 +70,17 @@ export class GenericObjectSchema<
 
     write(output: ISerialOutput, value: InferedProperties<T> & InferedSubTypes<S>[keyof S]): void {
         // Figuring out sub-types
-        const subTypeDescription = this.getSubTypeMap()[value.subType] || null;
+        const subTypeDescription = this.getSubTypeMap()[value.type] || null;
         if (subTypeDescription === null) {
-            throw new Error(`Unknown sub-type '${value.subType}' in among '${JSON.stringify(Object.keys(this.subTypeMap))}'`);
+            throw new Error(`Unknown sub-type '${value.type}' in among '${JSON.stringify(Object.keys(this.subTypeMap))}'`);
         }
 
         // Writing the sub-type out.
         if (this.keyedBy === SubTypeKey.ENUM) {
-            output.writeByte(value.subType as number);
+            output.writeByte(value.type as number);
         }
         else {
-            output.writeString(value.subType as string);
+            output.writeString(value.type as string);
         }
 
         // Writing the base properties
@@ -108,7 +108,7 @@ export class GenericObjectSchema<
         let result: any = super.read(input);
 
         // Making the sub type key available to the result object.
-        result.subType = subTypeKey;
+        result.type = subTypeKey;
 
         if (subTypeDescription !== null) {
             const extraKeys: string[] = Object.keys(subTypeDescription.properties).sort();
@@ -127,12 +127,12 @@ export class GenericObjectSchema<
         let size = super.sizeOf(value);
 
         // We're a generic object trying to encode a concrete value.
-        size += this.keyedBy === SubTypeKey.ENUM ? 1 : STRING.sizeOf(value.subType as string);
+        size += this.keyedBy === SubTypeKey.ENUM ? 1 : STRING.sizeOf(value.type as string);
 
         // Extra sub-type fields
-        const subTypeDescription = this.getSubTypeMap()[value.subType] || null;
+        const subTypeDescription = this.getSubTypeMap()[value.type] || null;
         if (subTypeDescription === null) {
-            throw new Error(`Unknown sub-type '${value.subType}' in among '${JSON.stringify(Object.keys(this.subTypeMap))}'`);
+            throw new Error(`Unknown sub-type '${value.type}' in among '${JSON.stringify(Object.keys(this.subTypeMap))}'`);
         }
 
         size += Object.keys(subTypeDescription.properties) // Going through extra property keys
