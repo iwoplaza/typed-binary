@@ -1,5 +1,5 @@
 import * as chai from 'chai';
-import { randIntBetween } from '../../test/random';
+import { randIntBetween } from '../test/random';
 import { makeIO } from './_mock.test';
 import { CharsSchema } from '.';
 

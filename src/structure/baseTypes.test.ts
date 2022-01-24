@@ -1,6 +1,6 @@
 import * as mocha from 'mocha';
 import * as chai from 'chai';
-import { randBetween, randIntBetween } from '../../test/random';
+import { randBetween, randIntBetween } from '../test/random';
 import { BufferReader, BufferWriter } from '../io';
 import { Schema } from './types';
 import { BOOL, BYTE, INT, FLOAT, STRING, } from '.';

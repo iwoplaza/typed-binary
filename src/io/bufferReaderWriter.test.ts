@@ -2,7 +2,7 @@ import * as mocha from 'mocha';
 import * as chai from 'chai';
 import { BufferWriter } from './bufferWriter';
 import { BufferReader } from './bufferReader';
-import { randBetween, randIntBetween } from '../../test/random';
+import { randBetween, randIntBetween } from '../test/random';
 
 const expect = chai.expect;
 describe('BufferWriter/BufferReader', () => {
