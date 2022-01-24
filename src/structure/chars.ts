@@ -27,7 +27,7 @@ export class CharsSchema extends Schema<string> {
         return content;
     }
 
-    sizeOf(value: string): number {
+    sizeOf(): number {
         return this.length;
     }
 }

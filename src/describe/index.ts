@@ -1,7 +1,7 @@
 import { ObjectSchema, CharsSchema, SubTypeKey } from '../structure';
 import { ArraySchema } from '../structure/array';
 import { OptionalSchema } from '../structure/optional';
-import { GenericObjectSchema, ObjectSchemaMap } from '../structure/object';
+import { GenericObjectSchema } from '../structure/object';
 import { TupleSchema } from '../structure/tuple';
 import { Schema, SchemaProperties } from '../structure/types';
 import { ValueOrProvider } from '../utilityTypes';
@@ -16,14 +16,14 @@ export const object = <P extends SchemaProperties>(properties: P) =>
 
 export const generic = <P extends SchemaProperties, S extends {[key in keyof S]: ObjectSchema<any>}>(properties: P, subTypeMap: ValueOrProvider<S>) =>
     new GenericObjectSchema(
-        SubTypeKey.STRING as const as any,
+        SubTypeKey.STRING as any,
         properties,
         subTypeMap
     );
 
 export const genericEnum = <P extends SchemaProperties, S extends {[key in keyof S]: ObjectSchema<any>}>(properties: P, subTypeMap: ValueOrProvider<S>) =>
     new GenericObjectSchema(
-        SubTypeKey.ENUM as const as any,
+        SubTypeKey.ENUM as any,
         properties,
         subTypeMap
     );

@@ -14,7 +14,7 @@ export class BoolSchema extends Schema<boolean> {
         output.writeBool(value);
     }
 
-    sizeOf(value: boolean): number {
+    sizeOf(): number {
         return 1;
     }
 }
@@ -54,7 +54,7 @@ export class ByteSchema extends Schema<number> {
         output.writeByte(value);
     }
 
-    sizeOf(value: number): number {
+    sizeOf(): number {
         return 1;
     }
 }
@@ -74,7 +74,7 @@ export class IntSchema extends Schema<number> {
         output.writeInt(value);
     }
 
-    sizeOf(value: number): number {
+    sizeOf(): number {
         return 4;
     }
 }
@@ -94,7 +94,7 @@ export class FloatSchema extends Schema<number> {
         output.writeFloat(value);
     }
 
-    sizeOf(_: number): number {
+    sizeOf(): number {
         return 4;
     }
 }

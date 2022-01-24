@@ -23,11 +23,12 @@ export class ObjectSchema<T extends SchemaProperties, O extends InferedPropertie
 
     read(input: ISerialInput): O {
         // Sorting the keys in ASCII ascending order, so that the order is platform independent.
-        const keys: string[] = Object.keys(this.properties).sort();
-        let result: any = {};
+        const keys: (keyof T)[] = Object.keys(this.properties).sort();
+        const result = {} as O;
 
         for (const key of keys) {
-            result[key] = this.properties[key].read(input);
+            // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+            result[key] = this.properties[key].read(input) as O[typeof key];
         }
 
         return result;
@@ -45,7 +46,7 @@ export class ObjectSchema<T extends SchemaProperties, O extends InferedPropertie
     }
 }
 
-type InferedSubTypes<T extends {[key in keyof T]: ObjectSchema<any>}> = {
+type InferedSubTypes<T extends {[key in keyof T]: ObjectSchema<SchemaProperties>}> = {
     [Key in keyof T]: T[Key]['_infered'] & { type: Key }
 };
 
@@ -53,8 +54,8 @@ export type ObjectSchemaMap<S, SI extends {[key in keyof SI]: SI[key]}> = {[key 
 
 export class GenericObjectSchema<
     T extends SchemaProperties, // Base properties
-    S extends {[key in keyof S]: ObjectSchema<any>}, // Sub type map
-    K extends (keyof S extends string ? SubTypeKey.STRING : SubTypeKey.ENUM)
+    S extends {[Key in keyof S]: ObjectSchema<SchemaProperties>}, // Sub type map
+    K extends ((keyof S) extends string ? SubTypeKey.STRING : SubTypeKey.ENUM)
 > extends ObjectSchema<T, InferedProperties<T> & InferedSubTypes<S>[keyof S]> {
     constructor(
         public readonly keyedBy: K,
@@ -72,7 +73,7 @@ export class GenericObjectSchema<
         // Figuring out sub-types
         const subTypeDescription = this.getSubTypeMap()[value.type] || null;
         if (subTypeDescription === null) {
-            throw new Error(`Unknown sub-type '${value.type}' in among '${JSON.stringify(Object.keys(this.subTypeMap))}'`);
+            throw new Error(`Unknown sub-type '${value.type.toString()}' in among '${JSON.stringify(Object.keys(this.subTypeMap))}'`);
         }
 
         // Writing the sub-type out.
@@ -87,10 +88,12 @@ export class GenericObjectSchema<
         super.write(output, value);
 
         // Extra sub-type fields
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
         const extraKeys: string[] = Object.keys(subTypeDescription.properties).sort();
     
         for (const key of extraKeys) {
-            const prop = subTypeDescription.properties[key];
+            // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access
+            const prop: Schema<unknown> = subTypeDescription.properties[key];
     
             prop.write(output, value[key]);
         }
@@ -105,18 +108,18 @@ export class GenericObjectSchema<
             throw new Error(`Unknown sub-type '${subTypeKey}' in among '${JSON.stringify(Object.keys(subTypeMap))}'`);
         }
 
-        let result: any = super.read(input);
+        const result = super.read(input);
 
         // Making the sub type key available to the result object.
-        result.type = subTypeKey;
+        result.type = subTypeKey as keyof S;
 
         if (subTypeDescription !== null) {
-            const extraKeys: string[] = Object.keys(subTypeDescription.properties).sort();
+            const extraKeys = Object.keys(subTypeDescription.properties).sort();
         
             for (const key of extraKeys) {
                 const prop = (subTypeDescription.properties)[key];
-        
-                result[key] = prop.read(input);
+                // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+                (result as any)[key] = prop.read(input);
             }
         }
 
@@ -132,12 +135,12 @@ export class GenericObjectSchema<
         // Extra sub-type fields
         const subTypeDescription = this.getSubTypeMap()[value.type] || null;
         if (subTypeDescription === null) {
-            throw new Error(`Unknown sub-type '${value.type}' in among '${JSON.stringify(Object.keys(this.subTypeMap))}'`);
+            throw new Error(`Unknown sub-type '${value.type.toString()}' in among '${JSON.stringify(Object.keys(this.subTypeMap))}'`);
         }
 
         size += Object.keys(subTypeDescription.properties) // Going through extra property keys
                         .map(key => subTypeDescription.properties[key].sizeOf(value[key])) // Mapping extra properties into their sizes
-                        .reduce((a, b) => a + b); // Summing them up
+                        .reduce((a, b) => a + b, 0); // Summing them up
     
         return size;
     }

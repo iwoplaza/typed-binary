@@ -28,6 +28,6 @@ export class TupleSchema<T> extends Schema<T[]> {
     }
 
     sizeOf(values: T[]): number {
-        return values.map((v: any) => this.elementType.sizeOf(v)).reduce((a, b) => a + b);
+        return values.map(v => this.elementType.sizeOf(v)).reduce((a, b) => a + b);
     }
 }

@@ -1,12 +1,12 @@
-import * as mocha from 'mocha';
 import * as chai from 'chai';
 import { randBetween, randIntBetween } from '../test/random';
 import { BufferReader, BufferWriter } from '../io';
 import { Schema } from './types';
 import { BOOL, BYTE, INT, FLOAT, STRING, } from '.';
+import { Parsed } from '../utilityTypes';
 
 
-function encodeAndDecode<T extends Schema<any>, P extends T['_infered']>(description: T, value: P, bufferSize: number): P {
+function encodeAndDecode<T extends Schema<Parsed<T>>>(description: T, value: Parsed<T>, bufferSize: number): Parsed<T> {
     const buffer = Buffer.alloc(bufferSize);
     description.write(new BufferWriter(buffer), value);
 

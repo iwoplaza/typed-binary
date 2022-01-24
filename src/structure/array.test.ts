@@ -8,7 +8,7 @@ const expect = chai.expect;
 describe('(read/write)Array', () => {
     it('should encode and decode a simple int array', () => {
         const length = randIntBetween(0, 5);
-        let value = [];
+        const value = [];
         for (let i = 0; i < length; ++i) {
             value.push(randIntBetween(-10000, 10000));
         }

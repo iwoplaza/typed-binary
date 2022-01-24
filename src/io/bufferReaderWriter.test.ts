@@ -1,4 +1,3 @@
-import * as mocha from 'mocha';
 import * as chai from 'chai';
 import { BufferWriter } from './bufferWriter';
 import { BufferReader } from './bufferReader';
@@ -20,7 +19,7 @@ describe('BufferWriter/BufferReader', () => {
         const writer = new BufferWriter(buffer);
 
         // Writing the ints
-        for (let int of intList) {
+        for (const int of intList) {
             writer.writeInt(int);
         }
 
@@ -48,7 +47,7 @@ describe('BufferWriter/BufferReader', () => {
         const writer = new BufferWriter(buffer);
 
         // Writing the ints
-        for (let float of floatList) {
+        for (const float of floatList) {
             writer.writeFloat(float);
         }
 

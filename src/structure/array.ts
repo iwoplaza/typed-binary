@@ -29,12 +29,10 @@ export class ArraySchema<T> extends Schema<T[]> {
     }
 
     sizeOf(values: T[]): number {
-        const len = values.length;
-
         // Length encoding
-        let size = INT.sizeOf(len);
+        let size = INT.sizeOf();
         // Values encoding
-        size += values.map((v: any) => this.elementType.sizeOf(v)).reduce((a, b) => a + b, 0);
+        size += values.map((v) => this.elementType.sizeOf(v)).reduce((a, b) => a + b, 0);
     
         return size;
     }

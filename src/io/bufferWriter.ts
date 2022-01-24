@@ -8,7 +8,7 @@ export class BufferWriter implements ISerialOutput {
     private readonly helperByteView: Uint8Array;
     private readonly switchEndianness: boolean;
 
-    private byteOffset: number = 0;
+    private byteOffset = 0;
 
     constructor(buffer: ArrayBufferLike) {
         if (buffer instanceof Buffer) {
@@ -19,7 +19,7 @@ export class BufferWriter implements ISerialOutput {
         this.uint8View = new Uint8Array(buffer, 0);
         this.byteOffset = 0;
 
-        let helperBuffer = new ArrayBuffer(4);
+        const helperBuffer = new ArrayBuffer(4);
         this.helperIntView = new Int32Array(helperBuffer);
         this.helperFloatView = new Float32Array(helperBuffer);
         this.helperByteView = new Uint8Array(helperBuffer);

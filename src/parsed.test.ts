@@ -6,7 +6,7 @@ import { generic, arrayOf, INT, STRING, BOOL, object, Parsed, genericEnum } from
 const enum ExpressionType {
     ADD = 0,
     NEGATE = 1,
-};
+}
 
 export const Expression = 
     genericEnum({}, () => ({
@@ -19,7 +19,7 @@ export const Expression =
         }),
     }));
 type Expression = Parsed<typeof Expression>;
-const expr = {} as Expression;
+// const expr = {} as Expression;
 
 
 export const KeyframeNodeTemplate =
@@ -40,4 +40,4 @@ export const KeyframeNodeTemplate =
     });
 
 type KeyframeNodeTemplate = Parsed<typeof KeyframeNodeTemplate>;
-const s = {} as KeyframeNodeTemplate;
+// const s = {} as KeyframeNodeTemplate;

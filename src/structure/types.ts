@@ -5,6 +5,10 @@ export interface ISchema<P> {
      * Used as a type holder, so that type inference works correctly.
      */
     readonly _infered: P;
+
+    write(output: ISerialOutput, value: P): void;
+    read(input: ISerialInput): P;
+    sizeOf(value: P): number;
 }
 
 export abstract class Schema<P> implements ISchema<P> {
@@ -27,8 +31,9 @@ export enum SubTypeKey {
     ENUM = 'ENUM',
 }
 
-export type SchemaProperties = {[key: string]: Schema<any>};
-export type InferedProperties<T extends {[key: string]: Schema<any>}> = {[key in keyof T]: T[key]['_infered']};
+// export type SchemaProperties<T> = T extends {[key in keyof T]: Schema<any>} ? {[key in keyof T]: Schema<T[key]['_infered']>} : never;
+export type SchemaProperties = {[key: string]: Schema<unknown>};
+export type InferedProperties<T extends {[key: string]: Schema<unknown>}> = {[key in keyof T]: T[key]['_infered']};
 
 export interface IConcreteObjectSchema<T extends SchemaProperties> extends ISchema<InferedProperties<T>> {
     readonly properties: T;
