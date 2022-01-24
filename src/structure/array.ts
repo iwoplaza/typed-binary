@@ -1,35 +1,41 @@
-import { INT } from '../describe';
 import type { ISerialInput, ISerialOutput } from '../io';
-import type { ArrayDescription, ReadContext, WriteContext, SizeContext } from './types';
+import { INT } from './baseTypes';
+import { Schema } from './types';
 
 
-export function readArray<T extends ArrayDescription>(ctx: ReadContext, input: ISerialInput, arrayType: T): any {
-    const array = [];
-
-    const len = input.readInt();
-
-    for (let i = 0; i < len; ++i) {
-        array.push(ctx.readAny(arrayType.elementType));
+export class ArraySchema<T> extends Schema<T[]> {
+    constructor(public readonly elementType: Schema<T>) {
+        super();
     }
 
-    return array;
-}
+    write(output: ISerialOutput, values: T[]): void {
+        output.writeInt(values.length);
 
-export function writeArray<T extends ArrayDescription>(ctx: WriteContext, output: ISerialOutput, arrayType: T, values: any): void {
-    output.writeInt(values.length);
-
-    for (const value of values) {
-        ctx.writeAny(arrayType.elementType, value);
+        for (const value of values) {
+            this.elementType.write(output, value);
+        }
     }
-}
 
-export function sizeOfArray<T extends ArrayDescription>(ctx: SizeContext, arrayType: T, values: any[]): number {
-    const len = values.length;
+    read(input: ISerialInput): T[] {
+        const array = [];
 
-    // Length encoding
-    let size = ctx.sizeOfAny(INT, len);
-    // Values encoding
-    size += values.map((v: any) => ctx.sizeOfAny(arrayType.elementType, v)).reduce((a, b) => a + b);
+        const len = input.readInt();
+    
+        for (let i = 0; i < len; ++i) {
+            array.push(this.elementType.read(input));
+        }
+    
+        return array;
+    }
 
-    return size;
+    sizeOf(values: T[]): number {
+        const len = values.length;
+
+        // Length encoding
+        let size = INT.sizeOf(len);
+        // Values encoding
+        size += values.map((v: any) => this.elementType.sizeOf(v)).reduce((a, b) => a + b, 0);
+    
+        return size;
+    }
 }

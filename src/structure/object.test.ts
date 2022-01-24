@@ -1,19 +1,18 @@
 import * as chai from 'chai';
-import { INT, STRING } from '../describe';
 import { makeIO } from './_mock.test';
-import { writeSerial, readSerial, TypeKey } from '.';
+import { ObjectSchema } from './object';
+import { INT, STRING } from './baseTypes';
+import { GenericObjectSchema } from './_internal';
+import { SubTypeKey } from '.';
 
 const expect = chai.expect;
 
 describe('(read/write)Object', () => {
     it('should encode and decode a simple object', () => {
-        const description = {
-            type: TypeKey.OBJECT as const,
-            properties: {
-                value: INT,
-                label: STRING,
-            },
-        };
+        const description = new ObjectSchema({
+            value: INT,
+            label: STRING,
+        });
 
         const value = {
             value: 70,
@@ -21,42 +20,51 @@ describe('(read/write)Object', () => {
         };
 
         const { output, input } = makeIO(64);
-        writeSerial({}, output, description, value);
-        expect(readSerial({}, input, description)).to.deep.equal(value);
+        description.write(output, value);
+        expect(description.read(input)).to.deep.equal(value);
     });
 
     it('should encode and decode a generic object', () => {
-        const genericDescription = {
-            type: TypeKey.OBJECT as const,
-            subTypeCategory: 'category',
-            properties: {
-                sharedValue: INT,
-            },
-        };
-
-        const concreteDescription = {
-            type: TypeKey.OBJECT as const,
-            subType: 'concrete',
-            properties: {
+        const genericDescription = new GenericObjectSchema(SubTypeKey.STRING, {
+            sharedValue: INT,
+        }, {
+            'concrete': new ObjectSchema({
                 extraValue: INT,
-            },
-        };
+            }),
+        });
 
         const value = {
-            subType: 'concrete',
+            subType: 'concrete' as const,
             sharedValue: 100,
             extraValue: 10,
         };
 
-        const context = {
-            ['category' as const]: {
-                ['concrete' as const]: concreteDescription,
-            },
-        };
         const { output, input } = makeIO(64);
         // Writing with the generic description.
-        writeSerial(context, output, genericDescription, value);
+        genericDescription.write(output, value);
         // Reading with the generic description.
-        expect(readSerial(context, input, genericDescription)).to.deep.equal(value);
+        expect(genericDescription.read(input)).to.deep.equal(value);
+    });
+
+    it('should encode and decode an enum generic object', () => {
+        const genericDescription = new GenericObjectSchema(SubTypeKey.ENUM, {
+            sharedValue: INT,
+        }, {
+            0: new ObjectSchema({
+                extraValue: INT,
+            }),
+        });
+
+        const value = {
+            subType: 0 as const,
+            sharedValue: 100,
+            extraValue: 10,
+        };
+
+        const { output, input } = makeIO(64);
+        // Writing with the generic description.
+        genericDescription.write(output, value);
+        // Reading with the generic description.
+        expect(genericDescription.read(input)).to.deep.equal(value);
     });
 });

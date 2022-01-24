@@ -1,134 +1,144 @@
 import type { ISerialInput, ISerialOutput } from '../io';
-import { STRING } from '../describe';
-import type {
-    ObjectDescription, ConcreteObjectDescription,
-    ReadContext, WriteContext, SizeContext
+import { ValueOrProvider } from '../utilityTypes';
+import { STRING } from './baseTypes';
+import {
+    Schema, InferedProperties, SchemaProperties
 } from './types';
 import { SubTypeKey } from './types';
 
 
-/*
-* IO
-*/
+export class ObjectSchema<T extends SchemaProperties, O extends InferedProperties<T> = InferedProperties<T>> extends Schema<O> {
+    constructor(public readonly properties: T) {
+        super();
+    }
 
-export function readObject<T extends ObjectDescription>(ctx: ReadContext, input: ISerialInput, description: T): any {
-    // Sorting the keys in ASCII ascending order, so that the order is platform independent.
-    const keys: string[] = Object.keys(description.properties).sort();
-    let result: any = {};
+    write(output: ISerialOutput, value: O): void {
+        // Sorting the keys in ASCII ascending order, so that the order is platform independent.
+        const keys: string[] = Object.keys(this.properties).sort();
 
-    let subTypeDescription: ObjectDescription|null = null;
-
-    if ('subTypeCategory' in description) {
-        const subTypeCategory = ctx.subTypes[description.subTypeCategory];
-        if (subTypeCategory === undefined) {
-            throw new Error(`Unknown sub-type category: '${description.subTypeCategory}'`);
-        }
-
-        const subTypeKey = description.keyedBy === SubTypeKey.ENUM ? input.readByte() : input.readString();
-        subTypeDescription = subTypeCategory[subTypeKey] || null;
-        
-        // Making the sub type key available to the result object.
-        result.subType = subTypeKey;
-
-        if (subTypeDescription === null) {
-            throw new Error(`Unknown sub-type '${subTypeKey}' in '${description.subTypeCategory}' category`);
+        for (const key of keys) {
+            this.properties[key].write(output, value[key]);
         }
     }
 
-    for (const key of keys) {
-        const obj = (description.properties)[key];
+    read(input: ISerialInput): O {
+        // Sorting the keys in ASCII ascending order, so that the order is platform independent.
+        const keys: string[] = Object.keys(this.properties).sort();
+        let result: any = {};
 
-        result[key] = ctx.readAny(obj);
-    }
-
-    if (subTypeDescription !== null) {
-        const extraKeys: string[] = Object.keys(subTypeDescription.properties).sort();
-    
-        for (const key of extraKeys) {
-            const prop = (subTypeDescription.properties)[key];
-    
-            result[key] = ctx.readAny(prop);
+        for (const key of keys) {
+            result[key] = this.properties[key].read(input);
         }
+
+        return result;
     }
 
-    return result;
+    sizeOf(value: O): number {
+        let size = 0;
+
+        // Going through the base properties
+        size += Object.keys(this.properties)
+                      .map(key => this.properties[key].sizeOf(value[key])) // Mapping properties into their sizes.
+                      .reduce((a, b) => a + b); // Summing them up
+
+        return size;
+    }
 }
 
-export function writeObject<T extends ObjectDescription>(ctx: WriteContext, output: ISerialOutput, description: T, value: any): void {
-    // Sorting the keys in ASCII ascending order, so that the order is platform independent.
-    const keys: string[] = Object.keys(description.properties).sort();
+type InferedSubTypes<T extends {[key in keyof T]: ObjectSchema<any>}> = {
+    [Key in keyof T]: T[Key]['_infered'] & { subType: Key }
+};
 
-    // Figuring out sub-types
-    let subTypeDescription: ConcreteObjectDescription | null = null;
+export type ObjectSchemaMap<S, SI extends {[key in keyof SI]: SI[key]}> = {[key in keyof S]: ObjectSchema<SI[key]>};
 
-    if ('subTypeCategory' in description) {
-        const category = ctx.subTypes[description.subTypeCategory];
+export class GenericObjectSchema<
+    T extends SchemaProperties, // Base properties
+    S extends {[key in keyof S]: ObjectSchema<any>}, // Sub type map
+    K extends (keyof S extends string ? SubTypeKey.STRING : SubTypeKey.ENUM)
+> extends ObjectSchema<T, InferedProperties<T> & InferedSubTypes<S>[keyof S]> {
+    constructor(
+        public readonly keyedBy: K,
+        properties: T,
+        private readonly subTypeMap: ValueOrProvider<S>
+    ) {
+        super(properties);
+    }
 
-        if (category === undefined) {
-            throw new Error(`Unknown sub-type category: '${description.subTypeCategory}'`);
-        }
+    private getSubTypeMap(): S {
+        return typeof this.subTypeMap === 'function' ? this.subTypeMap() : this.subTypeMap;
+    }
 
-        subTypeDescription = category[value.subType] || null;
+    write(output: ISerialOutput, value: InferedProperties<T> & InferedSubTypes<S>[keyof S]): void {
+        // Figuring out sub-types
+        const subTypeDescription = this.getSubTypeMap()[value.subType] || null;
         if (subTypeDescription === null) {
-            throw new Error(`Unknown sub-type '${value.subType}' in '${description.subTypeCategory}' category`);
+            throw new Error(`Unknown sub-type '${value.subType}' in among '${JSON.stringify(Object.keys(this.subTypeMap))}'`);
         }
 
         // Writing the sub-type out.
-        if (description.keyedBy === SubTypeKey.ENUM) {
-            output.writeByte(value.subType);
+        if (this.keyedBy === SubTypeKey.ENUM) {
+            output.writeByte(value.subType as number);
         }
         else {
-            output.writeString(value.subType);
+            output.writeString(value.subType as string);
         }
-    }
 
-    for (const key of keys) {
-        const propDescription = (description.properties)[key];
-        
-        ctx.writeAny(propDescription, value[key]);
-    }
+        // Writing the base properties
+        super.write(output, value);
 
-    // Extra sub-type fields
-    if (subTypeDescription !== null) {
+        // Extra sub-type fields
         const extraKeys: string[] = Object.keys(subTypeDescription.properties).sort();
     
         for (const key of extraKeys) {
-            const prop = (subTypeDescription.properties)[key];
+            const prop = subTypeDescription.properties[key];
     
-            ctx.writeAny(prop, value[key]);
+            prop.write(output, value[key]);
         }
     }
-}
 
-export function sizeOfObject<T extends ObjectDescription>(ctx: SizeContext, description: T, value: any): number {
-    let size = 0;
+    read(input: ISerialInput): InferedProperties<T> & InferedSubTypes<S>[keyof S] {
+        const subTypeMap = this.getSubTypeMap();
+        const subTypeKey = this.keyedBy === SubTypeKey.ENUM ? input.readByte() : input.readString();
 
-    // Going through the base properties
-    size += Object.keys(description.properties)
-                  .map(key => ctx.sizeOfAny(description.properties[key], value[key])) // Mapping properties into their sizes.
-                  .reduce((a, b) => a + b); // Summing them up
-
-    if ('subTypeCategory' in description) {
-        // We're a generic object trying to encode a concrete value.
-        const subType: string = (value as any).subType;
-
-        size += description.keyedBy === SubTypeKey.ENUM ? 1 : ctx.sizeOfAny(STRING, subType);
-
-        const category = ctx.subTypes[description.subTypeCategory];
-        if (category === undefined) {
-            throw new Error(`Unknown sub-type category: '${description.subTypeCategory}'`);
+        const subTypeDescription = subTypeMap[subTypeKey as keyof S] || null;
+        if (subTypeDescription === null) {
+            throw new Error(`Unknown sub-type '${subTypeKey}' in among '${JSON.stringify(Object.keys(subTypeMap))}'`);
         }
 
+        let result: any = super.read(input);
+
+        // Making the sub type key available to the result object.
+        result.subType = subTypeKey;
+
+        if (subTypeDescription !== null) {
+            const extraKeys: string[] = Object.keys(subTypeDescription.properties).sort();
+        
+            for (const key of extraKeys) {
+                const prop = (subTypeDescription.properties)[key];
+        
+                result[key] = prop.read(input);
+            }
+        }
+
+        return result;
+    }
+
+    sizeOf(value: InferedProperties<T> & InferedSubTypes<S>[keyof S]): number {
+        let size = super.sizeOf(value);
+
+        // We're a generic object trying to encode a concrete value.
+        size += this.keyedBy === SubTypeKey.ENUM ? 1 : STRING.sizeOf(value.subType as string);
+
         // Extra sub-type fields
-        const subTypeDescription = category[subType] || null;
+        const subTypeDescription = this.getSubTypeMap()[value.subType] || null;
         if (subTypeDescription === null) {
-            throw new Error(`Unknown sub-type '${subType}' in '${description.subTypeCategory}' category`);
+            throw new Error(`Unknown sub-type '${value.subType}' in among '${JSON.stringify(Object.keys(this.subTypeMap))}'`);
         }
 
         size += Object.keys(subTypeDescription.properties) // Going through extra property keys
-                        .map(key => ctx.sizeOfAny(subTypeDescription.properties[key], (value as any)[key])) // Mapping extra properties into their sizes
+                        .map(key => subTypeDescription.properties[key].sizeOf(value[key])) // Mapping extra properties into their sizes
                         .reduce((a, b) => a + b); // Summing them up
+    
+        return size;
     }
-
-    return size;
 }

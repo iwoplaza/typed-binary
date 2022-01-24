@@ -10,7 +10,12 @@ export class BufferReader implements ISerialInput {
 
     private byteOffset: number = 0;
 
-    constructor(buffer: Buffer) {
+    constructor(buffer: ArrayBufferLike) {
+        if (buffer instanceof Buffer) {
+            // Getting rid of the outer shell, which causes the Uint8Array line to create a copy, instead of a view.
+            buffer = buffer.buffer;
+        }
+
         this.uint8View = new Uint8Array(buffer, 0);
         this.byteOffset = 0;
         

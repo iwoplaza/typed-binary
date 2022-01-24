@@ -1,7 +1,7 @@
 import * as chai from 'chai';
 import { randIntBetween } from '../../test/random';
 import { makeIO } from './_mock.test';
-import { writeSerial, readSerial, TypeKey } from '.';
+import { CharsSchema } from '.';
 
 const expect = chai.expect;
 
@@ -15,10 +15,10 @@ describe('(read/write)Chars', () => {
             value += String.fromCharCode(randIntBetween(range[0].charCodeAt(0), range[1].charCodeAt(0)));
         }
 
-        const description = { type: TypeKey.CHARS as const, length: value.length };
+        const description = new CharsSchema(value.length);
 
         const { output, input } = makeIO(length);
-        writeSerial({}, output, description, value);
-        expect(readSerial({}, input, description)).to.equal(value);
+        description.write(output, value);
+        expect(description.read(input)).to.equal(value);
     });
 });

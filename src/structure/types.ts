@@ -1,19 +1,22 @@
-import { BaseTypeDescription } from './_internal';
+import { ISerialInput, ISerialOutput } from '../io';
 
-export enum TypeKey {
-    BOOL = 'BOOL',
-    BYTE = 'BYTE',
-    INT = 'INT',
-    FLOAT = 'FLOAT',
-    STRING = 'STRING',
-    CHARS = 'CHARS',
-    NULLABLE = 'NULLABLE',
-    OBJECT = 'OBJECT',
-    ARRAY = 'ARRAY',
-    TUPLE = 'TUPLE',
+export interface ISchema<P> {
+    /**
+     * Used as a type holder, so that type inference works correctly.
+     */
+    readonly _infered: P;
 }
 
-export type TypeDescription = ObjectDescription | ArrayDescription | TupleDescription | NullableDescription | CharsDescription | BaseTypeDescription;
+export abstract class Schema<P> implements ISchema<P> {
+    /**
+     * Used as a type holder, so that type inference works correctly.
+     */
+    readonly _infered!: P;
+    
+    abstract write(output: ISerialOutput, value: P): void;
+    abstract read(input: ISerialInput): P;
+    abstract sizeOf(value: P): number;
+}
 
 ////
 // CONTEXT
@@ -24,87 +27,9 @@ export enum SubTypeKey {
     ENUM = 'ENUM',
 }
 
-export type SubTypeCategory = {[key: string]: ConcreteObjectDescription};
+export type SchemaProperties = {[key: string]: Schema<any>};
+export type InferedProperties<T extends {[key: string]: Schema<any>}> = {[key in keyof T]: T[key]['_infered']};
 
-export interface ISubTypeContext {
-    [key: string]: SubTypeCategory;
-}
-
-export interface ReadContext {
-    subTypes: ISubTypeContext,
-    readAny(desc: any): any,
-}
-
-export interface WriteContext {
-    subTypes: ISubTypeContext,
-    writeAny(desc: any, value: any): void,
-}
-
-export interface SizeContext {
-    subTypes: ISubTypeContext,
-    sizeOfAny(desc: any, value: any): number;
-}
-
-////
-// OBJECT
-////
-
-export type PropertyDescription = SimpleObjectDescription | GenericObjectDescription | ArrayDescription | TupleDescription | NullableDescription | CharsDescription | BaseTypeDescription;
-
-export type SimpleObjectDescription = {
-    type: TypeKey.OBJECT,
-    properties: {
-        [key: string]: PropertyDescription,
-    },
-}
-
-export type GenericObjectDescription = SimpleObjectDescription & {
-    subTypeCategory: string,
-    /**
-     * @default SubTypeKey.STRING
-     */
-    keyedBy?: SubTypeKey,
-};
-
-export type ConcreteObjectDescription = SimpleObjectDescription & {
-    subType: string|number,
-};
-
-export type ObjectDescription = SimpleObjectDescription | GenericObjectDescription | ConcreteObjectDescription;
-
-////
-// CHARS
-////
-
-export type CharsDescription = {
-    type: TypeKey.CHARS,
-    length: number,
-};
-
-////
-// ARRAY
-////
-
-export type ArrayDescription = {
-    type: TypeKey.ARRAY,
-    elementType: PropertyDescription,
-}
-
-////
-// TUPLE
-////
-
-export type TupleDescription = {
-    type: TypeKey.TUPLE,
-    elementType: PropertyDescription,
-    length: number,
-}
-
-////
-// NULLABLE
-////
-
-export type NullableDescription = {
-    type: TypeKey.NULLABLE,
-    elementType: PropertyDescription,
+export interface IConcreteObjectSchema<T extends SchemaProperties> extends ISchema<InferedProperties<T>> {
+    readonly properties: T;
 }

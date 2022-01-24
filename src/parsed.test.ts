@@ -1,35 +1,44 @@
 // This file doesn't actually need to be run by a test-runner
 // It's mostly just to check if structure descriptions can be properly parsed.
 
-import { generic, concreteOf, arrayOf, FLOAT, BOOL, INT, STRING } from './describe';
-import { Parsed } from './parsed';
+import { generic, arrayOf, INT, STRING, BOOL, object, Parsed, genericEnum } from '.';
 
-
-export const KEYFRAME_NODE_TEMPLATE =
-    generic('keyframeNode' as const, {
-        connections: arrayOf(FLOAT),
-    });
-
-export const STANDARD_KEYFRAME_NODE =
-    concreteOf(KEYFRAME_NODE_TEMPLATE, 'core:standard' as const, {
-        animationKey: STRING,
-        startFrame: INT,
-        playbackSpeed: FLOAT,
-        looping: BOOL,
-    });
-
-export const MOVEMENT_KEYFRAME_NODE =
-    concreteOf(KEYFRAME_NODE_TEMPLATE, 'core:movement' as const, {
-        animationKey: STRING,
-        startFrame: INT,
-        playbackSpeed: FLOAT,
-    });
-
-const subTypeContext = {
-    ['keyframeNode' as const]: {
-        ['core:standard' as const]: STANDARD_KEYFRAME_NODE,
-        ['core:movement' as const]: MOVEMENT_KEYFRAME_NODE,
-    },
+const enum ExpressionType {
+    ADD = 0,
+    NEGATE = 1,
 };
 
-type KEYFRAME_NODE_TEMPLATE = Parsed<typeof KEYFRAME_NODE_TEMPLATE, typeof subTypeContext>;
+export const Expression = 
+    genericEnum({}, () => ({
+        [ExpressionType.ADD]: object({
+            leftHandSizeId: INT,
+            rightHandSizeId: INT,
+        }),
+        [ExpressionType.NEGATE]: object({
+            innerExpressionId: INT,
+        }),
+    }));
+type Expression = Parsed<typeof Expression>;
+const expr = {} as Expression;
+
+
+export const KeyframeNodeTemplate =
+    generic({
+        connections: arrayOf(INT),
+    }, {
+        'core:standard': object({
+            animationKey: STRING,
+            startFrame: INT,
+            playbackSpeed: INT,
+            looping: BOOL,
+        }),
+        'core:movement': object({
+            animationKey: STRING,
+            startFrame: INT,
+            playbackSpeed: INT,
+        }),
+    });
+
+type KeyframeNodeTemplate = Parsed<typeof KeyframeNodeTemplate>;
+const s = {} as KeyframeNodeTemplate;
+

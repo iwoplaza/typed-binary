@@ -1,6 +1,6 @@
-import { BufferReader, BufferWriter, readSerial, writeSerial } from 'typed-binary';
+import { BufferReader, BufferWriter } from 'typed-binary';
 import fs from 'fs/promises';
-import { Mesh, MeshHelper } from './schemas';
+import { Mesh } from './schemas';
 
 const DEFAULT_MESH: Mesh = {
     faces: [
@@ -16,10 +16,10 @@ const DEFAULT_MESH: Mesh = {
 
 async function loadMesh(): Promise<Mesh> {
     try {
-        const buffer = await fs.readFile('./mesh.bin');
+        const buffer = await fs.readFile('./binaryMesh/mesh.bin');
         const reader = new BufferReader(buffer);
 
-        return readSerial<typeof Mesh>(reader, Mesh);
+        return Mesh.read(reader);
     }
     catch (e) {
         return DEFAULT_MESH;
@@ -28,12 +28,12 @@ async function loadMesh(): Promise<Mesh> {
 
 async function saveMesh(mesh: Mesh): Promise<void> {
     try {
-        const buffer = Buffer.alloc(MeshHelper.sizeOf(mesh));
+        const buffer = Buffer.alloc(Mesh.sizeOf(mesh));
         const writer = new BufferWriter(buffer);
 
-        writeSerial<typeof Mesh>(writer, Mesh, mesh);
+        Mesh.write(writer, mesh);
 
-        await fs.writeFile('./mesh.bin', buffer);
+        await fs.writeFile('./binaryMesh/mesh.bin', buffer);
     }
     catch (e) {
         console.error(`Error occurred during mesh saving.`);

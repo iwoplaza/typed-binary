@@ -1,21 +1,13 @@
 export {
-    TypeKey,
-    BaseTypeMap,
-    BaseTypeDescription,
-    
-    TypeDescription,
-    PropertyDescription,
-    NullableDescription,
-    ArrayDescription,
-    ObjectDescription,
-    CharsDescription,
-    SubTypeCategory,
-    ISubTypeContext,
+    BOOL,
+    BYTE,
+    INT,
+    FLOAT,
+    STRING,
+
+    ObjectSchema,
+    CharsSchema,
+    ArraySchema,
+    OptionalSchema,
     SubTypeKey,
 } from './_internal';
-
-export {
-    readSerial,
-    writeSerial,
-    sizeOf,
-} from './general';

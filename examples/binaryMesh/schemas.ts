@@ -1,4 +1,4 @@
-import { helperFor, Parsed } from 'typed-binary';
+import { Parsed } from 'typed-binary';
 import { object, arrayOf, tupleOf, INT } from 'typed-binary';
 
 export const Vertex = object({
@@ -17,4 +17,3 @@ export const Mesh = object({
 
 // Helpful for the top-most level element
 export type Mesh = Parsed<typeof Mesh>;
-export const MeshHelper = helperFor<typeof Mesh>(Mesh);

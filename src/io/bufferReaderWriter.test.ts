@@ -14,7 +14,7 @@ describe('BufferWriter/BufferReader', () => {
         }
 
         // Creating appropriate buffer
-        const buffer = new ArrayBuffer(intList.length * 4);
+        const buffer = Buffer.alloc(intList.length * 4);
 
         // Writer
         const writer = new BufferWriter(buffer);
@@ -42,7 +42,7 @@ describe('BufferWriter/BufferReader', () => {
         }
 
         // Creating appropriate buffer
-        const buffer = new ArrayBuffer(floatList.length * 4);
+        const buffer = Buffer.alloc(floatList.length * 4);
 
         // Writer
         const writer = new BufferWriter(buffer);

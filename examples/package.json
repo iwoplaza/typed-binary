@@ -1,6 +1,7 @@
 {
   "name": "typed-binary-examples",
   "scripts": {
+    "link": "npm link ../",
     "example:binaryMesh": "ts-node binaryMesh/index.ts"
   },
   "devDependencies": {
