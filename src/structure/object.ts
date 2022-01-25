@@ -13,8 +13,7 @@ export class ObjectSchema<T extends SchemaProperties, O extends InferedPropertie
     }
 
     write(output: ISerialOutput, value: O): void {
-        // Sorting the keys in ASCII ascending order, so that the order is platform independent.
-        const keys: string[] = Object.keys(this.properties).sort();
+        const keys: string[] = Object.keys(this.properties);
 
         for (const key of keys) {
             this.properties[key].write(output, value[key]);
@@ -22,8 +21,7 @@ export class ObjectSchema<T extends SchemaProperties, O extends InferedPropertie
     }
 
     read(input: ISerialInput): O {
-        // Sorting the keys in ASCII ascending order, so that the order is platform independent.
-        const keys: (keyof T)[] = Object.keys(this.properties).sort();
+        const keys: (keyof T)[] = Object.keys(this.properties);
         const result = {} as O;
 
         for (const key of keys) {
@@ -89,7 +87,7 @@ export class GenericObjectSchema<
 
         // Extra sub-type fields
         // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
-        const extraKeys: string[] = Object.keys(subTypeDescription.properties).sort();
+        const extraKeys: string[] = Object.keys(subTypeDescription.properties);
     
         for (const key of extraKeys) {
             // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access
@@ -114,7 +112,7 @@ export class GenericObjectSchema<
         result.type = subTypeKey as keyof S;
 
         if (subTypeDescription !== null) {
-            const extraKeys = Object.keys(subTypeDescription.properties).sort();
+            const extraKeys = Object.keys(subTypeDescription.properties);
         
             for (const key of extraKeys) {
                 const prop = (subTypeDescription.properties)[key];
