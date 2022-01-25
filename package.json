@@ -1,6 +1,6 @@
 {
     "name": "typed-binary",
-    "version": "1.1.0",
+    "version": "1.1.1",
     "description": "Describe binary structures with full TypeScript support. Encode and decode into pure JavaScript objects.",
     "main": "dist/cjs/index.js",
     "module": "dist/esm/index.js",
