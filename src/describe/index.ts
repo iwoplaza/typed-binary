@@ -1,7 +1,7 @@
 import { ObjectSchema, CharsSchema, SubTypeKey } from '../structure';
 import { ArraySchema } from '../structure/array';
 import { OptionalSchema } from '../structure/optional';
-import { GenericObjectSchema, InferedSubTypes } from '../structure/object';
+import { GenericObjectSchema } from '../structure/object';
 import { TupleSchema } from '../structure/tuple';
 import { ISchema, SchemaProperties } from '../structure/types';
 import { OptionalUndefined, ValueOrProvider } from '../utilityTypes';
@@ -27,8 +27,8 @@ export const generic = <P extends SchemaProperties, S extends {[key in keyof S]:
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 export class TypeToken<I> {}
 
-export const typedGeneric = <P, S extends {[Key in keyof S]: ObjectSchema<SchemaProperties, any>}>(token: TypeToken<P>, properties: ValueOrProvider<unknown>, subTypeMap: S) =>
-    new GenericObjectSchema<any, S, SubTypeKey.STRING, OptionalUndefined<P> & InferedSubTypes<S>[keyof S]>(
+export const typedGeneric = <P extends {[key in keyof P]: P[key]} & { type: string }>(token: TypeToken<P>, properties: ValueOrProvider<unknown>, subTypeMap: any) =>
+    new GenericObjectSchema<any, any, SubTypeKey.STRING, P>(
         SubTypeKey.STRING,
         properties,
         subTypeMap

@@ -17,13 +17,12 @@ interface NegateExpression {
     inner: Expression;
 }
 
+type IntLiteralExpression = ParsedConcrete<ExpressionBase, typeof IntLiteralExpression, 'int_literal'>;
 const IntLiteralExpression = object({
     value: INT,
 });
-type IntLiteralExpression = ParsedConcrete<ExpressionBase, typeof IntLiteralExpression, 'int_literal'>;
 
 type Expression = ExpressionBase & (MultiplyExpression|NegateExpression|IntLiteralExpression);
-
 const Expression = typedGeneric(new TypeToken<Expression>(), {
     name: STRING,
 }, {

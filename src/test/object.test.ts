@@ -131,25 +131,29 @@ describe('ObjectSchema', () => {
     });
 
     it ('allows for generic type-hints', () => {
-        interface Explicit {
+        interface ExplicitBase {
             base: number;
         }
 
-        interface ExplicitA {
+        interface ExplicitA extends ExplicitBase {
+            type: 'a';
             a: string;
         }
 
-        interface ExplicitB {
+        interface ExplicitB extends ExplicitBase {
+            type: 'b';
             b: string;
         }
+
+        type Explicit = ExplicitA|ExplicitB;
 
         const schema = typedGeneric(new TypeToken<Explicit>(), {
             base: INT,
         }, {
-            ['a' as const]: typedObject<ExplicitA>({
+            ['a' as const]: object({
                 a: STRING,
             }),
-            ['b' as const]: typedObject<ExplicitB>({
+            ['b' as const]: object({
                 b: STRING,
             }),
         });
