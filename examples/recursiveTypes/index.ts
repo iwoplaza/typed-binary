@@ -6,14 +6,14 @@ import { INT, object, Parsed, ParsedConcrete, STRING, typedGeneric, typedObject,
 
 interface ExpressionBase {}
 
-interface MultiplyExpression {
-    type: 'multiply',
+interface MultiplyExpression extends ExpressionBase {
+    type: 'multiply';
     a: Expression;
     b: Expression;
 }
 
-interface NegateExpression {
-    type: 'negate',
+interface NegateExpression extends ExpressionBase {
+    type: 'negate';
     inner: Expression;
 }
 
@@ -22,7 +22,7 @@ const IntLiteralExpression = object({
     value: INT,
 });
 
-type Expression = ExpressionBase & (MultiplyExpression|NegateExpression|IntLiteralExpression);
+type Expression = MultiplyExpression|NegateExpression|IntLiteralExpression;
 const Expression = typedGeneric(new TypeToken<Expression>(), {
     name: STRING,
 }, {
