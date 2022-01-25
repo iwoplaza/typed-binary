@@ -1,5 +1,4 @@
 import type { ISerialInput, ISerialOutput } from '../io';
-import { OptionalUndefined } from '../utilityTypes';
 import { Schema } from './types';
 
 export class OptionalSchema<T> extends Schema<T|undefined> {
@@ -7,7 +6,7 @@ export class OptionalSchema<T> extends Schema<T|undefined> {
         super();
     }
 
-    write(output: ISerialOutput, value: OptionalUndefined<T|undefined>): void {
+    write(output: ISerialOutput, value: T|undefined): void {
         if (value !== undefined && value !== null) {
             output.writeBool(true);
             this.innerType.write(output, value);
@@ -17,7 +16,7 @@ export class OptionalSchema<T> extends Schema<T|undefined> {
         }
     }
 
-    read(input: ISerialInput): OptionalUndefined<T|undefined> {
+    read(input: ISerialInput): T|undefined {
         const valueExists = input.readBool();
     
         if (valueExists) {
@@ -27,7 +26,7 @@ export class OptionalSchema<T> extends Schema<T|undefined> {
         return undefined;
     }
 
-    sizeOf(value: OptionalUndefined<T|undefined>): number {
+    sizeOf(value: T|undefined): number {
         if (value === undefined)
             return 1;
     

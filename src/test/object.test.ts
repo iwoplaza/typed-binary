@@ -1,7 +1,7 @@
 import * as chai from 'chai';
 import { encodeAndDecode, makeIO } from './_mock.test';
 import { INT, STRING } from '../structure/baseTypes';
-import { generic, genericEnum, object, optional, typedObject } from '../describe';
+import { generic, genericEnum, object, optional, typedObject, typedGeneric, TypeToken } from '../describe';
 import { Parsed } from '../utilityTypes';
 
 const expect = chai.expect;
@@ -39,8 +39,8 @@ describe('ObjectSchema', () => {
             optional: undefined,
         };
 
-        expect(encodeAndDecode(schema, valueWithMissing)).to.deep.equal(valueWithMissing);
         expect(encodeAndDecode(schema, valueWithUndefined)).to.deep.equal(valueWithMissing);
+        expect(encodeAndDecode(schema, valueWithMissing)).to.deep.equal(valueWithMissing);
     });
 
     it('should encode and decode a generic object', () => {
@@ -124,6 +124,40 @@ describe('ObjectSchema', () => {
 
         const value: Explicit = {
             value: 5,
+        };
+
+        const decoded = encodeAndDecode(schema, value);
+        expect(decoded).to.deep.equal(value);
+    });
+
+    it ('allows for generic type-hints', () => {
+        interface Explicit {
+            base: number;
+        }
+
+        interface ExplicitA {
+            a: string;
+        }
+
+        interface ExplicitB {
+            b: string;
+        }
+
+        const schema = typedGeneric(new TypeToken<Explicit>(), {
+            base: INT,
+        }, {
+            ['a' as const]: typedObject<ExplicitA>({
+                a: STRING,
+            }),
+            ['b' as const]: typedObject<ExplicitB>({
+                b: STRING,
+            }),
+        });
+
+        const value = {
+            type: 'a' as const,
+            base: 15,
+            a: 'some',
         };
 
         const decoded = encodeAndDecode(schema, value);
