@@ -337,57 +337,8 @@ console.log(JSON.stringify(Person.read(reader).address)); // { "city": "New York
 
 # Recursive types
 If you want an object type to be able to contain one of itself (recursion), then you have to apply the following pattern:
-```ts
-import { INT, STRING, object, Parsed, ParsedConcrete, typedGeneric, typedObject, TypeToken } from 'typed-binary';
-
-interface ExpressionBase {}
-
-interface MultiplyExpression extends ExpressionBase {
-    type: 'multiply';
-    a: Expression;
-    b: Expression;
-}
-
-interface NegateExpression extends ExpressionBase {
-    type: 'negate';
-    inner: Expression;
-}
-
-type IntLiteralExpression = ParsedConcrete<ExpressionBase, typeof IntLiteralExpression, 'int_literal'>;
-const IntLiteralExpression = object({
-    value: INT,
-});
-
-type Expression = MultiplyExpression|NegateExpression|IntLiteralExpression;
-const Expression = typedGeneric(new TypeToken<Expression>(), {
-    name: STRING,
-}, {
-    'multiply': typedObject<MultiplyExpression>(() => ({
-        a: Expression,
-        b: Expression,
-    })),
-    'negate': typedObject<NegateExpression>(() => ({
-        inner: Expression,
-    })),
-    'int_literal': IntLiteralExpression
-});
-
-const expr: Parsed<typeof Expression> = {
-    type: 'multiply',
-    a: {
-        type: 'negate',
-        inner: {
-            type: 'int_literal',
-            value: 15,
-        }
-    },
-    b: {
-        type: 'int_literal',
-        value: 2,
-    },
-};
-
-```
+> CURRENTLY WORKING ON A NEW PATTERN.
+> THIS IS A WORK IN PROGRESS.
 
 # Serialization and Deserialization
 Each schema has the following methods:
