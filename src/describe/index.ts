@@ -24,10 +24,7 @@ export const generic = <P extends SchemaProperties, S extends {[key in keyof S]:
         subTypeMap
     );
 
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-export class TypeToken<I> {}
-
-export const typedGeneric = <P extends {[key in keyof P]: P[key]} & { type: string }>(token: TypeToken<P>, properties: ValueOrProvider<unknown>, subTypeMap: any) =>
+export const typedGeneric = <P extends {[key in keyof P]: P[key]} & { type: string }>(properties: ValueOrProvider<unknown>, subTypeMap: any) =>
     new GenericObjectSchema<any, any, SubTypeKey.STRING, P>(
         SubTypeKey.STRING,
         properties,
@@ -37,6 +34,13 @@ export const typedGeneric = <P extends {[key in keyof P]: P[key]} & { type: stri
 export const genericEnum = <P extends SchemaProperties, S extends {[key in keyof S]: ObjectSchema<any>}>(properties: P, subTypeMap: ValueOrProvider<S>) =>
     new GenericObjectSchema(
         SubTypeKey.ENUM as any,
+        properties,
+        subTypeMap
+    );
+
+export const typedGenericEnum = <P extends {[key in keyof P]: P[key]} & { type: any }>(properties: ValueOrProvider<unknown>, subTypeMap: any) =>
+    new GenericObjectSchema<any, any, SubTypeKey.ENUM, P>(
+        SubTypeKey.ENUM,
         properties,
         subTypeMap
     );

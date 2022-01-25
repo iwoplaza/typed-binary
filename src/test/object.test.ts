@@ -1,7 +1,7 @@
 import * as chai from 'chai';
 import { encodeAndDecode, makeIO } from './_mock.test';
 import { INT, STRING } from '../structure/baseTypes';
-import { generic, genericEnum, object, optional, typedObject, typedGeneric, TypeToken } from '../describe';
+import { generic, genericEnum, object, optional, typedObject, typedGeneric, typedGenericEnum } from '../describe';
 import { Parsed } from '../utilityTypes';
 
 const expect = chai.expect;
@@ -147,7 +147,7 @@ describe('ObjectSchema', () => {
 
         type Explicit = ExplicitA|ExplicitB;
 
-        const schema = typedGeneric(new TypeToken<Explicit>(), {
+        const schema = typedGeneric<Explicit>({
             base: INT,
         }, {
             ['a' as const]: object({
@@ -160,6 +160,44 @@ describe('ObjectSchema', () => {
 
         const value = {
             type: 'a' as const,
+            base: 15,
+            a: 'some',
+        };
+
+        const decoded = encodeAndDecode(schema, value);
+        expect(decoded).to.deep.equal(value);
+    });
+
+    it ('allows for generic enum type-hints', () => {
+        interface ExplicitBase {
+            base: number;
+        }
+
+        interface ExplicitA extends ExplicitBase {
+            type: 0;
+            a: string;
+        }
+
+        interface ExplicitB extends ExplicitBase {
+            type: 1;
+            b: string;
+        }
+
+        type Explicit = ExplicitA|ExplicitB;
+
+        const schema = typedGenericEnum<Explicit>({
+            base: INT,
+        }, {
+            0: object({
+                a: STRING,
+            }),
+            1: object({
+                b: STRING,
+            }),
+        });
+
+        const value = {
+            type: 0 as const,
             base: 15,
             a: 'some',
         };

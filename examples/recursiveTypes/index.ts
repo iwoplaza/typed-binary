@@ -2,7 +2,7 @@
 // Run with `npm run example:recursiveTypes`
 //
 
-import { INT, object, Parsed, ParsedConcrete, STRING, typedGeneric, typedObject, TypeToken } from 'typed-binary';
+import { INT, object, Parsed, ParsedConcrete, STRING, typedGeneric, typedObject } from 'typed-binary';
 
 interface ExpressionBase {}
 
@@ -23,7 +23,7 @@ const IntLiteralExpression = object({
 });
 
 type Expression = MultiplyExpression|NegateExpression|IntLiteralExpression;
-const Expression = typedGeneric(new TypeToken<Expression>(), {
+const Expression = typedGeneric<Expression>({
     name: STRING,
 }, {
     'multiply': typedObject<MultiplyExpression>(() => ({
