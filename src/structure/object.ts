@@ -1,5 +1,6 @@
+import { Parsed } from '..';
 import type { ISerialInput, ISerialOutput } from '../io';
-import type { ValueOrProvider } from '../utilityTypes';
+import type { OptionalUndefined, ValueOrProvider } from '../utilityTypes';
 import { STRING } from './baseTypes';
 import {
     Schema, InferedProperties, SchemaProperties
@@ -7,16 +8,28 @@ import {
 import { SubTypeKey } from './types';
 
 
-export class ObjectSchema<T extends SchemaProperties, O extends InferedProperties<T> = InferedProperties<T>> extends Schema<O> {
-    constructor(public readonly properties: T) {
+export class ObjectSchema<
+    T extends SchemaProperties,
+    O extends OptionalUndefined<InferedProperties<T>> = OptionalUndefined<InferedProperties<T>>
+> extends Schema<O> {
+    private cachedProperties?: T;
+
+    constructor(private readonly _properties: ValueOrProvider<T>) {
         super();
+    }
+
+    public get properties() {
+        return this.cachedProperties || (
+            this.cachedProperties = (typeof this._properties === 'function' ? this._properties() : this._properties)
+        );
     }
 
     write(output: ISerialOutput, value: O): void {
         const keys: string[] = Object.keys(this.properties);
 
         for (const key of keys) {
-            this.properties[key].write(output, value[key]);
+            // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+            this.properties[key].write(output, (value as any)[key]);
         }
     }
 
@@ -25,8 +38,11 @@ export class ObjectSchema<T extends SchemaProperties, O extends InferedPropertie
         const result = {} as O;
 
         for (const key of keys) {
-            // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-            result[key] = this.properties[key].read(input) as O[typeof key];
+            const value = this.properties[key].read(input);
+            if (value !== undefined) {
+                // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+                (result as any)[key] = value;
+            }
         }
 
         return result;
@@ -37,15 +53,16 @@ export class ObjectSchema<T extends SchemaProperties, O extends InferedPropertie
 
         // Going through the base properties
         size += Object.keys(this.properties)
-                      .map(key => this.properties[key].sizeOf(value[key])) // Mapping properties into their sizes.
+                      // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+                      .map(key => this.properties[key].sizeOf((value as any)[key])) // Mapping properties into their sizes.
                       .reduce((a, b) => a + b); // Summing them up
 
         return size;
     }
 }
 
-type InferedSubTypes<T extends {[key in keyof T]: ObjectSchema<SchemaProperties>}> = {
-    [Key in keyof T]: T[Key]['_infered'] & { type: Key }
+export type InferedSubTypes<T extends {[key in keyof T]: ObjectSchema<SchemaProperties>}> = {
+    [Key in keyof T]: Parsed<T[Key]> & { type: Key }
 };
 
 export type ObjectSchemaMap<S, SI extends {[key in keyof SI]: SI[key]}> = {[key in keyof S]: ObjectSchema<SI[key]>};
@@ -53,11 +70,12 @@ export type ObjectSchemaMap<S, SI extends {[key in keyof SI]: SI[key]}> = {[key 
 export class GenericObjectSchema<
     T extends SchemaProperties, // Base properties
     S extends {[Key in keyof S]: ObjectSchema<SchemaProperties>}, // Sub type map
-    K extends ((keyof S) extends string ? SubTypeKey.STRING : SubTypeKey.ENUM)
-> extends ObjectSchema<T, InferedProperties<T> & InferedSubTypes<S>[keyof S]> {
+    K extends string|number,
+    I extends OptionalUndefined<InferedProperties<T>> & InferedSubTypes<S>[keyof S] = OptionalUndefined<InferedProperties<T>> & InferedSubTypes<S>[keyof S]
+> extends ObjectSchema<T, I> {
     constructor(
         public readonly keyedBy: K,
-        properties: T,
+        properties: ValueOrProvider<T>,
         private readonly subTypeMap: ValueOrProvider<S>
     ) {
         super(properties);
@@ -67,7 +85,7 @@ export class GenericObjectSchema<
         return typeof this.subTypeMap === 'function' ? this.subTypeMap() : this.subTypeMap;
     }
 
-    write(output: ISerialOutput, value: InferedProperties<T> & InferedSubTypes<S>[keyof S]): void {
+    write(output: ISerialOutput, value: I): void {
         // Figuring out sub-types
         const subTypeDescription = this.getSubTypeMap()[value.type] || null;
         if (subTypeDescription === null) {
@@ -97,7 +115,7 @@ export class GenericObjectSchema<
         }
     }
 
-    read(input: ISerialInput): InferedProperties<T> & InferedSubTypes<S>[keyof S] {
+    read(input: ISerialInput): I {
         const subTypeMap = this.getSubTypeMap();
         const subTypeKey = this.keyedBy === SubTypeKey.ENUM ? input.readByte() : input.readString();
 
@@ -116,15 +134,18 @@ export class GenericObjectSchema<
         
             for (const key of extraKeys) {
                 const prop = (subTypeDescription.properties)[key];
-                // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-                (result as any)[key] = prop.read(input);
+                const value = prop.read(input);
+                if (value !== undefined) {
+                    // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+                    (result as any)[key] = value;
+                }
             }
         }
 
         return result;
     }
 
-    sizeOf(value: InferedProperties<T> & InferedSubTypes<S>[keyof S]): number {
+    sizeOf(value: I): number {
         let size = super.sizeOf(value);
 
         // We're a generic object trying to encode a concrete value.

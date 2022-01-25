@@ -5,7 +5,7 @@ import { ArraySchema, INT } from '../structure';
 
 const expect = chai.expect;
 
-describe('(read/write)Array', () => {
+describe('ArrayScheme', () => {
     it('should encode and decode a simple int array', () => {
         const length = randIntBetween(0, 5);
         const value = [];

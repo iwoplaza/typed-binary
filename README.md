@@ -16,6 +16,7 @@ Gives tools to describe binary structures with full TypeScript support. Encodes 
   - [Arrays](#arrays)
   - [Tuples](#tuples)
   - [Optionals](#optionals)
+- [Recursive types](#recursive-types)
 - [Serialization and Deserialization](#serialization-and-deserialization)
 
 # Features:
@@ -332,6 +333,60 @@ Person.write(writer, {
 
 console.log(JSON.stringify(Person.read(reader).address)); // undefined
 console.log(JSON.stringify(Person.read(reader).address)); // { "city": "New York", ... }
+```
+
+# Recursive types
+If you want an object type to be able to contain one of itself (recursion), then you have to apply the following pattern:
+```ts
+import { INT, STRING, object, Parsed, ParsedConcrete, typedGeneric, typedObject, TypeToken } from 'typed-binary';
+
+interface ExpressionBase {}
+
+interface MultiplyExpression extends ExpressionBase {
+    type: 'multiply';
+    a: Expression;
+    b: Expression;
+}
+
+interface NegateExpression extends ExpressionBase {
+    type: 'negate';
+    inner: Expression;
+}
+
+type IntLiteralExpression = ParsedConcrete<ExpressionBase, typeof IntLiteralExpression, 'int_literal'>;
+const IntLiteralExpression = object({
+    value: INT,
+});
+
+type Expression = MultiplyExpression|NegateExpression|IntLiteralExpression;
+const Expression = typedGeneric(new TypeToken<Expression>(), {
+    name: STRING,
+}, {
+    'multiply': typedObject<MultiplyExpression>(() => ({
+        a: Expression,
+        b: Expression,
+    })),
+    'negate': typedObject<NegateExpression>(() => ({
+        inner: Expression,
+    })),
+    'int_literal': IntLiteralExpression
+});
+
+const expr: Parsed<typeof Expression> = {
+    type: 'multiply',
+    a: {
+        type: 'negate',
+        inner: {
+            type: 'int_literal',
+            value: 15,
+        }
+    },
+    b: {
+        type: 'int_literal',
+        value: 2,
+    },
+};
+
 ```
 
 # Serialization and Deserialization
