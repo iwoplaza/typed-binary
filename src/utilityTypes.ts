@@ -1,7 +1,7 @@
 import { ISchema } from './structure/types';
 
 export type Parsed<T> = T extends ISchema<infer I> ? I : never;
-export type ParsedConcrete<B, T, ConcreteType extends string> = B & Parsed<T> & { type: ConcreteType };
+export type ParsedConcrete<B, T, ConcreteType extends string|number> = B & Parsed<T> & { type: ConcreteType };
 export type ValueOrProvider<T> = T | (() => T);
 
 type UndefinedKeys<T> = {
