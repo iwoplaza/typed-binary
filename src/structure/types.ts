@@ -1,4 +1,5 @@
 import { ISerialInput, ISerialOutput } from '../io';
+import { OptionalUndefined } from '../utilityTypes';
 
 export interface ISchema<P> {
     /**
@@ -6,9 +7,9 @@ export interface ISchema<P> {
      */
     readonly _infered: P;
 
-    write(output: ISerialOutput, value: P): void;
-    read(input: ISerialInput): P;
-    sizeOf(value: P): number;
+    write(output: ISerialOutput, value: OptionalUndefined<P>): void;
+    read(input: ISerialInput): OptionalUndefined<P>;
+    sizeOf(value: OptionalUndefined<P>): number;
 }
 
 export abstract class Schema<P> implements ISchema<P> {
@@ -17,9 +18,9 @@ export abstract class Schema<P> implements ISchema<P> {
      */
     readonly _infered!: P;
     
-    abstract write(output: ISerialOutput, value: P): void;
-    abstract read(input: ISerialInput): P;
-    abstract sizeOf(value: P): number;
+    abstract write(output: ISerialOutput, value: OptionalUndefined<P>): void;
+    abstract read(input: ISerialInput): OptionalUndefined<P>;
+    abstract sizeOf(value: OptionalUndefined<P>): number;
 }
 
 ////

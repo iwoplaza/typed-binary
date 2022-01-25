@@ -10,7 +10,7 @@ export function makeIO(bufferSize: number) {
     };
 }
 
-export function encodeAndDecode<T extends ISchema<Parsed<T>>>(schema: T, value: Parsed<T>): Parsed<T> {
+export function encodeAndDecode<T extends ISchema<T['_infered']>>(schema: T, value: Parsed<T>): Parsed<T> {
     const buffer = Buffer.alloc(schema.sizeOf(value));
 
     schema.write(new BufferWriter(buffer), value);

@@ -1,4 +1,4 @@
-import { STRING, typedGeneric, typedObject, TypeToken } from 'typed-binary';
+import { object, optional, Parsed, STRING, typedGeneric, typedObject, TypeToken } from 'typed-binary';
 
 interface Expression {
     name: string;

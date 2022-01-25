@@ -3,7 +3,7 @@ import { ArraySchema } from '../structure/array';
 import { OptionalSchema } from '../structure/optional';
 import { GenericObjectSchema, InferedSubTypes } from '../structure/object';
 import { TupleSchema } from '../structure/tuple';
-import { Schema, SchemaProperties } from '../structure/types';
+import { ISchema, SchemaProperties } from '../structure/types';
 import { ValueOrProvider } from '../utilityTypes';
 
 
@@ -24,9 +24,15 @@ export const generic = <P extends SchemaProperties, S extends {[key in keyof S]:
         subTypeMap
     );
 
-export class TypeToken<P> {
-    readonly _infered!: P;
+export class TypeToken<I> {
+    readonly _infered!: I;
 }
+
+export interface Ref<I> extends ISchema<I> {
+    readonly _infered: I;
+}
+
+export const ref = <I>(inner: any): Ref<I> => inner as unknown as Ref<I>;
 
 export const typedGeneric = <P, S extends {[Key in keyof S]: ObjectSchema<SchemaProperties, any>}>(token: TypeToken<P>, properties: ValueOrProvider<unknown>, subTypeMap: S) =>
     new GenericObjectSchema<any, S, SubTypeKey.STRING, P & InferedSubTypes<S>[keyof S]>(
@@ -42,11 +48,11 @@ export const genericEnum = <P extends SchemaProperties, S extends {[key in keyof
         subTypeMap
     );
 
-export const arrayOf = <T extends Schema<T['_infered']>>(elementType: T) =>
+export const arrayOf = <T extends ISchema<T['_infered']>>(elementType: T) =>
     new ArraySchema(elementType);
 
-export const tupleOf = <T extends Schema<T['_infered']>>(elementType: T, length: number) =>
+export const tupleOf = <T extends ISchema<T['_infered']>>(elementType: T, length: number) =>
     new TupleSchema(elementType, length);
 
-export const optional = <I, T extends Schema<I>>(innerType: T) =>
+export const optional = <T extends ISchema<T['_infered']>>(innerType: T) =>
     new OptionalSchema(innerType);

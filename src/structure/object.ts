@@ -1,5 +1,5 @@
 import type { ISerialInput, ISerialOutput } from '../io';
-import type { ValueOrProvider } from '../utilityTypes';
+import type { OptionalUndefined, ValueOrProvider } from '../utilityTypes';
 import { STRING } from './baseTypes';
 import {
     Schema, InferedProperties, SchemaProperties
@@ -7,7 +7,10 @@ import {
 import { SubTypeKey } from './types';
 
 
-export class ObjectSchema<T extends SchemaProperties, O extends InferedProperties<T> = InferedProperties<T>> extends Schema<O> {
+export class ObjectSchema<
+    T extends SchemaProperties,
+    O extends InferedProperties<T> = InferedProperties<T>
+> extends Schema<O> {
     private cachedProperties?: T;
 
     constructor(private readonly _properties: ValueOrProvider<T>) {
@@ -20,32 +23,37 @@ export class ObjectSchema<T extends SchemaProperties, O extends InferedPropertie
         );
     }
 
-    write(output: ISerialOutput, value: O): void {
+    write(output: ISerialOutput, value: OptionalUndefined<O>): void {
         const keys: string[] = Object.keys(this.properties);
 
         for (const key of keys) {
-            this.properties[key].write(output, value[key]);
+            // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+            this.properties[key].write(output, (value as any)[key]);
         }
     }
 
-    read(input: ISerialInput): O {
+    read(input: ISerialInput): OptionalUndefined<O> {
         const keys: (keyof T)[] = Object.keys(this.properties);
-        const result = {} as O;
+        const result = {} as OptionalUndefined<O>;
 
         for (const key of keys) {
-            // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-            result[key] = this.properties[key].read(input) as O[typeof key];
+            const value = this.properties[key].read(input) as O[typeof key];
+            if (value !== undefined) {
+                // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+                (result as any)[key] = value;
+            }
         }
 
         return result;
     }
 
-    sizeOf(value: O): number {
+    sizeOf(value: OptionalUndefined<O>): number {
         let size = 0;
 
         // Going through the base properties
         size += Object.keys(this.properties)
-                      .map(key => this.properties[key].sizeOf(value[key])) // Mapping properties into their sizes.
+                      // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+                      .map(key => this.properties[key].sizeOf((value as any)[key])) // Mapping properties into their sizes.
                       .reduce((a, b) => a + b); // Summing them up
 
         return size;
@@ -76,19 +84,19 @@ export class GenericObjectSchema<
         return typeof this.subTypeMap === 'function' ? this.subTypeMap() : this.subTypeMap;
     }
 
-    write(output: ISerialOutput, value: I): void {
+    write(output: ISerialOutput, value: OptionalUndefined<I>): void {
         // Figuring out sub-types
-        const subTypeDescription = this.getSubTypeMap()[value.type] || null;
+        const subTypeDescription = this.getSubTypeMap()[(value as I).type] || null;
         if (subTypeDescription === null) {
-            throw new Error(`Unknown sub-type '${value.type.toString()}' in among '${JSON.stringify(Object.keys(this.subTypeMap))}'`);
+            throw new Error(`Unknown sub-type '${(value as I).type.toString()}' in among '${JSON.stringify(Object.keys(this.subTypeMap))}'`);
         }
 
         // Writing the sub-type out.
         if (this.keyedBy === SubTypeKey.ENUM) {
-            output.writeByte(value.type as number);
+            output.writeByte((value as I).type as number);
         }
         else {
-            output.writeString(value.type as string);
+            output.writeString((value as I).type as string);
         }
 
         // Writing the base properties
@@ -102,11 +110,11 @@ export class GenericObjectSchema<
             // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access
             const prop: Schema<unknown> = subTypeDescription.properties[key];
     
-            prop.write(output, value[key]);
+            prop.write(output, (value as I)[key]);
         }
     }
 
-    read(input: ISerialInput): I {
+    read(input: ISerialInput): OptionalUndefined<I> {
         const subTypeMap = this.getSubTypeMap();
         const subTypeKey = this.keyedBy === SubTypeKey.ENUM ? input.readByte() : input.readString();
 
@@ -118,35 +126,38 @@ export class GenericObjectSchema<
         const result = super.read(input);
 
         // Making the sub type key available to the result object.
-        result.type = subTypeKey as keyof S;
+        (result as I).type = subTypeKey as keyof S;
 
         if (subTypeDescription !== null) {
             const extraKeys = Object.keys(subTypeDescription.properties);
         
             for (const key of extraKeys) {
                 const prop = (subTypeDescription.properties)[key];
-                // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-                (result as any)[key] = prop.read(input);
+                const value = prop.read(input);
+                if (value !== undefined) {
+                    // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+                    (result as any)[key] = value;
+                }
             }
         }
 
         return result;
     }
 
-    sizeOf(value: I): number {
+    sizeOf(value: OptionalUndefined<I>): number {
         let size = super.sizeOf(value);
 
         // We're a generic object trying to encode a concrete value.
-        size += this.keyedBy === SubTypeKey.ENUM ? 1 : STRING.sizeOf(value.type as string);
+        size += this.keyedBy === SubTypeKey.ENUM ? 1 : STRING.sizeOf((value as I).type as string);
 
         // Extra sub-type fields
-        const subTypeDescription = this.getSubTypeMap()[value.type] || null;
+        const subTypeDescription = this.getSubTypeMap()[(value as I).type] || null;
         if (subTypeDescription === null) {
-            throw new Error(`Unknown sub-type '${value.type.toString()}' in among '${JSON.stringify(Object.keys(this.subTypeMap))}'`);
+            throw new Error(`Unknown sub-type '${(value as I).type.toString()}' in among '${JSON.stringify(Object.keys(this.subTypeMap))}'`);
         }
 
         size += Object.keys(subTypeDescription.properties) // Going through extra property keys
-                        .map(key => subTypeDescription.properties[key].sizeOf(value[key])) // Mapping extra properties into their sizes
+                        .map(key => subTypeDescription.properties[key].sizeOf((value as I)[key])) // Mapping extra properties into their sizes
                         .reduce((a, b) => a + b, 0); // Summing them up
     
         return size;

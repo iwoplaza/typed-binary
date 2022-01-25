@@ -1,7 +1,7 @@
 import * as chai from 'chai';
-import { makeIO } from './_mock.test';
+import { encodeAndDecode, makeIO } from './_mock.test';
 import { INT, STRING } from '../structure/baseTypes';
-import { generic, genericEnum, object } from '../describe';
+import { generic, genericEnum, object, optional, typedObject } from '../describe';
 import { Parsed } from '../utilityTypes';
 
 const expect = chai.expect;
@@ -21,6 +21,26 @@ describe('ObjectSchema', () => {
         const { output, input } = makeIO(64);
         description.write(output, value);
         expect(description.read(input)).to.deep.equal(value);
+    });
+
+    it('should treat undefined properties as optional', () => {
+        const OptionalString = optional(STRING);
+        const schema = object({
+            required: STRING,
+            optional: OptionalString,
+        });
+
+        const valueWithMissing = {
+            required: 'Required',
+        };
+
+        const valueWithUndefined = {
+            required: 'Required',
+            optional: undefined,
+        };
+
+        expect(encodeAndDecode(schema, valueWithMissing)).to.deep.equal(valueWithMissing);
+        expect(encodeAndDecode(schema, valueWithUndefined)).to.deep.equal(valueWithMissing);
     });
 
     it('should encode and decode a generic object', () => {
@@ -86,8 +106,27 @@ describe('ObjectSchema', () => {
         const { output, input } = makeIO(schema.sizeOf(value));
         schema.write(output, value);
 
-        expect(input.readInt() === 1); // a
-        expect(input.readInt() === 3); // c
-        expect(input.readInt() === 2); // b
+        expect(input.readInt()).to.equal(1); // a
+        expect(input.readInt()).to.equal(3); // c
+        expect(input.readInt()).to.equal(2); // b
+    });
+
+    it ('allows for type-hints', () => {
+        interface Explicit {
+            value: number;
+            next?: Explicit;
+        }
+
+        const schema = typedObject<Explicit>(() => ({
+            value: INT,
+            next: optional(schema),
+        }));
+
+        const value: Explicit = {
+            value: 5,
+        };
+
+        const decoded = encodeAndDecode(schema, value);
+        expect(decoded).to.deep.equal(value);
     });
 });
