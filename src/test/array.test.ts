@@ -1,7 +1,7 @@
 import * as chai from 'chai';
-import { randIntBetween } from '../test/random';
+import { randIntBetween } from './random';
 import { makeIO } from './_mock.test';
-import { ArraySchema, INT } from '.';
+import { ArraySchema, INT } from '../structure';
 
 const expect = chai.expect;
 

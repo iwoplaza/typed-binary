@@ -1,11 +1,11 @@
 import * as chai from 'chai';
-import { randIntBetween } from '../test/random';
+import { randIntBetween } from './random';
 import { makeIO } from './_mock.test';
-import { CharsSchema } from '.';
+import { CharsSchema } from '../structure';
 
 const expect = chai.expect;
 
-describe('(read/write)Chars', () => {
+describe('CharsSchema', () => {
     it('should encode and decode fixed-size char array', () => {
         const length = randIntBetween(0, 100);
         let value = '';

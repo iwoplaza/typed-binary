@@ -1,11 +1,11 @@
 import * as chai from 'chai';
-import { randIntBetween } from '../test/random';
-import { OptionalSchema, INT } from '.';
+import { randIntBetween } from './random';
+import { OptionalSchema, INT } from '../structure';
 import { makeIO } from './_mock.test';
 
 const expect = chai.expect;
 
-describe('(read/write)Optiona;', () => {
+describe('OptionalSchema', () => {
     it('should encode and decode an optional int, with a value', () => {
         const innerValue = randIntBetween(-10000, 10000);
 

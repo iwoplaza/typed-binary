@@ -1,15 +1,14 @@
 import * as chai from 'chai';
 import { makeIO } from './_mock.test';
-import { ObjectSchema } from './object';
-import { INT, STRING } from './baseTypes';
-import { GenericObjectSchema } from './_internal';
-import { SubTypeKey } from '.';
+import { INT, STRING } from '../structure/baseTypes';
+import { generic, genericEnum, object } from '../describe';
+import { Parsed } from '../utilityTypes';
 
 const expect = chai.expect;
 
-describe('(read/write)Object', () => {
+describe('ObjectSchema', () => {
     it('should encode and decode a simple object', () => {
-        const description = new ObjectSchema({
+        const description = object({
             value: INT,
             label: STRING,
         });
@@ -25,13 +24,14 @@ describe('(read/write)Object', () => {
     });
 
     it('should encode and decode a generic object', () => {
-        const genericDescription = new GenericObjectSchema(SubTypeKey.STRING, {
-            sharedValue: INT,
-        }, {
-            'concrete': new ObjectSchema({
-                extraValue: INT,
-            }),
-        });
+        const genericDescription =
+            generic({
+                sharedValue: INT,
+            }, {
+                'concrete': object({
+                    extraValue: INT,
+                }),
+            });
 
         const value = {
             type: 'concrete' as const,
@@ -47,13 +47,14 @@ describe('(read/write)Object', () => {
     });
 
     it('should encode and decode an enum generic object', () => {
-        const genericDescription = new GenericObjectSchema(SubTypeKey.ENUM, {
-            sharedValue: INT,
-        }, {
-            0: new ObjectSchema({
-                extraValue: INT,
-            }),
-        });
+        const genericDescription =
+            genericEnum({
+                sharedValue: INT,
+            }, {
+                0: object({
+                    extraValue: INT,
+                }),
+            });
 
         const value = {
             type: 0 as const,
@@ -66,5 +67,27 @@ describe('(read/write)Object', () => {
         genericDescription.write(output, value);
         // Reading with the generic description.
         expect(genericDescription.read(input)).to.deep.equal(value);
+    });
+
+    it('preserves insertion-order of properties', () => {
+        const schema = object({
+            a: INT,
+            c: INT,
+            b: INT,
+        });
+
+        // Purpusefully out-of-order.
+        const value: Parsed<typeof schema> = {
+            a: 1,
+            b: 2,
+            c: 3,
+        };
+
+        const { output, input } = makeIO(schema.sizeOf(value));
+        schema.write(output, value);
+
+        expect(input.readInt() === 1); // a
+        expect(input.readInt() === 3); // c
+        expect(input.readInt() === 2); // b
     });
 });
