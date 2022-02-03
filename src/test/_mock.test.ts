@@ -1,5 +1,5 @@
 import { BufferReader, BufferWriter } from '../io';
-import { ISchema } from '../structure/types';
+import { IStableSchema } from '../structure/types';
 import { Parsed } from '../utilityTypes';
 
 export function makeIO(bufferSize: number) {
@@ -10,10 +10,10 @@ export function makeIO(bufferSize: number) {
     };
 }
 
-export function encodeAndDecode<T extends ISchema<Parsed<T>>>(schema: T, value: Parsed<T>): Parsed<T> {
+export function encodeAndDecode<T extends IStableSchema<unknown>>(schema: T, value: Parsed<T>): Parsed<T> {
     const buffer = Buffer.alloc(schema.sizeOf(value));
 
     schema.write(new BufferWriter(buffer), value);
 
-    return schema.read(new BufferReader(buffer));
+    return schema.read(new BufferReader(buffer)) as Parsed<T>;
 }

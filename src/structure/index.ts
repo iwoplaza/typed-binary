@@ -5,6 +5,9 @@ export {
     FLOAT,
     STRING,
 
+    Ref,
+    Keyed,
+    KeyedSchema,
     ObjectSchema,
     CharsSchema,
     ArraySchema,

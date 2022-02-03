@@ -4,3 +4,4 @@ export * from './chars';
 export * from './optional';
 export * from './object';
 export * from './array';
+export * from './keyed';
