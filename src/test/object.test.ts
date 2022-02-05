@@ -6,6 +6,7 @@ import { Parsed } from '../utilityTypes';
 
 const expect = chai.expect;
 
+
 describe('ObjectSchema', () => {
     it('should encode and decode a simple object', () => {
         const description = object({
@@ -39,16 +40,20 @@ describe('ObjectSchema', () => {
     });
 
     it('should encode and decode a generic object', () => {
-        const genericDescription =
+        type GenericType = Parsed<typeof GenericType>;
+        const GenericType =
             generic({
                 sharedValue: INT,
             }, {
                 'concrete': object({
                     extraValue: INT,
                 }),
+                'other': object({
+                    notImportant: INT,
+                }),
             });
 
-        const value = {
+        const value: GenericType = {
             type: 'concrete' as const,
             sharedValue: 100,
             extraValue: 10,
@@ -56,22 +61,26 @@ describe('ObjectSchema', () => {
 
         const { output, input } = makeIO(64);
         // Writing with the generic description.
-        genericDescription.write(output, value);
+        GenericType.write(output, value);
         // Reading with the generic description.
-        expect(genericDescription.read(input)).to.deep.equal(value);
+        expect(GenericType.read(input)).to.deep.equal(value);
     });
 
     it('should encode and decode an enum generic object', () => {
-        const genericDescription =
+        type GenericType = Parsed<typeof GenericType>;
+        const GenericType =
             genericEnum({
                 sharedValue: INT,
             }, {
                 0: object({
                     extraValue: INT,
                 }),
+                1: object({
+                    notImportant: INT,
+                }),
             });
 
-        const value = {
+        const value: GenericType = {
             type: 0 as const,
             sharedValue: 100,
             extraValue: 10,
@@ -79,9 +88,9 @@ describe('ObjectSchema', () => {
 
         const { output, input } = makeIO(64);
         // Writing with the generic description.
-        genericDescription.write(output, value);
+        GenericType.write(output, value);
         // Reading with the generic description.
-        expect(genericDescription.read(input)).to.deep.equal(value);
+        expect(GenericType.read(input)).to.deep.equal(value);
     });
 
     it('preserves insertion-order of properties', () => {

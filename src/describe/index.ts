@@ -13,15 +13,15 @@ export const chars = <T extends number>(length: T) =>
 export const object = <P extends {[key: string]: unknown}>(properties: SchemaMap<P>) =>
     new ObjectSchema(properties);
 
-export const generic = <P, S extends {[key in keyof S]: ISchemaWithProperties<any>}>(properties: SchemaMap<P>, subTypeMap: S) =>
-    new GenericObjectSchema(
+export const generic = <P extends Record<string, unknown>, S extends {[Key in keyof S]: ISchemaWithProperties<Record<string, unknown>>}>(properties: SchemaMap<P>, subTypeMap: S) =>
+    new GenericObjectSchema<P, S>(
         SubTypeKey.STRING,
         properties,
         subTypeMap
     );
 
-export const genericEnum = <P, S extends {[key in keyof S]: ISchemaWithProperties<any>}>(properties: SchemaMap<P>, subTypeMap: S) =>
-    new GenericObjectSchema(
+export const genericEnum = <P extends Record<string, unknown>, S extends {[Key in keyof S]: ISchemaWithProperties<Record<string, unknown>>}>(properties: SchemaMap<P>, subTypeMap: S) =>
+    new GenericObjectSchema<P, S>(
         SubTypeKey.ENUM,
         properties,
         subTypeMap

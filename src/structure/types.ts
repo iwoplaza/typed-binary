@@ -59,4 +59,3 @@ export interface IRefResolver {
 
 export type SchemaMap<T> = {[key in keyof T]: ISchema<T[key]>};
 export type StableSchemaMap<T> = {[key in keyof T]: IStableSchema<T[key]>};
-export type SchemaWithPropertiesMap<T extends Record<string, Record<string, unknown>>> = {[key in keyof T]: ISchemaWithProperties<T[key]>};

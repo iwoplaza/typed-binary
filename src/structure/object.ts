@@ -1,7 +1,7 @@
 import type { ISerialInput, ISerialOutput } from '../io';
 import { STRING } from './baseTypes';
 import {
-    Schema, IRefResolver, ISchemaWithProperties, SchemaMap, StableSchemaMap, SchemaWithPropertiesMap
+    Schema, IRefResolver, ISchemaWithProperties, SchemaMap, StableSchemaMap
 } from './types';
 import { SubTypeKey } from './types';
 
@@ -9,7 +9,7 @@ export function exactEntries<T extends Record<keyof T, T[keyof T]>>(record: T): 
     return Object.entries(record) as [keyof T, T[keyof T]][];
 }
 
-export function resolveMap<T extends Record<string, Record<string, unknown>>>(ctx: IRefResolver, refs: SchemaWithPropertiesMap<T>): StableObjectSchemaMap<T>;
+export function resolveMap<T extends {[K in keyof T]: ISchemaWithProperties<Record<string, unknown>>}>(ctx: IRefResolver, refs: T): StabilizedMap<T>;
 export function resolveMap<T>(ctx: IRefResolver, refs: SchemaMap<T>): StableSchemaMap<T>;
 export function resolveMap<T>(ctx: IRefResolver, refs: SchemaMap<T>): StableSchemaMap<T> {
     const props = {} as StableSchemaMap<T>;
@@ -61,19 +61,20 @@ export class ObjectSchema<T extends {[key: string]: unknown}> extends Schema<T> 
     }
 }
 
-export type AsSubTypes<T> = ({[K in keyof T]: T[K] & { type: K }})[keyof T];
+export type AsSubTypes<T> = ({[K in keyof T]: T[K] extends ISchemaWithProperties<infer P> ? P & { type: K } : never})[keyof T];
+export type StabilizedMap<T> = ({[K in keyof T]: T[K] extends ISchemaWithProperties<infer P> ? ObjectSchema<P> : never});
 
 export class GenericObjectSchema<
     T extends Record<string, unknown>, // Base properties
-    E extends {[Key in keyof E]: Record<string, unknown>}, // Sub type map
+    E extends {[key in keyof E]: ISchemaWithProperties<Record<string, unknown>>}, // Sub type map
 > extends Schema<T & AsSubTypes<E>> {
     private _baseObject: ObjectSchema<T>;
-    public subTypeMap: {[key in keyof E]: ObjectSchema<E[key]>};
+    public subTypeMap: StabilizedMap<E>;
 
     constructor(
         public readonly keyedBy: SubTypeKey,
         properties: SchemaMap<T>,
-        private readonly _subTypeMap: {[key in keyof E]: ISchemaWithProperties<E[key]>}
+        private readonly _subTypeMap: E
     ) {
         super();
 
@@ -81,7 +82,7 @@ export class GenericObjectSchema<
 
         // In case this object isn't part of a keyed chain,
         // let's assume sub types are stable.
-        this.subTypeMap = _subTypeMap as typeof this.subTypeMap;
+        this.subTypeMap = _subTypeMap as unknown as typeof this.subTypeMap;
     }
 
     resolve(ctx: IRefResolver): void {
