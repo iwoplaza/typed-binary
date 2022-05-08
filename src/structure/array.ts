@@ -1,11 +1,21 @@
 import type { ISerialInput, ISerialOutput } from '../io';
 import { INT } from './baseTypes';
-import { Schema } from './types';
+import { IRefResolver, ISchema, IStableSchema, Schema } from './types';
 
 
 export class ArraySchema<T> extends Schema<T[]> {
-    constructor(public readonly elementType: Schema<T>) {
+    public elementType: IStableSchema<T>
+
+    constructor(private readonly _unstableElementType: ISchema<T>) {
         super();
+
+        // In case this array isn't part of a keyed chain,
+        // let's assume the inner type is stable.
+        this.elementType = _unstableElementType as IStableSchema<T>;
+    }
+
+    resolve(ctx: IRefResolver): void {
+        this.elementType = ctx.resolve(this._unstableElementType);
     }
 
     write(output: ISerialOutput, values: T[]): void {

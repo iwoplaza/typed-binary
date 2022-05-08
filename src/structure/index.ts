@@ -5,6 +5,12 @@ export {
     FLOAT,
     STRING,
 
+    Ref,
+    IRefResolver,
+    Schema,
+    ISchemaWithProperties,
+    Keyed,
+    KeyedSchema,
     ObjectSchema,
     CharsSchema,
     ArraySchema,

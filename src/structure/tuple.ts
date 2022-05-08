@@ -1,10 +1,20 @@
 import { TypedBinaryError } from '../error';
-import { Schema } from './types';
+import { IRefResolver, ISchema, IStableSchema, Schema } from './types';
 import type { ISerialInput, ISerialOutput } from '../io';
 
 export class TupleSchema<T> extends Schema<T[]> {
-    constructor(public readonly elementType: Schema<T>, public readonly length: number) {
+    private elementSchema: IStableSchema<T>;
+
+    constructor(private readonly _unstableElementSchema: ISchema<T>, public readonly length: number) {
         super();
+
+        // In case this array isn't part of a keyed chain,
+        // let's assume the inner type is stable.
+        this.elementSchema = _unstableElementSchema as IStableSchema<T>;
+    }
+
+    resolve(ctx: IRefResolver): void {
+        this.elementSchema = ctx.resolve(this._unstableElementSchema);
     }
 
     write(output: ISerialOutput, values: T[]): void {
@@ -13,7 +23,7 @@ export class TupleSchema<T> extends Schema<T[]> {
         }
     
         for (const value of values) {
-            this.elementType.write(output, value);
+            this.elementSchema.write(output, value);
         }
     }
 
@@ -21,13 +31,13 @@ export class TupleSchema<T> extends Schema<T[]> {
         const array = [];
 
         for (let i = 0; i < this.length; ++i) {
-            array.push(this.elementType.read(input));
+            array.push(this.elementSchema.read(input));
         }
     
         return array;
     }
 
     sizeOf(values: T[]): number {
-        return values.map(v => this.elementType.sizeOf(v)).reduce((a, b) => a + b);
+        return values.map(v => this.elementSchema.sizeOf(v)).reduce((a, b) => a + b);
     }
 }

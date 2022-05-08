@@ -3,53 +3,38 @@ import { ArraySchema } from '../structure/array';
 import { OptionalSchema } from '../structure/optional';
 import { GenericObjectSchema } from '../structure/object';
 import { TupleSchema } from '../structure/tuple';
-import { ISchema, SchemaProperties } from '../structure/types';
-import { OptionalUndefined, ValueOrProvider } from '../utilityTypes';
-import { Parsed } from '..';
+import { ISchema, ISchemaWithProperties, IStableSchema, Ref, SchemaMap } from '../structure/types';
+import { KeyedSchema } from '../structure/keyed';
 
 
 export const chars = <T extends number>(length: T) =>
     new CharsSchema(length);
 
-export const object = <P extends SchemaProperties>(properties: ValueOrProvider<P>) =>
+export const object = <P extends Record<string, unknown> = Record<string, never>>(properties: SchemaMap<P>) =>
     new ObjectSchema(properties);
 
-export const typedObject = <P extends {[key in keyof P]: P[key]}>(properties: ValueOrProvider<unknown>) =>
-    new ObjectSchema<any, OptionalUndefined<P>>(properties);
-
-export const generic = <P extends SchemaProperties, S extends {[key in keyof S]: ObjectSchema<any>}>(properties: P, subTypeMap: ValueOrProvider<S>) =>
+export const generic = <P extends Record<string, unknown> = Record<string, never>, S extends {[Key in keyof S]: ISchemaWithProperties<Record<string, unknown>>} = Record<string, never>>(properties: SchemaMap<P>, subTypeMap: S) =>
     new GenericObjectSchema(
-        SubTypeKey.STRING as any,
-        properties,
-        subTypeMap
-    );
-
-export const typedGeneric = <P extends {[key in keyof P]: P[key]} & { type: string }>(properties: ValueOrProvider<unknown>, subTypeMap: any) =>
-    new GenericObjectSchema<any, any, SubTypeKey.STRING, P>(
         SubTypeKey.STRING,
         properties,
         subTypeMap
     );
 
-export const genericEnum = <P extends SchemaProperties, S extends {[key in keyof S]: ObjectSchema<any>}>(properties: P, subTypeMap: ValueOrProvider<S>) =>
+export const genericEnum = <P extends Record<string, unknown>, S extends {[Key in keyof S]: ISchemaWithProperties<Record<string, unknown>>}>(properties: SchemaMap<P>, subTypeMap: S) =>
     new GenericObjectSchema(
-        SubTypeKey.ENUM as any,
-        properties,
-        subTypeMap
-    );
-
-export const typedGenericEnum = <P extends {[key in keyof P]: P[key]} & { type: any }>(properties: ValueOrProvider<unknown>, subTypeMap: any) =>
-    new GenericObjectSchema<any, any, SubTypeKey.ENUM, P>(
         SubTypeKey.ENUM,
         properties,
         subTypeMap
     );
 
-export const arrayOf = <T extends ISchema<Parsed<T>>>(elementType: T) =>
+export const arrayOf = <T extends ISchema<T['_infered']>>(elementType: T) =>
     new ArraySchema(elementType);
 
-export const tupleOf = <T extends ISchema<Parsed<T>>>(elementType: T, length: number) =>
+export const tupleOf = <T extends ISchema<T['_infered']>>(elementType: T, length: number) =>
     new TupleSchema(elementType, length);
 
-export const optional = <T extends ISchema<Parsed<T>>>(innerType: T) =>
+export const optional = <T>(innerType: ISchema<T>) =>
     new OptionalSchema(innerType);
+
+export const keyed = <K extends string, P extends IStableSchema<unknown>>(key: K, inner: (ref: ISchema<Ref<K>>) => P) =>
+    new KeyedSchema(key, inner);

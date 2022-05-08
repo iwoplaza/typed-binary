@@ -1,10 +1,11 @@
 import * as chai from 'chai';
 import { encodeAndDecode, makeIO } from './_mock.test';
 import { INT, STRING } from '../structure/baseTypes';
-import { generic, genericEnum, object, optional, typedObject, typedGeneric, typedGenericEnum } from '../describe';
+import { generic, genericEnum, object, optional } from '../describe';
 import { Parsed } from '../utilityTypes';
 
 const expect = chai.expect;
+
 
 describe('ObjectSchema', () => {
     it('should encode and decode a simple object', () => {
@@ -23,37 +24,36 @@ describe('ObjectSchema', () => {
         expect(description.read(input)).to.deep.equal(value);
     });
 
-    it('should treat undefined properties as optional', () => {
+    it('should treat optional properties as undefined', () => {
         const OptionalString = optional(STRING);
         const schema = object({
             required: STRING,
             optional: OptionalString,
         });
 
-        const valueWithMissing = {
-            required: 'Required',
-        };
-
         const valueWithUndefined = {
             required: 'Required',
             optional: undefined,
         };
 
-        expect(encodeAndDecode(schema, valueWithUndefined)).to.deep.equal(valueWithMissing);
-        expect(encodeAndDecode(schema, valueWithMissing)).to.deep.equal(valueWithMissing);
+        expect(encodeAndDecode(schema, valueWithUndefined)).to.deep.equal(valueWithUndefined);
     });
 
     it('should encode and decode a generic object', () => {
-        const genericDescription =
+        type GenericType = Parsed<typeof GenericType>;
+        const GenericType =
             generic({
                 sharedValue: INT,
             }, {
                 'concrete': object({
                     extraValue: INT,
                 }),
+                'other': object({
+                    notImportant: INT,
+                }),
             });
 
-        const value = {
+        const value: GenericType = {
             type: 'concrete' as const,
             sharedValue: 100,
             extraValue: 10,
@@ -61,22 +61,26 @@ describe('ObjectSchema', () => {
 
         const { output, input } = makeIO(64);
         // Writing with the generic description.
-        genericDescription.write(output, value);
+        GenericType.write(output, value);
         // Reading with the generic description.
-        expect(genericDescription.read(input)).to.deep.equal(value);
+        expect(GenericType.read(input)).to.deep.equal(value);
     });
 
     it('should encode and decode an enum generic object', () => {
-        const genericDescription =
+        type GenericType = Parsed<typeof GenericType>;
+        const GenericType =
             genericEnum({
                 sharedValue: INT,
             }, {
                 0: object({
                     extraValue: INT,
                 }),
+                1: object({
+                    notImportant: INT,
+                }),
             });
 
-        const value = {
+        const value: GenericType = {
             type: 0 as const,
             sharedValue: 100,
             extraValue: 10,
@@ -84,9 +88,9 @@ describe('ObjectSchema', () => {
 
         const { output, input } = makeIO(64);
         // Writing with the generic description.
-        genericDescription.write(output, value);
+        GenericType.write(output, value);
         // Reading with the generic description.
-        expect(genericDescription.read(input)).to.deep.equal(value);
+        expect(GenericType.read(input)).to.deep.equal(value);
     });
 
     it('preserves insertion-order of properties', () => {
@@ -109,100 +113,5 @@ describe('ObjectSchema', () => {
         expect(input.readInt()).to.equal(1); // a
         expect(input.readInt()).to.equal(3); // c
         expect(input.readInt()).to.equal(2); // b
-    });
-
-    it ('allows for type-hints', () => {
-        interface Explicit {
-            value: number;
-            next?: Explicit;
-        }
-
-        const schema = typedObject<Explicit>(() => ({
-            value: INT,
-            next: optional(schema),
-        }));
-
-        const value: Explicit = {
-            value: 5,
-        };
-
-        const decoded = encodeAndDecode(schema, value);
-        expect(decoded).to.deep.equal(value);
-    });
-
-    it ('allows for generic type-hints', () => {
-        interface ExplicitBase {
-            base: number;
-        }
-
-        interface ExplicitA extends ExplicitBase {
-            type: 'a';
-            a: string;
-        }
-
-        interface ExplicitB extends ExplicitBase {
-            type: 'b';
-            b: string;
-        }
-
-        type Explicit = ExplicitA|ExplicitB;
-
-        const schema = typedGeneric<Explicit>({
-            base: INT,
-        }, {
-            ['a' as const]: object({
-                a: STRING,
-            }),
-            ['b' as const]: object({
-                b: STRING,
-            }),
-        });
-
-        const value = {
-            type: 'a' as const,
-            base: 15,
-            a: 'some',
-        };
-
-        const decoded = encodeAndDecode(schema, value);
-        expect(decoded).to.deep.equal(value);
-    });
-
-    it ('allows for generic enum type-hints', () => {
-        interface ExplicitBase {
-            base: number;
-        }
-
-        interface ExplicitA extends ExplicitBase {
-            type: 0;
-            a: string;
-        }
-
-        interface ExplicitB extends ExplicitBase {
-            type: 1;
-            b: string;
-        }
-
-        type Explicit = ExplicitA|ExplicitB;
-
-        const schema = typedGenericEnum<Explicit>({
-            base: INT,
-        }, {
-            0: object({
-                a: STRING,
-            }),
-            1: object({
-                b: STRING,
-            }),
-        });
-
-        const value = {
-            type: 0 as const,
-            base: 15,
-            a: 'some',
-        };
-
-        const decoded = encodeAndDecode(schema, value);
-        expect(decoded).to.deep.equal(value);
     });
 });

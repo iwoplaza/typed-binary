@@ -2,39 +2,22 @@
 // Run with `npm run example:recursiveTypes`
 //
 
-import { INT, object, Parsed, ParsedConcrete, STRING, typedGeneric, typedObject } from 'typed-binary';
+import { Parsed } from 'typed-binary';
+import { INT, STRING, keyed, generic, object, optional } from 'typed-binary';
 
-interface ExpressionBase {}
-
-interface MultiplyExpression extends ExpressionBase {
-    type: 'multiply';
-    a: Expression;
-    b: Expression;
-}
-
-interface NegateExpression extends ExpressionBase {
-    type: 'negate';
-    inner: Expression;
-}
-
-type IntLiteralExpression = ParsedConcrete<ExpressionBase, typeof IntLiteralExpression, 'int_literal'>;
-const IntLiteralExpression = object({
-    value: INT,
-});
-
-type Expression = MultiplyExpression|NegateExpression|IntLiteralExpression;
-const Expression = typedGeneric<Expression>({
-    name: STRING,
-}, {
-    'multiply': typedObject<MultiplyExpression>(() => ({
+type Expression = Parsed<typeof Expression>;
+const Expression = keyed('expression', (Expression) => generic({}, {
+    'multiply': object({
         a: Expression,
         b: Expression,
-    })),
-    'negate': typedObject<NegateExpression>(() => ({
+    }),
+    'negate': object({
         inner: Expression,
-    })),
-    'int_literal': IntLiteralExpression
-});
+    }),
+    'int_literal': object({
+        value: INT,
+    }),
+}));
 
 const expr: Parsed<typeof Expression> = {
     type: 'multiply',
@@ -51,3 +34,46 @@ const expr: Parsed<typeof Expression> = {
     },
 };
 
+type Instruction = Parsed<typeof Instruction>;
+const Instruction = object({
+    target_variable: STRING,
+    expression: optional(Expression),
+});
+
+type Complex = Parsed<typeof Complex>;
+const Complex = keyed('complex' as const, (Complex) => object({
+    label: STRING,
+    inner: optional(Complex),
+    cycle: keyed('cycle' as const, (Cycle) => object({
+        value: STRING,
+        next: optional(Cycle),
+    })),
+}));
+
+const inst: Instruction = {
+    target_variable: 'firstlevel',
+    expression: undefined,
+};
+
+const complex: Complex = {
+    label: '1',
+    inner: {
+        label: '1->2',
+        inner: undefined,
+        cycle: {
+            value: '1->2: A',
+            next: undefined,
+        },
+    },
+    cycle: {
+        value: '1: B',
+        next: {
+            value: '1: B->C',
+            next: undefined,
+        },
+    },
+}
+
+console.log(expr);
+console.log(inst);
+console.log(complex);

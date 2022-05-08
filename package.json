@@ -11,7 +11,8 @@
         "prepublishOnly": "npm run lint && npm run build",
         "dryPublish": "npm publish --dry-run",
         "test": "cross-env TS_NODE_PROJECT=\"tsconfig.test.json\" mocha --reporter spec --require ts-node/register src/**/*.test.ts",
-        "test-single": "cross-env TS_NODE_PROJECT=\"tsconfig.test.json\" mocha --reporter spec --require ts-node/register"
+        "test-single": "cross-env TS_NODE_PROJECT=\"tsconfig.test.json\" mocha --reporter spec --require ts-node/register",
+        "ts-version": "tsc -v"
     },
     "keywords": [
         "typescript",

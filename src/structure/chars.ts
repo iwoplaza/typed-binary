@@ -1,11 +1,13 @@
-import { TypedBinaryError } from '../error';
 import type { ISerialInput, ISerialOutput } from '../io';
+import { TypedBinaryError } from '../error';
 import { Schema } from './types';
 
 export class CharsSchema extends Schema<string> {
     constructor(public readonly length: number) {
         super();
     }
+
+    resolve(): void { /* Nothing to resolve */ }
 
     write(output: ISerialOutput, value: string): void {
         if (value.length !== this.length) {

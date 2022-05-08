@@ -1,20 +1,44 @@
-import { Parsed } from '..';
 import { ISerialInput, ISerialOutput } from '../io';
 
-export interface ISchema<P> {
-    write(output: ISerialOutput, value: P): void;
-    read(input: ISerialInput): P;
-    sizeOf(value: P): number;
+/**
+ * A schema that hasn't been resolved yet (a reference).
+ * Distinguishing between a "stable" schema, and an "unstable" schema
+ * helps to avoid errors in usage of unresolved schemas (the lack of utility functions).
+ */
+export interface ISchema<I> {
+    readonly _infered: I;
 }
 
-export abstract class Schema<P> implements ISchema<P> {
-    abstract write(output: ISerialOutput, value: P): void;
-    abstract read(input: ISerialInput): P;
-    abstract sizeOf(value: P): number;
+export interface ISchemaWithProperties<I extends {[key: string]: unknown}> extends ISchema<I> {
+    readonly properties: StableSchemaMap<I>;
+}
+
+export interface IStableSchema<I> extends ISchema<I> {
+    resolve(ctx: IRefResolver): void;
+    write(output: ISerialOutput, value: I): void;
+    read(input: ISerialInput): I;
+    sizeOf(value: I): number;
+}
+
+export abstract class Schema<I> implements IStableSchema<I> {
+    readonly _infered!: I;
+
+    abstract resolve(ctx: IRefResolver): void;
+    abstract write(output: ISerialOutput, value: I): void;
+    abstract read(input: ISerialInput): I;
+    abstract sizeOf(value: I): number;
+}
+
+export class Ref<K extends string> {
+    constructor(public readonly key: K) {}
+}
+
+export class Keyed<K extends string, S extends ISchema<S['_infered']>> {
+    constructor(public readonly key: K, public readonly innerType: S) {}
 }
 
 ////
-// CONTEXT
+// Generic types
 ////
 
 export enum SubTypeKey {
@@ -22,10 +46,16 @@ export enum SubTypeKey {
     ENUM = 'ENUM',
 }
 
-// export type SchemaProperties<T> = T extends {[key in keyof T]: Schema<any>} ? {[key in keyof T]: Schema<Parsed<T[key]>>} : never;
-export type SchemaProperties = {[key: string]: Schema<unknown>};
-export type InferedProperties<T extends {[key: string]: Schema<unknown>}> = {[key in keyof T]: Parsed<T[key]>};
+export interface IRefResolver {
+    hasKey(key: string): boolean;
 
-export interface IConcreteObjectSchema<T extends SchemaProperties> extends ISchema<InferedProperties<T>> {
-    readonly properties: T;
+    resolve<T>(schemaOrRef: ISchema<T>): IStableSchema<T>;
+    register<K extends string>(key: K, schema: IStableSchema<unknown>): void;
 }
+
+////
+// Alias types
+////
+
+export type SchemaMap<T> = {[key in keyof T]: ISchema<T[key]>};
+export type StableSchemaMap<T> = {[key in keyof T]: IStableSchema<T[key]>};

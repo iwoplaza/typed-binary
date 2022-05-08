@@ -1,9 +1,13 @@
 {
   "name": "typed-binary-examples",
   "scripts": {
-    "link": "npm link ../",
+    "link": "cd .. && npm run build && cd examples/ && npm link ../",
     "example:binaryMesh": "ts-node binaryMesh/index.ts",
-    "example:recursiveTypes": "ts-node recursiveTypes/index.ts"
+    "example:recursiveTypes": "ts-node recursiveTypes/index.ts",
+    "example:genericTypes": "ts-node genericTypes/index.ts",
+    "example:genericEnumTypes": "ts-node genericEnumTypes/index.ts",
+    "example:stateMachine": "ts-node stateMachine/index.ts",
+    "example:customSchema": "ts-node customSchema/index.ts"
   },
   "devDependencies": {
     "ts-node": "^10.4.0",

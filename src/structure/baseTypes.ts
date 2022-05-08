@@ -6,6 +6,8 @@ import { Schema } from './types';
 ////
 
 export class BoolSchema extends Schema<boolean> {
+    resolve(): void { /* Nothing to resolve */ }
+
     read(input: ISerialInput): boolean {
         return input.readBool();
     }
@@ -26,15 +28,17 @@ export const BOOL = new BoolSchema();
 ////
 
 export class StringSchema extends Schema<string> {
+    resolve(): void { /* Nothing to resolve */ }
+
     read(input: ISerialInput): string {
         return input.readString();
     }
 
-    write(output: ISerialOutput, value: string): void {
+    write<T extends string>(output: ISerialOutput, value: T): void {
         output.writeString(value);
     }
 
-    sizeOf(value: string): number {
+    sizeOf<T extends string>(value: T): number {
         return value.length + 1;
     }
 }
@@ -46,6 +50,8 @@ export const STRING = new StringSchema();
 ////
 
 export class ByteSchema extends Schema<number> {
+    resolve(): void { /* Nothing to resolve */ }
+
     read(input: ISerialInput): number {
         return input.readByte();
     }
@@ -66,6 +72,8 @@ export const BYTE = new ByteSchema();
 ////
 
 export class IntSchema extends Schema<number> {
+    resolve(): void { /* Nothing to resolve */ }
+
     read(input: ISerialInput): number {
         return input.readInt();
     }
@@ -86,6 +94,8 @@ export const INT = new IntSchema();
 ////
 
 export class FloatSchema extends Schema<number> {
+    resolve(): void { /* Nothing to resolve */ }
+
     read(input: ISerialInput): number {
         return input.readFloat();
     }
