@@ -2,19 +2,42 @@
 // Run with `npm run example:recursiveTypes`
 //
 
-import type { Parsed } from 'typed-binary';
-import { STRING, keyed, object, optional } from 'typed-binary';
+import { Parsed } from 'typed-binary';
+import { INT, STRING, keyed, generic, object, optional } from 'typed-binary';
 
 type Expression = Parsed<typeof Expression>;
-const Expression = keyed('expression' as const, (Expression) => object({
-    bruh: STRING,
-    inner: optional(Expression),
+const Expression = keyed('expression', (Expression) => generic({}, {
+    'multiply': object({
+        a: Expression,
+        b: Expression,
+    }),
+    'negate': object({
+        inner: Expression,
+    }),
+    'int_literal': object({
+        value: INT,
+    }),
 }));
+
+const expr: Parsed<typeof Expression> = {
+    type: 'multiply',
+    a: {
+        type: 'negate',
+        inner: {
+            type: 'int_literal',
+            value: 15,
+        }
+    },
+    b: {
+        type: 'int_literal',
+        value: 2,
+    },
+};
 
 type Instruction = Parsed<typeof Instruction>;
 const Instruction = object({
-    some: STRING,
-    inner: optional(Expression),
+    target_variable: STRING,
+    expression: optional(Expression),
 });
 
 type Complex = Parsed<typeof Complex>;
@@ -27,17 +50,9 @@ const Complex = keyed('complex' as const, (Complex) => object({
     })),
 }));
 
-const expr: Expression = {
-    bruh: 'firstLevel',
-    inner: {
-        bruh: 'hello',
-        inner: undefined,
-    },
-};
-
 const inst: Instruction = {
-    some: 'firstlevel',
-    inner: undefined,
+    target_variable: 'firstlevel',
+    expression: undefined,
 };
 
 const complex: Complex = {

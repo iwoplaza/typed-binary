@@ -57,7 +57,7 @@ class RefResolve implements IRefResolver {
     }
 }
 
-export class KeyedSchema<K extends string, S extends IStableSchema<S['_infered']>> implements ISchema<Keyed<K, S>> {
+export class KeyedSchema<K extends string, S extends IStableSchema<unknown>> implements ISchema<Keyed<K, S>> {
     public readonly _infered!: Keyed<K, S>;
     public innerType: S;
 

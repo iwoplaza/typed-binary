@@ -57,17 +57,19 @@ export class ObjectSchema<T extends {[key: string]: unknown}> extends Schema<T> 
     sizeOf<I extends T>(value: I): number {
         return exactEntries(this.properties)
                       .map(([key, property]) => property.sizeOf(value[key])) // Mapping properties into their sizes.
-                      .reduce((a, b) => a + b); // Summing them up
+                      .reduce((a, b) => a + b, 0); // Summing them up
     }
 }
 
 export type AsSubTypes<T> = ({[K in keyof T]: T[K] extends ISchemaWithProperties<infer P> ? P & { type: K } : never})[keyof T];
 export type StabilizedMap<T> = ({[K in keyof T]: T[K] extends ISchemaWithProperties<infer P> ? ObjectSchema<P> : never});
 
+type GenericInfered<T, E> = T extends Record<string, never> ? AsSubTypes<E> : T & AsSubTypes<E>;
+
 export class GenericObjectSchema<
     T extends Record<string, unknown>, // Base properties
     E extends {[key in keyof E]: ISchemaWithProperties<Record<string, unknown>>}, // Sub type map
-> extends Schema<T & AsSubTypes<E>> {
+> extends Schema<GenericInfered<T, E>> {
     private _baseObject: ObjectSchema<T>;
     public subTypeMap: StabilizedMap<E>;
 
@@ -90,7 +92,7 @@ export class GenericObjectSchema<
         this.subTypeMap = resolveMap(ctx, this._subTypeMap);
     }
 
-    write(output: ISerialOutput, value: T & AsSubTypes<E>): void {
+    write(output: ISerialOutput, value: GenericInfered<T, E>): void {
         // Figuring out sub-types
 
         const subTypeDescription = this.subTypeMap[value.type] || null;
@@ -107,7 +109,7 @@ export class GenericObjectSchema<
         }
 
         // Writing the base properties
-        this._baseObject.write(output, value);
+        this._baseObject.write(output, value as T);
 
         // Extra sub-type fields
         for (const [key, extraProp] of exactEntries(subTypeDescription.properties)) {
@@ -115,7 +117,7 @@ export class GenericObjectSchema<
         }
     }
 
-    read(input: ISerialInput): T & AsSubTypes<E> {
+    read(input: ISerialInput): GenericInfered<T, E> {
         const subTypeKey = this.keyedBy === SubTypeKey.ENUM ? input.readByte() : input.readString();
 
         const subTypeDescription = this.subTypeMap[subTypeKey as keyof E] || null;
@@ -123,7 +125,7 @@ export class GenericObjectSchema<
             throw new Error(`Unknown sub-type '${subTypeKey}' in among '${JSON.stringify(Object.keys(this.subTypeMap))}'`);
         }
 
-        const result = this._baseObject.read(input) as T & AsSubTypes<E>;
+        const result = this._baseObject.read(input) as GenericInfered<T, E>;
 
         // Making the sub type key available to the result object.
         result.type = subTypeKey as keyof E;
@@ -138,8 +140,8 @@ export class GenericObjectSchema<
         return result;
     }
 
-    sizeOf(value: T & AsSubTypes<E>): number {
-        let size = this._baseObject.sizeOf(value);
+    sizeOf(value: GenericInfered<T, E>): number {
+        let size = this._baseObject.sizeOf(value as T);
 
         // We're a generic object trying to encode a concrete value.
         size += this.keyedBy === SubTypeKey.ENUM ? 1 : STRING.sizeOf(value.type as string);

@@ -6,6 +6,9 @@ export {
     STRING,
 
     Ref,
+    IRefResolver,
+    Schema,
+    ISchemaWithProperties,
     Keyed,
     KeyedSchema,
     ObjectSchema,

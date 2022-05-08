@@ -10,13 +10,15 @@ Gives tools to describe binary structures with full TypeScript support. Encodes 
 - [Features](#features)
 - [Installation](#installation)
 - [Basic usage](#basic-usage)
+- [Running examples](#running-examples)
 - [Defining schemas](#defining-schemas)
   - [Primitives](#primitives)
   - [Objects](#objects)
   - [Arrays](#arrays)
   - [Tuples](#tuples)
   - [Optionals](#optionals)
-- [Recursive types](#recursive-types)
+  - [Recursive types](#recursive-types)
+- [Custom schema types](#custom-schema-types)
 - [Serialization and Deserialization](#serialization-and-deserialization)
 
 # Features:
@@ -36,6 +38,8 @@ Using NPM:
 $ npm i --save typed-binary
 ```
 
+# Requirements
+To properly enable type inference, **TypeScript 4.5** and up is required because of it's newly added [Tail-Recursion Elimination on Conditional Types](https://www.typescriptlang.org/docs/handbook/release-notes/typescript-4-5.html#tail-recursion-elimination-on-conditional-types) feature,
 
 # Basic usage
 ```ts
@@ -104,6 +108,11 @@ async function saveGameState(state: GameState): Promise<void> {
 }
 ```
 
+# Running examples
+There are a handful of examples provided. To run any one of them make sure to clone the [typed-binary](https://github.com/iwoplaza/typed-binary) repository first, then go into the `examples/` directory. To setup the examples environment, run `npm run link`, which will build the parent project and link it to dependencies of the child 'examples' project.
+
+Pick an example that peaks interest, and run `npm run example:exampleName`.
+
 # Defining schemas
 ## Primitives
 There's a couple primitives to choose from:
@@ -164,7 +173,7 @@ This feature allows for the parsing of a type that contains different fields dep
 
 **Keyed by strings:**
 ```ts
-import { BufferWriter, BufferReader, INT, STRING, generic, object } from 'typed-binary';
+import { BufferWriter, BufferReader, INT, STRING, BOOL, generic, object } from 'typed-binary';
 
 // Generic object schema
 const Animal = generic({
@@ -218,6 +227,7 @@ else {
     // This would result in a type error (Static typing FTW!)
     // console.log(`Striped: ${animal.striped}`);
 }
+
 ```
 
 **Keyed by an enum (byte):**
@@ -335,42 +345,48 @@ console.log(JSON.stringify(Person.read(reader).address)); // undefined
 console.log(JSON.stringify(Person.read(reader).address)); // { "city": "New York", ... }
 ```
 
-# Recursive types
-If you want an object type to be able to contain one of itself (recursion), then you have to apply the following pattern:
+## Recursive types
+If you want an object type to be able to contain one of itself (recursion), then you have to start using **keyed** types. The basic pattern is this:
+
 ```ts
-import { INT, STRING, object, Parsed, ParsedConcrete, typedGeneric, typedObject, TypeToken } from 'typed-binary';
-
-interface ExpressionBase {}
-
-interface MultiplyExpression extends ExpressionBase {
-    type: 'multiply';
-    a: Expression;
-    b: Expression;
-}
-
-interface NegateExpression extends ExpressionBase {
-    type: 'negate';
-    inner: Expression;
-}
-
-type IntLiteralExpression = ParsedConcrete<ExpressionBase, typeof IntLiteralExpression, 'int_literal'>;
-const IntLiteralExpression = object({
+/**
+ * Wrapping a schema with a 'keyed' call allows the inner code to
+ * use a reference to the type we're currently creating, instead
+ * of the type itself.
+ * 
+ * The reference variable 'Recursive' doesn't have to be called
+ * the same as the actual variable we're storing the schema in,
+ * but it's a neat trick that makes the schema code more readable.
+ * 
+ * The 'recursive-key' has to uniquely identify this type in this tree.
+ * There may be other distinct types using the same key, as long as they do
+ * not interact with each other (one doesn't contain the other).
+ * This is because references are resolved recursively once the method
+ * passed as the 2nd argument to 'keyed' returns the schema.
+ */
+const Recursive = keyed('recursive-key', (Recursive) => object({
     value: INT,
-});
+    next: optional(Recursive),
+}))
+```
 
-type Expression = MultiplyExpression|NegateExpression|IntLiteralExpression;
-const Expression = typedGeneric(new TypeToken<Expression>(), {
-    name: STRING,
-}, {
-    'multiply': typedObject<MultiplyExpression>(() => ({
+### Recursive types alongside generics
+```ts
+import { INT, STRING, object, keyed } from 'typed-binary';
+
+type Expression = Parsed<typeof Expression>;
+const Expression = keyed('expression', (Expression) => generic({}, {
+    'multiply': object({
         a: Expression,
         b: Expression,
-    })),
-    'negate': typedObject<NegateExpression>(() => ({
+    }),
+    'negate': object({
         inner: Expression,
-    })),
-    'int_literal': IntLiteralExpression
-});
+    }),
+    'int_literal': object({
+        value: INT,
+    }),
+}));
 
 const expr: Parsed<typeof Expression> = {
     type: 'multiply',
@@ -387,6 +403,53 @@ const expr: Parsed<typeof Expression> = {
     },
 };
 
+```
+
+# Custom schema types
+Custom schema types can be defined. They are, under the hood, classes that extend the `Schema<T>` base class. The generic `T` type represents what kind of data this schema serializes from and deserializes into.
+
+```ts
+import { ISerialInput, ISerialOutput, Schema, IRefResolver } from 'typed-binary';
+
+/**
+ * A schema storing radians with 2 bytes of precision.
+ */
+class RadiansSchema extends Schema<number> {
+    resolve(ctx: IRefResolver): void {
+        // No inner references to resolve
+    }
+
+    read(input: ISerialInput): number {
+        const low = input.readByte();
+        const high = input.readByte();
+
+        const discrete = (high << 8) | low;
+        return discrete / 65535 * Math.PI;
+    }
+
+    write(output: ISerialOutput, value: number): void {
+        // The value will be wrapped to be in range of [0, Math.PI)
+        const wrapped = ((value % Math.PI) + Math.PI) % Math.PI;
+        // Discretising the value to be ints in range of [0, 65535]
+        const discrete = Math.min(Math.floor(wrapped / Math.PI * 65535), 65535);
+
+        const low = discrete & 0xFF;
+        const high = (discrete >> 8) & 0xFF;
+
+        output.writeByte(low);
+        output.writeByte(high);
+    }
+
+    sizeOf(_: number): number {
+        // The size of the data serialized by this schema
+        // doesn't depend on the actual value. It's always 2 bytes.
+        return 2;
+    }
+}
+
+// Creating a singleton instance of the schema,
+// since it has no configuration properties.
+export const RADIANS = new RadiansSchema();
 ```
 
 # Serialization and Deserialization

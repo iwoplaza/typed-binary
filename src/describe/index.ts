@@ -10,18 +10,18 @@ import { KeyedSchema } from '../structure/keyed';
 export const chars = <T extends number>(length: T) =>
     new CharsSchema(length);
 
-export const object = <P extends {[key: string]: unknown}>(properties: SchemaMap<P>) =>
+export const object = <P extends Record<string, unknown> = Record<string, never>>(properties: SchemaMap<P>) =>
     new ObjectSchema(properties);
 
-export const generic = <P extends Record<string, unknown>, S extends {[Key in keyof S]: ISchemaWithProperties<Record<string, unknown>>}>(properties: SchemaMap<P>, subTypeMap: S) =>
-    new GenericObjectSchema<P, S>(
+export const generic = <P extends Record<string, unknown> = Record<string, never>, S extends {[Key in keyof S]: ISchemaWithProperties<Record<string, unknown>>} = Record<string, never>>(properties: SchemaMap<P>, subTypeMap: S) =>
+    new GenericObjectSchema(
         SubTypeKey.STRING,
         properties,
         subTypeMap
     );
 
 export const genericEnum = <P extends Record<string, unknown>, S extends {[Key in keyof S]: ISchemaWithProperties<Record<string, unknown>>}>(properties: SchemaMap<P>, subTypeMap: S) =>
-    new GenericObjectSchema<P, S>(
+    new GenericObjectSchema(
         SubTypeKey.ENUM,
         properties,
         subTypeMap

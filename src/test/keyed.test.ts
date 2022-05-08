@@ -1,7 +1,7 @@
 import * as chai from 'chai';
 import { encodeAndDecode } from './_mock.test';
 import { INT, STRING } from '../structure/baseTypes';
-import { keyed, object, generic, optional } from '../describe';
+import { keyed, object, generic, genericEnum, optional } from '../describe';
 import { Parsed } from '..';
 
 const expect = chai.expect;
@@ -170,6 +170,74 @@ describe('KeyedSchema', () => {
                 right: {
                     label: 'Level 2-B',
                     type: 'continuous',
+                    next: undefined,
+                },
+            },
+        };
+
+        const decoded = encodeAndDecode(Example, value);
+        expect(decoded).to.deep.equal(value);
+    });
+
+    it('should encode and decode a keyed enum generic object, no base props, with references', () => {
+        type Example = Parsed<typeof Example>;
+        const Example = keyed('example', (Example) => genericEnum({}, {
+            0: object({
+                next: optional(Example),
+            }),
+            1: object({
+                left: optional(Example),
+                right: optional(Example),
+            })
+        }));
+
+        const value: Example = {
+            type: 0,
+            next: {
+                type: 1,
+                left: {
+                    type: 0,
+                    next: undefined,
+                },
+                right: {
+                    type: 0,
+                    next: undefined,
+                },
+            },
+        };
+
+        const decoded = encodeAndDecode(Example, value);
+        expect(decoded).to.deep.equal(value);
+    });
+
+    it('should encode and decode a keyed enum generic object, with references', () => {
+        type Example = Parsed<typeof Example>;
+        const Example = keyed('example', (Example) => genericEnum({
+            label: STRING,
+        }, {
+            0: object({
+                next: optional(Example),
+            }),
+            1: object({
+                left: optional(Example),
+                right: optional(Example),
+            })
+        }));
+
+        const value: Example = {
+            label: 'Root',
+            type: 0,
+            next: {
+                label: 'Level 1',
+                type: 1,
+                left: {
+                    label: 'Level 2-A',
+                    type: 0,
+                    next: undefined,
+                },
+                right: {
+                    label: 'Level 2-B',
+                    type: 0,
                     next: undefined,
                 },
             },
