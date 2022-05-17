@@ -3,7 +3,9 @@
 <a href="https://github.com/iwoplaza" rel="nofollow"><img src="https://img.shields.io/badge/created%20by-@iwoplaza-4BBAAB.svg" alt="Created by Iwo Plaza"></a>
 <a href="https://opensource.org/licenses/MIT" rel="nofollow"><img src="https://img.shields.io/github/license/iwoplaza/typed-binary" alt="License"></a>
 <a href="https://www.npmjs.com/package/typed-binary" rel="nofollow"><img src="https://img.shields.io/npm/dw/typed-binary.svg" alt="npm"></a>
-<a href="https://www.npmjs.com/package/typed-binary" rel="nofollow"><img src="https://img.shields.io/github/stars/iwoplaza/typed-binary" alt="stars"></a>
+<a href="https://github.com/iwoplaza/typed-binary/actions/workflows/coverage.yml" target="_blank">
+  <img src="https://github.com/iwoplaza/typed-binary/actions/workflows/coverage.yml/badge.svg" alt="Build Status">
+</a>
 
 Gives tools to describe binary structures with full TypeScript support. Encodes and decodes into pure JavaScript objects, while giving type context for the parsed data.
 
