@@ -7,7 +7,8 @@
     "example:genericTypes": "ts-node genericTypes/index.ts",
     "example:genericEnumTypes": "ts-node genericEnumTypes/index.ts",
     "example:stateMachine": "ts-node stateMachine/index.ts",
-    "example:customSchema": "ts-node customSchema/index.ts"
+    "example:customSchema": "ts-node customSchema/index.ts",
+    "example:inferredShowcase": "ts-node inferredShowcase/index.ts"
   },
   "devDependencies": {
     "ts-node": "^10.4.0",

@@ -1,10 +1,21 @@
 # Typed Binary
-<a href="https://twitter.com/ivesiris" rel="nofollow"><img src="https://img.shields.io/badge/created%20by-@ivesiris-4BBAAB.svg" alt="Created by Iwo Plaza"></a>
+
+<a href="https://github.com/iwoplaza" rel="nofollow"><img src="https://img.shields.io/badge/created%20by-@iwoplaza-4BBAAB.svg" alt="Created by Iwo Plaza"></a>
 <a href="https://opensource.org/licenses/MIT" rel="nofollow"><img src="https://img.shields.io/github/license/iwoplaza/typed-binary" alt="License"></a>
 <a href="https://www.npmjs.com/package/typed-binary" rel="nofollow"><img src="https://img.shields.io/npm/dw/typed-binary.svg" alt="npm"></a>
 <a href="https://www.npmjs.com/package/typed-binary" rel="nofollow"><img src="https://img.shields.io/github/stars/iwoplaza/typed-binary" alt="stars"></a>
 
 Gives tools to describe binary structures with full TypeScript support. Encodes and decodes into pure JavaScript objects, while giving type context for the parsed data.
+
+## Prioritising Developer Experience
+Serialise and deserialise typed schemas without the need for redundant interfaces or an external DSL. Schemas themselves define what type they encode and decode, and **the IDE knows it**!
+
+![Basic Type and Documentation Inferrence](/docs/media/basic-type-and-doc-inferrence.gif)
+
+Above is a self-contained code snippet using typed-binary. The IDE can properly infer what `Dog` is. What's even more interesting, is that the "parsed" properties inherit the schema's **JSDocs** (seen on the gif above).
+
+## Highlight feature
+The feature I am most proud of would have to be [recursive types](#recursive-types). I wasn't sure it it would be possible to achieve without additional tooling, but pushing the TypeScript type inference engine to it's extremes paid off.
 
 # Table of contents
 - [Features](#features)
@@ -22,12 +33,14 @@ Gives tools to describe binary structures with full TypeScript support. Encodes 
 - [Serialization and Deserialization](#serialization-and-deserialization)
 
 # Features:
-- Type-safe schemas (your IDE will know what structure the parsed binary is in).
-- Generic objects
-- Estimating the size of any resulting binary object (helpful for creating buffered storage)
+- [Type-safe schema definition system](#defining-schemas) (your IDE will know what structure the parsed binary is in).
+- [JSDoc inheritance](#prioritising-developer-experience)
+- [Estimating the size of any resulting binary object (helpful for creating buffered storage)](#serialization-and-deserialization)
 
 ### Why Typed Binary over other libraries?
 - It's one of the few libraries (if not the only one) with fully staticly-typed binary schemas.
+- Since value types are inferred from the schemas themselves, there is a **single source-of-truth**.
+- No external DSL necessary to define the schemas, meaning you have instant feedback without the need to compile the interface definitions.
 - It has **zero-dependencies**.
 - It's platform independent (use it in Node.js as well as in in Browsers)
 - While being made with TypeScript in mind, it also works with plain JavaScript.
@@ -43,7 +56,11 @@ To properly enable type inference, **TypeScript 4.5** and up is required because
 
 # Basic usage
 ```ts
-import { object, arrayOf, INT, STRING, BOOL, Parsed } from 'typed-binary';
+import {
+    Parsed,
+    object, arrayOf,
+    INT, STRING, BOOL,
+} from 'typed-binary';
 
 const GameState = object({
     nickname: STRING,               // Variable-length string
@@ -56,7 +73,7 @@ const GameState = object({
     }),
 });
 
-// Automatically generating the parsed type.
+// Type alias for ease-of-use
 type GameState = Parsed<typeof GameState>;
 
 //...
@@ -77,7 +94,7 @@ async function loadGameState(): Promise<GameState> {
     catch (e) {
         // Returning the default state if no saved state found.
         return {
-            nickname: "Default",
+            nickname: 'Default',
             stage: 1,
             newGamePlus: false,
             collectables: [],
