@@ -11,7 +11,7 @@ export class BufferWriter implements ISerialOutput {
     private byteOffset = 0;
 
     constructor(buffer: ArrayBufferLike) {
-        if (buffer instanceof Buffer) {
+        if (typeof Buffer !== 'undefined' && buffer instanceof Buffer) {
             // Getting rid of the outer shell, which causes the Uint8Array line to create a copy, instead of a view.
             buffer = buffer.buffer;
         }

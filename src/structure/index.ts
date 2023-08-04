@@ -11,9 +11,10 @@ export {
     ISchemaWithProperties,
     Keyed,
     KeyedSchema,
-    ObjectSchema,
     CharsSchema,
     ArraySchema,
+    ObjectSchema,
+    GenericObjectSchema,
     OptionalSchema,
     SubTypeKey,
 } from './_internal';
