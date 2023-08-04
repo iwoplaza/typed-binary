@@ -1,31 +1,9 @@
-import { isBigEndian } from '../util';
+import { BufferIOBase, BufferIOOptions } from './bufferIOBase';
 import { ISerialOutput } from './types';
 
-export class BufferWriter implements ISerialOutput {
-    private readonly uint8View: Uint8Array;
-    private readonly helperIntView: Int32Array;
-    private readonly helperFloatView: Float32Array;
-    private readonly helperByteView: Uint8Array;
-    private readonly switchEndianness: boolean;
-
-    private byteOffset = 0;
-
-    constructor(buffer: ArrayBufferLike) {
-        if (typeof Buffer !== 'undefined' && buffer instanceof Buffer) {
-            // Getting rid of the outer shell, which causes the Uint8Array line to create a copy, instead of a view.
-            buffer = buffer.buffer;
-        }
-        
-        this.uint8View = new Uint8Array(buffer, 0);
-        this.byteOffset = 0;
-
-        const helperBuffer = new ArrayBuffer(4);
-        this.helperIntView = new Int32Array(helperBuffer);
-        this.helperFloatView = new Float32Array(helperBuffer);
-        this.helperByteView = new Uint8Array(helperBuffer);
-
-        // We want to ensure the output is big endian
-        this.switchEndianness = !isBigEndian();
+export class BufferWriter extends BufferIOBase implements ISerialOutput {
+    constructor(buffer: ArrayBufferLike, options?: BufferIOOptions) {
+        super(buffer, options);
     }
 
     writeBool(value: boolean) {
@@ -56,10 +34,6 @@ export class BufferWriter implements ISerialOutput {
         }
 
         // Extra null character
-        this.byteOffset++;
-    }
-
-    get currentByteOffset() {
-        return this.byteOffset;
+        this.uint8View[this.byteOffset++] = 0;
     }
 }
