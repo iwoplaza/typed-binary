@@ -1,9 +1,7 @@
-import { INT, arrayOf, object } from 'typed-binary';
+import { i32, arrayOf, object } from 'typed-binary';
 import { NodeTemplate } from './node';
 
-
-export const Graph =
-    object({
-        entryNode: INT,
-        nodes:     arrayOf(NodeTemplate),
-    });
+export const Graph = object({
+  entryNode: i32,
+  nodes: arrayOf(NodeTemplate),
+});
