@@ -20,7 +20,7 @@ describe('BufferWriter/BufferReader', () => {
 
     // Writing the ints
     for (const int of intList) {
-      writer.writeInt(int);
+      writer.writeInt32(int);
     }
 
     // Expecting specific buffer offset
@@ -29,7 +29,7 @@ describe('BufferWriter/BufferReader', () => {
     // Reading the ints
     const reader = new BufferReader(buffer);
     for (let i = 0; i < intList.length; ++i) {
-      expect(reader.readInt()).to.equal(intList[i]);
+      expect(reader.readInt32()).to.equal(intList[i]);
     }
   });
 
@@ -48,16 +48,16 @@ describe('BufferWriter/BufferReader', () => {
 
     // Writing the ints
     for (const float of floatList) {
-      writer.writeFloat(float);
+      writer.writeFloat32(float);
     }
 
     // Expecting specific buffer offset
     expect(writer.currentByteOffset).to.equal(floatList.length * 4);
 
-    // Reading the ints
+    // Reading the floats
     const reader = new BufferReader(buffer);
     for (let i = 0; i < floatList.length; ++i) {
-      expect(reader.readFloat()).to.be.closeTo(floatList[i], 0.001);
+      expect(reader.readFloat32()).to.be.closeTo(floatList[i], 0.001);
     }
   });
 });

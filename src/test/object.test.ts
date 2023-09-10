@@ -115,8 +115,8 @@ describe('ObjectSchema', () => {
     const { output, input } = makeIO(schema.sizeOf(value));
     schema.write(output, value);
 
-    expect(input.readInt()).to.equal(1); // a
-    expect(input.readInt()).to.equal(3); // c
-    expect(input.readInt()).to.equal(2); // b
+    expect(input.readInt32()).to.equal(1); // a
+    expect(input.readInt32()).to.equal(3); // c
+    expect(input.readInt32()).to.equal(2); // b
   });
 });

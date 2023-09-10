@@ -4,7 +4,7 @@ import { f32 } from '../structure';
 import { encodeAndDecode } from './_mock.test';
 
 const expect = chai.expect;
-describe('FloatSchema', () => {
+describe('Float32Schema', () => {
   it('should encode and decode a f32 value', () => {
     const value = randBetween(-100, 100);
     const decoded = encodeAndDecode(f32, value);

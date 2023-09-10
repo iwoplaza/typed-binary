@@ -2,6 +2,7 @@ export {
   bool,
   byte,
   i32,
+  u32,
   f32,
   string,
   Ref,
@@ -16,4 +17,4 @@ export {
   GenericObjectSchema,
   OptionalSchema,
   SubTypeKey,
-} from "./_internal";
+} from './_internal';

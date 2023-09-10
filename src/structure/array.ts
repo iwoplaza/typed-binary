@@ -18,7 +18,7 @@ export class ArraySchema<T> extends Schema<T[]> {
   }
 
   write(output: ISerialOutput, values: T[]): void {
-    output.writeInt(values.length);
+    output.writeUint32(values.length);
 
     for (const value of values) {
       this.elementType.write(output, value);
@@ -28,7 +28,7 @@ export class ArraySchema<T> extends Schema<T[]> {
   read(input: ISerialInput): T[] {
     const array = [];
 
-    const len = input.readInt();
+    const len = input.readUint32();
 
     for (let i = 0; i < len; ++i) {
       array.push(this.elementType.read(input));

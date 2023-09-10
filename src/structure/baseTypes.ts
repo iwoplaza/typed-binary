@@ -77,17 +77,17 @@ export const byte = new ByteSchema();
 // i32
 ////
 
-export class IntSchema extends Schema<number> {
+export class Int32Schema extends Schema<number> {
   resolve(): void {
     /* Nothing to resolve */
   }
 
   read(input: ISerialInput): number {
-    return input.readInt();
+    return input.readInt32();
   }
 
   write(output: ISerialOutput, value: number): void {
-    output.writeInt(value);
+    output.writeInt32(value);
   }
 
   sizeOf(): number {
@@ -95,23 +95,47 @@ export class IntSchema extends Schema<number> {
   }
 }
 
-export const i32 = new IntSchema();
+export const i32 = new Int32Schema();
+
+////
+// u32
+////
+
+export class Uint32Schema extends Schema<number> {
+  resolve(): void {
+    /* Nothing to resolve */
+  }
+
+  read(input: ISerialInput): number {
+    return input.readUint32();
+  }
+
+  write(output: ISerialOutput, value: number): void {
+    output.writeUint32(value);
+  }
+
+  sizeOf(): number {
+    return 4;
+  }
+}
+
+export const u32 = new Uint32Schema();
 
 ////
 // FLOAT
 ////
 
-export class FloatSchema extends Schema<number> {
+export class Float32Schema extends Schema<number> {
   resolve(): void {
     /* Nothing to resolve */
   }
 
   read(input: ISerialInput): number {
-    return input.readFloat();
+    return input.readFloat32();
   }
 
   write(output: ISerialOutput, value: number): void {
-    output.writeFloat(value);
+    output.writeFloat32(value);
   }
 
   sizeOf(): number {
@@ -119,4 +143,4 @@ export class FloatSchema extends Schema<number> {
   }
 }
 
-export const f32 = new FloatSchema();
+export const f32 = new Float32Schema();
