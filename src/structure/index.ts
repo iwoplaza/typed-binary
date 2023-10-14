@@ -5,6 +5,7 @@ export {
   u32,
   f32,
   string,
+  MaxValue,
   Ref,
   IRefResolver,
   Schema,

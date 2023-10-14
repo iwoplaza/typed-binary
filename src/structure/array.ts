@@ -1,6 +1,12 @@
 import type { ISerialInput, ISerialOutput } from '../io';
 import { i32 } from './baseTypes';
-import { IRefResolver, ISchema, IStableSchema, Schema } from './types';
+import {
+  IRefResolver,
+  ISchema,
+  IStableSchema,
+  Schema,
+  MaxValue,
+} from './types';
 
 export class ArraySchema<T> extends Schema<T[]> {
   public elementType: IStableSchema<T>;
@@ -37,7 +43,12 @@ export class ArraySchema<T> extends Schema<T[]> {
     return array;
   }
 
-  sizeOf(values: T[]): number {
+  sizeOf(values: T[] | typeof MaxValue): number {
+    if (values === MaxValue) {
+      // arrays cannot be bound
+      return NaN;
+    }
+
     // Length encoding
     let size = i32.sizeOf();
     // Values encoding

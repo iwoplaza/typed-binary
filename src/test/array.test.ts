@@ -3,6 +3,7 @@ import { randIntBetween } from './random';
 import { makeIO } from './_mock.test';
 import { ArraySchema, i32 } from '../structure';
 import { arrayOf } from '..';
+import { MaxValue } from '../structure/types';
 
 const expect = chai.expect;
 
@@ -19,6 +20,12 @@ describe('ArraySchema', () => {
     expect(IntArray.sizeOf(values)).to.equal(
       i32.sizeOf() + length * i32.sizeOf(),
     );
+  });
+
+  it('should fail to estimate size of max value', () => {
+    const IntArray = arrayOf(i32);
+
+    expect(IntArray.sizeOf(MaxValue)).to.be.NaN;
   });
 
   it('should encode and decode a simple int array', () => {

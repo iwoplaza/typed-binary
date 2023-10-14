@@ -1,5 +1,5 @@
 import { ISerialInput, ISerialOutput } from '../io';
-import { Schema } from './types';
+import { Schema, MaxValue } from './types';
 
 ////
 // BOOL
@@ -42,7 +42,11 @@ export class StringSchema extends Schema<string> {
     output.writeString(value);
   }
 
-  sizeOf<T extends string>(value: T): number {
+  sizeOf<T extends string>(value: T | typeof MaxValue): number {
+    if (value === MaxValue) {
+      // A string cannot be bound
+      return NaN;
+    }
     return value.length + 1;
   }
 }

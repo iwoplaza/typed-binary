@@ -6,6 +6,7 @@ import {
   ISchemaWithProperties,
   SchemaMap,
   StableSchemaMap,
+  MaxValue,
 } from './types';
 import { SubTypeKey } from './types';
 
@@ -73,9 +74,11 @@ export class ObjectSchema<T extends { [key: string]: unknown }>
     return result;
   }
 
-  sizeOf<I extends T>(value: I): number {
+  sizeOf<I extends T>(value: I | typeof MaxValue): number {
     return exactEntries(this.properties)
-      .map(([key, property]) => property.sizeOf(value[key])) // Mapping properties into their sizes.
+      .map(([key, property]) =>
+        property.sizeOf(value == MaxValue ? MaxValue : value[key]),
+      ) // Mapping properties into their sizes.
       .reduce((a, b) => a + b, 0); // Summing them up
   }
 }
