@@ -1,5 +1,10 @@
-import type { ISerialInput, ISerialOutput } from '../io';
-import { string } from './baseTypes';
+import {
+  Measurer,
+  type IMeasurer,
+  type ISerialInput,
+  type ISerialOutput,
+} from '../io';
+import { byte, string } from './baseTypes';
 import {
   Schema,
   IRefResolver,
@@ -74,12 +79,15 @@ export class ObjectSchema<T extends { [key: string]: unknown }>
     return result;
   }
 
-  sizeOf<I extends T>(value: I | typeof MaxValue): number {
-    return exactEntries(this.properties)
-      .map(([key, property]) =>
-        property.sizeOf(value == MaxValue ? MaxValue : value[key]),
-      ) // Mapping properties into their sizes.
-      .reduce((a, b) => a + b, 0); // Summing them up
+  measure(
+    value: T | typeof MaxValue,
+    measurer: IMeasurer = new Measurer(),
+  ): IMeasurer {
+    for (const [key, property] of exactEntries(this.properties)) {
+      property.measure(value === MaxValue ? MaxValue : value[key], measurer);
+    }
+
+    return measurer;
   }
 }
 
@@ -186,29 +194,52 @@ export class GenericObjectSchema<
     return result;
   }
 
-  sizeOf(value: GenericInfered<T, E>): number {
-    let size = this._baseObject.sizeOf(value as T);
+  measure(
+    value: GenericInfered<T, E> | MaxValue,
+    measurer: IMeasurer = new Measurer(),
+  ): IMeasurer {
+    this._baseObject.measure(value as T | MaxValue, measurer);
 
     // We're a generic object trying to encode a concrete value.
-    size +=
-      this.keyedBy === SubTypeKey.ENUM
-        ? 1
-        : string.sizeOf(value.type as string);
-
-    // Extra sub-type fields
-    const subTypeDescription = this.subTypeMap[value.type] || null;
-    if (subTypeDescription === null) {
-      throw new Error(
-        `Unknown sub-type '${value.type.toString()}' in among '${JSON.stringify(
-          Object.keys(this.subTypeMap),
-        )}'`,
-      );
+    if (this.keyedBy === SubTypeKey.ENUM) {
+      byte.measure(0, measurer);
+    } else if (value !== MaxValue) {
+      string.measure(value.type as string, measurer);
+    } else {
+      // 'type' can be a string of any length, so the schema is unbounded.
+      return measurer.unbounded;
     }
 
-    size += exactEntries(subTypeDescription.properties) // Going through extra property keys
-      .map(([key, prop]) => prop.sizeOf(value[key])) // Mapping extra properties into their sizes
-      .reduce((a, b) => a + b, 0); // Summing them up
+    // Extra sub-type fields
+    if (value === MaxValue) {
+      const biggestSubType = (Object.values(this.subTypeMap) as E[keyof E][])
+        .map((subType) => {
+          const forkedMeasurer = measurer.fork();
 
-    return size;
+          Object.values(subType.properties) // Going through extra properties
+            .forEach((prop) => prop.measure(MaxValue, forkedMeasurer)); // Measuring them
+
+          return [subType, forkedMeasurer.size] as const;
+        })
+        .reduce((a, b) => (a[1] > b[1] ? a : b))[0];
+
+      // Measuring for real this time
+      Object.values(biggestSubType.properties) // Going through extra properties
+        .forEach((prop) => prop.measure(MaxValue, measurer));
+    } else {
+      const subTypeDescription = this.subTypeMap[value.type] || null;
+      if (subTypeDescription === null) {
+        throw new Error(
+          `Unknown sub-type '${value.type.toString()}', expected one of '${JSON.stringify(
+            Object.keys(this.subTypeMap),
+          )}'`,
+        );
+      }
+
+      exactEntries(subTypeDescription.properties) // Going through extra properties
+        .forEach(([key, prop]) => prop.measure(value[key], measurer)); // Measuring them
+    }
+
+    return measurer;
   }
 }

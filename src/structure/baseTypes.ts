@@ -1,4 +1,4 @@
-import { ISerialInput, ISerialOutput } from '../io';
+import { ISerialInput, ISerialOutput, IMeasurer, Measurer } from '../io';
 import { Schema, MaxValue } from './types';
 
 ////
@@ -18,8 +18,11 @@ export class BoolSchema extends Schema<boolean> {
     output.writeBool(value);
   }
 
-  sizeOf(): number {
-    return 1;
+  measure(
+    _: boolean | MaxValue,
+    measurer: IMeasurer = new Measurer(),
+  ): IMeasurer {
+    return measurer.add(1);
   }
 }
 
@@ -42,12 +45,15 @@ export class StringSchema extends Schema<string> {
     output.writeString(value);
   }
 
-  sizeOf<T extends string>(value: T | typeof MaxValue): number {
+  measure(
+    value: string | typeof MaxValue,
+    measurer: IMeasurer = new Measurer(),
+  ): IMeasurer {
     if (value === MaxValue) {
       // A string cannot be bound
-      return NaN;
+      return measurer.unbounded;
     }
-    return value.length + 1;
+    return measurer.add(value.length + 1);
   }
 }
 
@@ -70,8 +76,11 @@ export class ByteSchema extends Schema<number> {
     output.writeByte(value);
   }
 
-  sizeOf(): number {
-    return 1;
+  measure(
+    _: number | MaxValue,
+    measurer: IMeasurer = new Measurer(),
+  ): IMeasurer {
+    return measurer.add(1);
   }
 }
 
@@ -94,8 +103,11 @@ export class Int32Schema extends Schema<number> {
     output.writeInt32(value);
   }
 
-  sizeOf(): number {
-    return 4;
+  measure(
+    _: number | MaxValue,
+    measurer: IMeasurer = new Measurer(),
+  ): IMeasurer {
+    return measurer.add(4);
   }
 }
 
@@ -118,8 +130,11 @@ export class Uint32Schema extends Schema<number> {
     output.writeUint32(value);
   }
 
-  sizeOf(): number {
-    return 4;
+  measure(
+    _: number | MaxValue,
+    measurer: IMeasurer = new Measurer(),
+  ): IMeasurer {
+    return measurer.add(4);
   }
 }
 
@@ -142,8 +157,11 @@ export class Float32Schema extends Schema<number> {
     output.writeFloat32(value);
   }
 
-  sizeOf(): number {
-    return 4;
+  measure(
+    _: number | MaxValue,
+    measurer: IMeasurer = new Measurer(),
+  ): IMeasurer {
+    return measurer.add(4);
   }
 }
 

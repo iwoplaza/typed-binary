@@ -1,6 +1,6 @@
 import { Parsed } from '..';
 import { TypedBinaryError } from '../error';
-import { ISerialInput, ISerialOutput } from '../io';
+import { IMeasurer, ISerialInput, ISerialOutput, Measurer } from '../io';
 import {
   IRefResolver,
   ISchema,
@@ -36,9 +36,9 @@ class RefSchema<K extends string> implements IStableSchema<Ref<K>> {
     );
   }
 
-  sizeOf(): number {
+  measure(): IMeasurer {
     throw new TypedBinaryError(
-      `Tried to estimate size of a reference directly. Resolve it instead.`,
+      `Tried to measure size of a reference directly. Resolve it instead.`,
     );
   }
 }
@@ -107,7 +107,10 @@ export class KeyedSchema<K extends string, S extends IStableSchema<unknown>>
     this.innerType.write(output, value);
   }
 
-  sizeOf(value: Parsed<S> | typeof MaxValue): number {
-    return this.innerType.sizeOf(value);
+  measure(
+    value: Parsed<S> | typeof MaxValue,
+    measurer: IMeasurer = new Measurer(),
+  ): IMeasurer {
+    return this.innerType.measure(value, measurer);
   }
 }

@@ -1,5 +1,10 @@
-import type { ISerialInput, ISerialOutput } from '../io';
-import { i32 } from './baseTypes';
+import {
+  type ISerialInput,
+  type ISerialOutput,
+  type IMeasurer,
+  Measurer,
+} from '../io';
+import { u32 } from './baseTypes';
 import {
   IRefResolver,
   ISchema,
@@ -43,19 +48,23 @@ export class ArraySchema<T> extends Schema<T[]> {
     return array;
   }
 
-  sizeOf(values: T[] | typeof MaxValue): number {
+  measure(
+    values: T[] | typeof MaxValue,
+    measurer: IMeasurer = new Measurer(),
+  ): IMeasurer {
     if (values === MaxValue) {
       // arrays cannot be bound
-      return NaN;
+      return measurer.unbounded;
     }
 
     // Length encoding
-    let size = i32.sizeOf();
-    // Values encoding
-    size += values
-      .map((v) => this.elementType.sizeOf(v))
-      .reduce((a, b) => a + b, 0);
+    u32.measure(values.length, measurer);
 
-    return size;
+    // Values encoding
+    for (const value of values) {
+      this.elementType.measure(value, measurer);
+    }
+
+    return measurer;
   }
 }

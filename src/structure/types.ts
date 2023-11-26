@@ -1,5 +1,6 @@
-import { ISerialInput, ISerialOutput } from '../io';
+import { ISerialInput, ISerialOutput, IMeasurer } from '../io';
 
+export type MaxValue = typeof MaxValue;
 export const MaxValue = Symbol('The maximum value a schema can hold');
 
 /**
@@ -20,7 +21,7 @@ export interface IStableSchema<I> extends ISchema<I> {
   resolve(ctx: IRefResolver): void;
   write(output: ISerialOutput, value: I): void;
   read(input: ISerialInput): I;
-  sizeOf(value: I | typeof MaxValue): number;
+  measure(value: I | typeof MaxValue, measurer?: IMeasurer): IMeasurer;
 }
 
 export abstract class Schema<I> implements IStableSchema<I> {
@@ -29,7 +30,7 @@ export abstract class Schema<I> implements IStableSchema<I> {
   abstract resolve(ctx: IRefResolver): void;
   abstract write(output: ISerialOutput, value: I): void;
   abstract read(input: ISerialInput): I;
-  abstract sizeOf(value: I | typeof MaxValue): number;
+  abstract measure(value: I | typeof MaxValue, measurer?: IMeasurer): IMeasurer;
 }
 
 export class Ref<K extends string> {

@@ -50,4 +50,8 @@ export class BufferReader extends BufferIOBase implements ISerialInput {
 
     return contents;
   }
+
+  skipBytes(bytes: number): void {
+    this.byteOffset += bytes;
+  }
 }

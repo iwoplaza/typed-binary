@@ -1,12 +1,21 @@
 import * as chai from 'chai';
 import { encodeAndDecode, makeIO } from './_mock.test';
-import { i32, string } from '../structure/baseTypes';
 import { generic, genericEnum, object, optional } from '../describe';
+import { byte, i32, string, MaxValue } from '../structure';
 import { Parsed } from '../utilityTypes';
 
 const expect = chai.expect;
 
 describe('ObjectSchema', () => {
+  it('should properly estimate size of max value', () => {
+    const description = object({
+      value: i32,
+      label: byte,
+    });
+
+    expect(description.measure(MaxValue).size).to.equal(5);
+  });
+
   it('should encode and decode a simple object', () => {
     const description = object({
       value: i32,
@@ -112,7 +121,7 @@ describe('ObjectSchema', () => {
       c: 3,
     };
 
-    const { output, input } = makeIO(schema.sizeOf(value));
+    const { output, input } = makeIO(schema.measure(value).size);
     schema.write(output, value);
 
     expect(input.readInt32()).to.equal(1); // a

@@ -9,6 +9,8 @@ export {
   Ref,
   IRefResolver,
   Schema,
+  ISchema,
+  IStableSchema,
   ISchemaWithProperties,
   Keyed,
   KeyedSchema,

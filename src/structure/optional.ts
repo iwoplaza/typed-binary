@@ -1,4 +1,9 @@
-import type { ISerialInput, ISerialOutput } from '../io';
+import {
+  Measurer,
+  type IMeasurer,
+  type ISerialInput,
+  type ISerialOutput,
+} from '../io';
 import {
   IRefResolver,
   ISchema,
@@ -41,9 +46,14 @@ export class OptionalSchema<T> extends Schema<T | undefined> {
     return undefined;
   }
 
-  sizeOf(value: T | undefined | typeof MaxValue): number {
-    if (value === undefined) return 1;
+  measure(
+    value: T | typeof MaxValue | undefined,
+    measurer: IMeasurer = new Measurer(),
+  ): IMeasurer {
+    if (value !== undefined) {
+      this.innerSchema.measure(value, measurer);
+    }
 
-    return 1 + this.innerSchema.sizeOf(value);
+    return measurer.add(1);
   }
 }

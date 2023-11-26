@@ -6,7 +6,12 @@ import {
   MaxValue,
   Schema,
 } from './types';
-import type { ISerialInput, ISerialOutput } from '../io';
+import {
+  Measurer,
+  type IMeasurer,
+  type ISerialInput,
+  type ISerialOutput,
+} from '../io';
 
 export class TupleSchema<T> extends Schema<T[]> {
   private elementSchema: IStableSchema<T>;
@@ -48,13 +53,17 @@ export class TupleSchema<T> extends Schema<T[]> {
     return array;
   }
 
-  sizeOf(values: T[] | typeof MaxValue): number {
-    if (values === MaxValue) {
-      return this.length * this.elementSchema.sizeOf(MaxValue);
+  measure(
+    values: T[] | MaxValue,
+    measurer: IMeasurer = new Measurer(),
+  ): IMeasurer {
+    for (let i = 0; i < this.length; ++i) {
+      this.elementSchema.measure(
+        values === MaxValue ? MaxValue : values[i],
+        measurer,
+      );
     }
 
-    return values
-      .map((v) => this.elementSchema.sizeOf(v))
-      .reduce((a, b) => a + b);
+    return measurer;
   }
 }
