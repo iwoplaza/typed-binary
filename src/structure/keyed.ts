@@ -3,14 +3,14 @@ import { TypedBinaryError } from '../error';
 import { IMeasurer, ISerialInput, ISerialOutput, Measurer } from '../io';
 import {
   IRefResolver,
+  IUnstableSchema,
   ISchema,
-  IStableSchema,
   Keyed,
   Ref,
   MaxValue,
 } from './types';
 
-class RefSchema<K extends string> implements IStableSchema<Ref<K>> {
+class RefSchema<K extends string> implements ISchema<Ref<K>> {
   public readonly _infered!: Ref<K>;
   public readonly ref: Ref<K>;
 
@@ -44,22 +44,22 @@ class RefSchema<K extends string> implements IStableSchema<Ref<K>> {
 }
 
 class RefResolve implements IRefResolver {
-  private registry: { [key: string]: IStableSchema<unknown> } = {};
+  private registry: { [key: string]: ISchema<unknown> } = {};
 
   hasKey(key: string): boolean {
     return this.registry[key] !== undefined;
   }
 
-  register<K extends string>(key: K, schema: IStableSchema<unknown>): void {
+  register<K extends string>(key: K, schema: ISchema<unknown>): void {
     this.registry[key] = schema;
   }
 
-  resolve<T>(unstableSchema: ISchema<T>): IStableSchema<T> {
+  resolve<T>(unstableSchema: IUnstableSchema<T>): ISchema<T> {
     if (unstableSchema instanceof RefSchema) {
       const ref = unstableSchema.ref;
       const key = ref.key as string;
       if (this.registry[key] !== undefined) {
-        return this.registry[key] as IStableSchema<T>;
+        return this.registry[key] as ISchema<T>;
       }
 
       throw new TypedBinaryError(
@@ -68,21 +68,21 @@ class RefResolve implements IRefResolver {
     }
 
     // Since it's not a RefSchema, we assume it can be resolved.
-    (unstableSchema as IStableSchema<T>).resolve(this);
+    (unstableSchema as ISchema<T>).resolve(this);
 
-    return unstableSchema as IStableSchema<T>;
+    return unstableSchema as ISchema<T>;
   }
 }
 
-export class KeyedSchema<K extends string, S extends IStableSchema<unknown>>
-  implements ISchema<Keyed<K, S>>
+export class KeyedSchema<K extends string, S extends ISchema<unknown>>
+  implements IUnstableSchema<Keyed<K, S>>
 {
   public readonly _infered!: Keyed<K, S>;
   public innerType: S;
 
   constructor(
     public readonly key: K,
-    innerResolver: (ref: ISchema<Ref<K>>) => S,
+    innerResolver: (ref: IUnstableSchema<Ref<K>>) => S,
   ) {
     this.innerType = innerResolver(new RefSchema(key));
     this._infered = new Keyed(key, this.innerType);

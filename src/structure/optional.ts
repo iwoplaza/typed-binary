@@ -6,21 +6,21 @@ import {
 } from '../io';
 import {
   IRefResolver,
+  IUnstableSchema,
   ISchema,
-  IStableSchema,
   MaxValue,
   Schema,
 } from './types';
 
 export class OptionalSchema<T> extends Schema<T | undefined> {
-  private innerSchema: IStableSchema<T>;
+  private innerSchema: ISchema<T>;
 
-  constructor(private readonly _innerUnstableSchema: ISchema<T>) {
+  constructor(private readonly _innerUnstableSchema: IUnstableSchema<T>) {
     super();
 
     // In case this optional isn't part of a keyed chain,
     // let's assume the inner type is stable.
-    this.innerSchema = _innerUnstableSchema as IStableSchema<T>;
+    this.innerSchema = _innerUnstableSchema as ISchema<T>;
   }
 
   resolve(ctx: IRefResolver): void {

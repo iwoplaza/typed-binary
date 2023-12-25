@@ -4,9 +4,9 @@ import { OptionalSchema } from '../structure/optional';
 import { GenericObjectSchema } from '../structure/object';
 import { TupleSchema } from '../structure/tuple';
 import {
-  ISchema,
+  IUnstableSchema,
   ISchemaWithProperties,
-  IStableSchema,
+  ISchema,
   Ref,
   SchemaMap,
 } from '../structure/types';
@@ -40,18 +40,17 @@ export const genericEnum = <
   subTypeMap: S,
 ) => new GenericObjectSchema(SubTypeKey.ENUM, properties, subTypeMap);
 
-export const arrayOf = <T extends ISchema<T['_infered']>>(elementType: T) =>
-  new ArraySchema(elementType);
-
-export const tupleOf = <T extends ISchema<T['_infered']>>(
+export const arrayOf = <T extends IUnstableSchema<T['_infered']>>(
+  elementType: T,
+) => new ArraySchema(elementType);
+export const tupleOf = <T extends IUnstableSchema<T['_infered']>>(
   elementType: T,
   length: number,
 ) => new TupleSchema(elementType, length);
-
-export const optional = <T>(innerType: ISchema<T>) =>
+export const optional = <T>(innerType: IUnstableSchema<T>) =>
   new OptionalSchema(innerType);
 
-export const keyed = <K extends string, P extends IStableSchema<unknown>>(
+export const keyed = <K extends string, P extends ISchema<unknown>>(
   key: K,
-  inner: (ref: ISchema<Ref<K>>) => P,
+  inner: (ref: IUnstableSchema<Ref<K>>) => P,
 ) => new KeyedSchema(key, inner);

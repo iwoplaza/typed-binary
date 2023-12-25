@@ -1,7 +1,7 @@
 import * as chai from 'chai';
 import { randBetween } from './random';
 import { f32 } from '../structure';
-import { encodeAndDecode } from './_mock.test';
+import { encodeAndDecode } from './helpers/mock';
 
 const expect = chai.expect;
 describe('Float32Schema', () => {

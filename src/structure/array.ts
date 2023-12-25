@@ -7,21 +7,21 @@ import {
 import { u32 } from './baseTypes';
 import {
   IRefResolver,
+  IUnstableSchema,
   ISchema,
-  IStableSchema,
   Schema,
   MaxValue,
 } from './types';
 
 export class ArraySchema<T> extends Schema<T[]> {
-  public elementType: IStableSchema<T>;
+  public elementType: ISchema<T>;
 
-  constructor(private readonly _unstableElementType: ISchema<T>) {
+  constructor(private readonly _unstableElementType: IUnstableSchema<T>) {
     super();
 
     // In case this array isn't part of a keyed chain,
     // let's assume the inner type is stable.
-    this.elementType = _unstableElementType as IStableSchema<T>;
+    this.elementType = _unstableElementType as ISchema<T>;
   }
 
   resolve(ctx: IRefResolver): void {

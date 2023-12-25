@@ -22,13 +22,15 @@ export class BufferIOBase {
   protected byteOffset = 0;
 
   constructor(buffer: ArrayBufferLike, options?: BufferIOOptions) {
+    this.byteOffset = options?.byteOffset ?? 0;
+
     if (typeof Buffer !== 'undefined' && buffer instanceof Buffer) {
       // Getting rid of the outer shell, which causes the Uint8Array line to create a copy, instead of a view.
+      this.byteOffset += buffer.byteOffset;
       buffer = buffer.buffer;
     }
 
     this.uint8View = new Uint8Array(buffer, 0);
-    this.byteOffset = options?.byteOffset ?? 0;
 
     const helperBuffer = new ArrayBuffer(4);
     this.helperInt32View = new Int32Array(helperBuffer);

@@ -3,7 +3,7 @@ import * as chai from 'chai';
 import { ArraySchema, i32, MaxValue } from '../structure';
 import { arrayOf } from '../describe';
 import { randIntBetween } from './random';
-import { makeIO } from './_mock.test';
+import { makeIO } from './helpers/mock';
 
 const expect = chai.expect;
 

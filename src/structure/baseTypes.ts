@@ -6,10 +6,6 @@ import { Schema, MaxValue } from './types';
 ////
 
 export class BoolSchema extends Schema<boolean> {
-  resolve(): void {
-    /* Nothing to resolve */
-  }
-
   read(input: ISerialInput): boolean {
     return input.readBool();
   }
@@ -33,10 +29,6 @@ export const bool = new BoolSchema();
 ////
 
 export class StringSchema extends Schema<string> {
-  resolve(): void {
-    /* Nothing to resolve */
-  }
-
   read(input: ISerialInput): string {
     return input.readString();
   }
@@ -64,10 +56,6 @@ export const string = new StringSchema();
 ////
 
 export class ByteSchema extends Schema<number> {
-  resolve(): void {
-    /* Nothing to resolve */
-  }
-
   read(input: ISerialInput): number {
     return input.readByte();
   }
@@ -91,10 +79,6 @@ export const byte = new ByteSchema();
 ////
 
 export class Int32Schema extends Schema<number> {
-  resolve(): void {
-    /* Nothing to resolve */
-  }
-
   read(input: ISerialInput): number {
     return input.readInt32();
   }
@@ -118,10 +102,6 @@ export const i32 = new Int32Schema();
 ////
 
 export class Uint32Schema extends Schema<number> {
-  resolve(): void {
-    /* Nothing to resolve */
-  }
-
   read(input: ISerialInput): number {
     return input.readUint32();
   }
@@ -145,10 +125,6 @@ export const u32 = new Uint32Schema();
 ////
 
 export class Float32Schema extends Schema<number> {
-  resolve(): void {
-    /* Nothing to resolve */
-  }
-
   read(input: ISerialInput): number {
     return input.readFloat32();
   }
