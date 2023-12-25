@@ -33,8 +33,6 @@ describe('Socket IO Usage', () => {
 
       clientSocket.on('connect', done);
     });
-
-    console.log('Connecting to server...');
   });
 
   async function sendAndReceive<T>(

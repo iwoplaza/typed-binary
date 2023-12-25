@@ -27,7 +27,10 @@ export interface ISchema<I> extends IUnstableSchema<I> {
 export abstract class Schema<I> implements ISchema<I> {
   readonly _infered!: I;
 
-  abstract resolve(ctx: IRefResolver): void;
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  resolve(ctx: IRefResolver): void {
+    // override this if you need to resolve internal references.
+  }
   abstract write(output: ISerialOutput, value: I): void;
   abstract read(input: ISerialInput): I;
   abstract measure(value: I | typeof MaxValue, measurer?: IMeasurer): IMeasurer;

@@ -65,7 +65,7 @@ To properly enable type inference, **TypeScript 4.5** and up is required because
 # Basic usage
 
 ```ts
-import { Parsed, object, arrayOf, i32, string, bool } from "typed-binary";
+import { Parsed, object, arrayOf, i32, string, bool } from 'typed-binary';
 
 const GameState = object({
   nickname: string, // Variable-length string
@@ -84,7 +84,7 @@ type GameState = Parsed<typeof GameState>;
 
 //...
 
-import { BufferReader, BufferWriter } from "typed-binary";
+import { BufferReader, BufferWriter } from 'typed-binary';
 
 /**
  * Responsible for retrieving the saved game state.
@@ -92,14 +92,14 @@ import { BufferReader, BufferWriter } from "typed-binary";
  */
 async function loadGameState(): Promise<GameState> {
   try {
-    const buffer = await fs.readFile("./savedState.bin");
+    const buffer = await fs.readFile('./savedState.bin');
     const reader = new BufferReader(buffer);
 
     return GameState.read(reader);
   } catch (e) {
     // Returning the default state if no saved state found.
     return {
-      nickname: "Default",
+      nickname: 'Default',
       stage: 1,
       newGamePlus: false,
       collectables: [],
@@ -117,11 +117,11 @@ async function loadGameState(): Promise<GameState> {
  */
 async function saveGameState(state: GameState): Promise<void> {
   try {
-    const buffer = Buffer.alloc(GameState.sizeOf(state));
+    const buffer = Buffer.alloc(GameState.measure(state).size);
     const writer = new BufferWriter(buffer);
 
     GameState.write(writer, state);
-    await fs.writeFile("./savedState.bin", buffer);
+    await fs.writeFile('./savedState.bin', buffer);
   } catch (e) {
     console.error(`Error occurred during the saving process.`);
     console.error(e);
@@ -153,16 +153,16 @@ There's a couple primitives to choose from:
   - A string of characters followed by a '\0' terminal character.
 
 ```ts
-import { BufferWriter, BufferReader, byte, string } from "typed-binary";
+import { BufferWriter, BufferReader, byte, string } from 'typed-binary';
 
 const buffer = Buffer.alloc(16);
 const writer = new BufferWriter(buffer);
 const reader = new BufferReader(buffer);
 
 // Writing four bytes into the buffer
-byte.write(writer, "W".charCodeAt(0));
-byte.write(writer, "o".charCodeAt(0));
-byte.write(writer, "w".charCodeAt(0));
+byte.write(writer, 'W'.charCodeAt(0));
+byte.write(writer, 'o'.charCodeAt(0));
+byte.write(writer, 'w'.charCodeAt(0));
 byte.write(writer, 0);
 
 console.log(string.read(reader)); // Wow
@@ -175,7 +175,7 @@ Objects store their properties in key-ascending-alphabetical order, one next to 
 ### Simple objects
 
 ```ts
-import { BufferWriter, BufferReader, i32, string, object } from "typed-binary";
+import { BufferWriter, BufferReader, i32, string, object } from 'typed-binary';
 
 const buffer = Buffer.alloc(16);
 const writer = new BufferWriter(buffer);
@@ -190,8 +190,8 @@ const Person = object({
 
 // Writing a Person
 Person.write(writer, {
-  firstName: "John",
-  lastName: "Doe",
+  firstName: 'John',
+  lastName: 'Doe',
   age: 43,
 });
 
@@ -213,7 +213,7 @@ import {
   bool,
   generic,
   object,
-} from "typed-binary";
+} from 'typed-binary';
 
 // Generic object schema
 const Animal = generic(
@@ -230,7 +230,7 @@ const Animal = generic(
       // Animal can be a cat
       striped: bool,
     }),
-  }
+  },
 );
 
 // A buffer to serialize into/out of
@@ -240,10 +240,10 @@ const reader = new BufferReader(buffer);
 
 // Writing an Animal
 Animal.write(writer, {
-  type: "cat", // We're specyfing which concrete type we want this object to be.
+  type: 'cat', // We're specyfing which concrete type we want this object to be.
 
   // Base properties
-  nickname: "James",
+  nickname: 'James',
   age: 5,
 
   // Concrete type specific properties
@@ -257,11 +257,11 @@ console.log(JSON.stringify(animal)); // { "age": 5, "striped": true ... }
 
 // -- Type checking works here! --
 // animal.type => 'cat' | 'dog'
-if (animal.type === "cat") {
+if (animal.type === 'cat') {
   // animal.type => 'cat'
   console.log("It's a cat!");
   // animal.striped => bool
-  console.log(animal.striped ? "Striped" : "Not striped");
+  console.log(animal.striped ? 'Striped' : 'Not striped');
 } else {
   // animal.type => 'dog'
   console.log("It's a dog!");
@@ -358,7 +358,7 @@ import {
   string,
   object,
   optional,
-} from "typed-binary";
+} from 'typed-binary';
 
 const buffer = Buffer.alloc(16);
 const writer = new BufferWriter(buffer);
@@ -381,20 +381,20 @@ const Person = object({
 
 // Writing a Person (no address)
 Person.write(writer, {
-  firstName: "John",
-  lastName: "Doe",
+  firstName: 'John',
+  lastName: 'Doe',
   age: 43,
 });
 
 // Writing a Person (with an address)
 Person.write(writer, {
-  firstName: "Jesse",
-  lastName: "Doe",
+  firstName: 'Jesse',
+  lastName: 'Doe',
   age: 38,
   address: {
-    city: "New York",
-    street: "Binary St.",
-    postalCode: "11-111",
+    city: 'New York',
+    street: 'Binary St.',
+    postalCode: '11-111',
   },
 });
 
@@ -422,21 +422,21 @@ If you want an object type to be able to contain one of itself (recursion), then
  * This is because references are resolved recursively once the method
  * passed as the 2nd argument to 'keyed' returns the schema.
  */
-const Recursive = keyed("recursive-key", (Recursive) =>
+const Recursive = keyed('recursive-key', (Recursive) =>
   object({
     value: i32,
     next: optional(Recursive),
-  })
+  }),
 );
 ```
 
 ### Recursive types alongside generics
 
 ```ts
-import { i32, string, object, keyed } from "typed-binary";
+import { i32, string, object, keyed } from 'typed-binary';
 
 type Expression = Parsed<typeof Expression>;
-const Expression = keyed("expression", (Expression) =>
+const Expression = keyed('expression', (Expression) =>
   generic(
     {},
     {
@@ -450,21 +450,21 @@ const Expression = keyed("expression", (Expression) =>
       int_literal: object({
         value: i32,
       }),
-    }
-  )
+    },
+  ),
 );
 
 const expr: Parsed<typeof Expression> = {
-  type: "multiply",
+  type: 'multiply',
   a: {
-    type: "negate",
+    type: 'negate',
     inner: {
-      type: "int_literal",
+      type: 'int_literal',
       value: 15,
     },
   },
   b: {
-    type: "int_literal",
+    type: 'int_literal',
     value: 2,
   },
 };
@@ -480,16 +480,12 @@ import {
   ISerialOutput,
   Schema,
   IRefResolver,
-} from "typed-binary";
+} from 'typed-binary';
 
 /**
  * A schema storing radians with 2 bytes of precision.
  */
 class RadiansSchema extends Schema<number> {
-  resolve(ctx: IRefResolver): void {
-    // No inner references to resolve
-  }
-
   read(input: ISerialInput): number {
     const low = input.readByte();
     const high = input.readByte();
@@ -501,7 +497,7 @@ class RadiansSchema extends Schema<number> {
   write(output: ISerialOutput, value: number): void {
     // The value will be wrapped to be in range of [0, Math.PI)
     const wrapped = ((value % Math.PI) + Math.PI) % Math.PI;
-    // Discretising the value to be ints in range of [0, 65535]
+    // Quantizing the value to range of [0, 65535]
     const discrete = Math.min(Math.floor((wrapped / Math.PI) * 65535), 65535);
 
     const low = discrete & 0xff;
@@ -511,16 +507,16 @@ class RadiansSchema extends Schema<number> {
     output.writeByte(high);
   }
 
-  sizeOf(_: number): number {
+  measure(_: number, measurer: IMeasurer = new Measurer()): IMeasurer {
     // The size of the data serialized by this schema
     // doesn't depend on the actual value. It's always 2 bytes.
-    return 2;
+    return measurer.add(2);
   }
 }
 
 // Creating a singleton instance of the schema,
 // since it has no configuration properties.
-export const RADIANS = new RadiansSchema();
+export const radians = new RadiansSchema();
 ```
 
 # Serialization and Deserialization
@@ -539,13 +535,13 @@ read(input: ISerialInput): T;
 /**
  * Estimates the size of the value (according to the schema's structure)
  */
-sizeOf(value: T): number;
+measure(value: T | MaxValue, measurer: IMeasurer): IMeasurer;
 ```
 
 The `ISerialInput/Output` interfaces have a basic built-in implementation that reads/writes to a buffer:
 
 ```ts
-import { BufferReader, BufferWriter } from "typed-binary";
+import { BufferReader, BufferWriter } from 'typed-binary';
 
 // Creating a fixed-length buffer of arbitrary size (64 bytes).
 const buffer = Buffer.alloc(64); // Or new ArrayBuffer(64); on browsers.

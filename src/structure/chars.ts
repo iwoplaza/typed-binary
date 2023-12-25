@@ -1,14 +1,15 @@
-import type { IMeasurer, ISerialInput, ISerialOutput } from '../io';
+import {
+  Measurer,
+  type IMeasurer,
+  type ISerialInput,
+  type ISerialOutput,
+} from '../io';
 import { TypedBinaryError } from '../error';
 import { Schema } from './types';
 
 export class CharsSchema extends Schema<string> {
   constructor(public readonly length: number) {
     super();
-  }
-
-  resolve(): void {
-    /* Nothing to resolve */
   }
 
   write(output: ISerialOutput, value: string): void {
@@ -33,7 +34,7 @@ export class CharsSchema extends Schema<string> {
     return content;
   }
 
-  measure(_: string, measurer: IMeasurer): IMeasurer {
+  measure(_: string, measurer: IMeasurer = new Measurer()): IMeasurer {
     return measurer.add(this.length);
   }
 }
