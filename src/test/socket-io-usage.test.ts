@@ -1,6 +1,6 @@
 import * as chai from 'chai';
-import { createServer } from 'node:http';
-import { type AddressInfo } from 'node:net';
+import { createServer } from 'http';
+import { type AddressInfo } from 'net';
 import { Server, Socket as ServerSocket } from 'socket.io';
 import { Socket as ClientSocket, io as ioClient } from 'socket.io-client';
 
