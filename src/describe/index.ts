@@ -54,3 +54,13 @@ export const keyed = <K extends string, P extends ISchema<unknown>>(
   key: K,
   inner: (ref: IUnstableSchema<Ref<K>>) => P,
 ) => new KeyedSchema(key, inner);
+
+export const concat = <Objs extends ObjectSchema<{ [key: string]: unknown }>[]>(
+  objs: Objs,
+) => {
+  return new ObjectSchema(
+    Object.fromEntries(
+      objs.map(({ properties }) => Object.entries(properties)).flat(),
+    ) as unknown as SchemaMap<Objs[number]['_infered']>,
+  );
+};

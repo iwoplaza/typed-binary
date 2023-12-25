@@ -1,6 +1,6 @@
 import * as chai from 'chai';
 import { encodeAndDecode, makeIO } from './helpers/mock';
-import { generic, genericEnum, object, optional } from '../describe';
+import { concat, generic, genericEnum, object, optional } from '../describe';
 import { byte, i32, string, MaxValue } from '../structure';
 import { Parsed } from '../utilityTypes';
 
@@ -126,6 +126,66 @@ describe('ObjectSchema', () => {
 
     expect(input.readInt32()).to.equal(1); // a
     expect(input.readInt32()).to.equal(3); // c
+    expect(input.readInt32()).to.equal(2); // b
+  });
+
+  it('allows to extend it with more properties', () => {
+    const schema = object({
+      a: i32,
+      b: i32,
+    });
+
+    const extended = concat([
+      schema,
+      object({
+        c: i32,
+        d: i32,
+      }),
+    ]);
+
+    const value: Parsed<typeof extended> = {
+      a: 1,
+      b: 2,
+      c: 3,
+      d: 4,
+    };
+
+    const { output, input } = makeIO(extended.measure(value).size);
+    extended.write(output, value);
+
+    expect(input.readInt32()).to.equal(1); // a
+    expect(input.readInt32()).to.equal(2); // b
+    expect(input.readInt32()).to.equal(3); // c
+    expect(input.readInt32()).to.equal(4); // d
+  });
+
+  it('allows to prepend it with more properties', () => {
+    const schema = object({
+      a: i32,
+      b: i32,
+    });
+
+    const prepended = concat([
+      object({
+        c: i32,
+        d: i32,
+      }),
+      schema,
+    ]);
+
+    const value: Parsed<typeof prepended> = {
+      a: 1,
+      b: 2,
+      c: 3,
+      d: 4,
+    };
+
+    const { output, input } = makeIO(prepended.measure(value).size);
+    prepended.write(output, value);
+
+    expect(input.readInt32()).to.equal(3); // c
+    expect(input.readInt32()).to.equal(4); // d
+    expect(input.readInt32()).to.equal(1); // a
     expect(input.readInt32()).to.equal(2); // b
   });
 });
