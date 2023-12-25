@@ -1,5 +1,5 @@
 import * as chai from 'chai';
-import { encodeAndDecode, makeIO } from './_mock.test';
+import { encodeAndDecode, makeIO } from './helpers/mock';
 import { generic, genericEnum, object, optional } from '../describe';
 import { byte, i32, string, MaxValue } from '../structure';
 import { Parsed } from '../utilityTypes';

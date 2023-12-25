@@ -1,7 +1,7 @@
 import * as chai from 'chai';
 import { randIntBetween } from './random';
 import { i32, u32 } from '../structure';
-import { encodeAndDecode } from './_mock.test';
+import { encodeAndDecode } from './helpers/mock';
 
 const expect = chai.expect;
 

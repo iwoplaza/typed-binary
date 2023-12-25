@@ -1,6 +1,6 @@
 import * as chai from 'chai';
 import { bool } from '../structure';
-import { encodeAndDecode } from './_mock.test';
+import { encodeAndDecode } from './helpers/mock';
 
 const expect = chai.expect;
 describe('BoolSchema', () => {

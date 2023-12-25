@@ -23,8 +23,10 @@ export class BufferIOBase {
 
   constructor(buffer: ArrayBufferLike, options?: BufferIOOptions) {
     if (typeof Buffer !== 'undefined' && buffer instanceof Buffer) {
-      // Getting rid of the outer shell, which causes the Uint8Array line to create a copy, instead of a view.
-      buffer = buffer.buffer;
+      if (buffer.byteLength === buffer.buffer.byteLength) {
+        // Getting rid of the outer shell, which causes the Uint8Array line to create a copy, instead of a view.
+        buffer = buffer.buffer;
+      }
     }
 
     this.uint8View = new Uint8Array(buffer, 0);

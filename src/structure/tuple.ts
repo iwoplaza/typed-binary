@@ -1,8 +1,8 @@
 import { TypedBinaryError } from '../error';
 import {
   IRefResolver,
+  IUnstableSchema,
   ISchema,
-  IStableSchema,
   MaxValue,
   Schema,
 } from './types';
@@ -14,17 +14,17 @@ import {
 } from '../io';
 
 export class TupleSchema<T> extends Schema<T[]> {
-  private elementSchema: IStableSchema<T>;
+  private elementSchema: ISchema<T>;
 
   constructor(
-    private readonly _unstableElementSchema: ISchema<T>,
+    private readonly _unstableElementSchema: IUnstableSchema<T>,
     public readonly length: number,
   ) {
     super();
 
     // In case this array isn't part of a keyed chain,
     // let's assume the inner type is stable.
-    this.elementSchema = _unstableElementSchema as IStableSchema<T>;
+    this.elementSchema = _unstableElementSchema as ISchema<T>;
   }
 
   resolve(ctx: IRefResolver): void {
