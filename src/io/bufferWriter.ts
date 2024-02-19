@@ -46,8 +46,4 @@ export class BufferWriter extends BufferIOBase implements ISerialOutput {
     // Extra null character
     this.uint8View[this.byteOffset++] = 0;
   }
-
-  skipBytes(bytes: number): void {
-    this.byteOffset += bytes;
-  }
 }

@@ -5,6 +5,7 @@ export interface ISerialInput {
   readUint32(): number;
   readFloat32(): number;
   readString(): string;
+  seekTo(offset: number): void;
   skipBytes(bytes: number): void;
   readonly currentByteOffset: number;
 }
@@ -16,6 +17,7 @@ export interface ISerialOutput {
   writeUint32(value: number): void;
   writeFloat32(value: number): void;
   writeString(value: string): void;
+  seekTo(offset: number): void;
   skipBytes(bytes: number): void;
   readonly currentByteOffset: number;
 }

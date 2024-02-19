@@ -1,37 +1,32 @@
 import { TypedBinaryError } from '../error';
-import {
-  IRefResolver,
-  IUnstableSchema,
-  ISchema,
-  MaxValue,
-  Schema,
-} from './types';
+import { IRefResolver, MaxValue, Schema, AnySchema } from './types';
 import {
   Measurer,
   type IMeasurer,
   type ISerialInput,
   type ISerialOutput,
 } from '../io';
+import { Parsed } from '../utilityTypes';
 
-export class TupleSchema<T> extends Schema<T[]> {
-  private elementSchema: ISchema<T>;
+export class TupleSchema<TUnwrap extends AnySchema> extends Schema<TUnwrap[]> {
+  private elementSchema: TUnwrap;
 
   constructor(
-    private readonly _unstableElementSchema: IUnstableSchema<T>,
+    private readonly _unstableElementSchema: TUnwrap,
     public readonly length: number,
   ) {
     super();
 
     // In case this array isn't part of a keyed chain,
     // let's assume the inner type is stable.
-    this.elementSchema = _unstableElementSchema as ISchema<T>;
+    this.elementSchema = _unstableElementSchema;
   }
 
   resolve(ctx: IRefResolver): void {
     this.elementSchema = ctx.resolve(this._unstableElementSchema);
   }
 
-  write(output: ISerialOutput, values: T[]): void {
+  write(output: ISerialOutput, values: Parsed<TUnwrap>[]): void {
     if (values.length !== this.length) {
       throw new TypedBinaryError(
         `Expected tuple of length ${this.length}, got ${values.length}`,
@@ -43,18 +38,18 @@ export class TupleSchema<T> extends Schema<T[]> {
     }
   }
 
-  read(input: ISerialInput): T[] {
-    const array = [];
+  read(input: ISerialInput): Parsed<TUnwrap>[] {
+    const array: Parsed<TUnwrap>[] = [];
 
     for (let i = 0; i < this.length; ++i) {
-      array.push(this.elementSchema.read(input));
+      array.push(this.elementSchema.read(input) as Parsed<TUnwrap>);
     }
 
     return array;
   }
 
   measure(
-    values: T[] | MaxValue,
+    values: Parsed<TUnwrap>[] | MaxValue,
     measurer: IMeasurer = new Measurer(),
   ): IMeasurer {
     for (let i = 0; i < this.length; ++i) {

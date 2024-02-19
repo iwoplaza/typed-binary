@@ -11,7 +11,7 @@ Gives tools to describe binary structures with full TypeScript support. Encodes 
 
 Serialise and deserialise typed schemas without the need for redundant interfaces or an external DSL. Schemas themselves define what type they encode and decode, and **the IDE knows it**!
 
-![Basic Type and Documentation Inferrence](/docs/media/basic-type-and-doc-inferrence.gif)
+![Basic Type and Documentation Inference](/docs/media/basic-type-and-doc-inferrence.gif)
 
 Above is a self-contained code snippet using typed-binary. The IDE can properly infer what `Dog` is. What's even more interesting, is that the "parsed" properties inherit the schema's **JSDocs** (seen on the gif above).
 

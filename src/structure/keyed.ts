@@ -1,20 +1,21 @@
-import { Parsed } from '..';
 import { TypedBinaryError } from '../error';
 import { IMeasurer, ISerialInput, ISerialOutput, Measurer } from '../io';
+import { Parsed } from '../utilityTypes';
 import {
   IRefResolver,
-  IUnstableSchema,
   ISchema,
-  Keyed,
   Ref,
   MaxValue,
+  PropertyDescription,
+  AnySchema,
 } from './types';
 
-class RefSchema<K extends string> implements ISchema<Ref<K>> {
-  public readonly _infered!: Ref<K>;
-  public readonly ref: Ref<K>;
+class RefSchema<TKeyDef extends string> implements ISchema<Ref<TKeyDef>> {
+  public readonly __unwrapped!: Ref<TKeyDef>;
+  public readonly __keyDefinition!: never;
+  public readonly ref: Ref<TKeyDef>;
 
-  constructor(key: K) {
+  constructor(key: TKeyDef) {
     this.ref = new Ref(key);
   }
 
@@ -24,7 +25,7 @@ class RefSchema<K extends string> implements ISchema<Ref<K>> {
     );
   }
 
-  read(): Ref<K> {
+  read(): Parsed<Ref<TKeyDef>> {
     throw new TypedBinaryError(
       `Tried to read a reference directly. Resolve it instead.`,
     );
@@ -41,6 +42,12 @@ class RefSchema<K extends string> implements ISchema<Ref<K>> {
       `Tried to measure size of a reference directly. Resolve it instead.`,
     );
   }
+
+  seekProperty(): PropertyDescription | null {
+    throw new TypedBinaryError(
+      `Tried to seek property of a reference directly. Resolve it instead.`,
+    );
+  }
 }
 
 class RefResolve implements IRefResolver {
@@ -54,12 +61,12 @@ class RefResolve implements IRefResolver {
     this.registry[key] = schema;
   }
 
-  resolve<T>(unstableSchema: IUnstableSchema<T>): ISchema<T> {
+  resolve<TSchema extends AnySchema>(unstableSchema: TSchema): TSchema {
     if (unstableSchema instanceof RefSchema) {
       const ref = unstableSchema.ref;
       const key = ref.key as string;
       if (this.registry[key] !== undefined) {
-        return this.registry[key] as ISchema<T>;
+        return this.registry[key] as TSchema;
       }
 
       throw new TypedBinaryError(
@@ -68,24 +75,26 @@ class RefResolve implements IRefResolver {
     }
 
     // Since it's not a RefSchema, we assume it can be resolved.
-    (unstableSchema as ISchema<T>).resolve(this);
+    unstableSchema.resolve(this);
 
-    return unstableSchema as ISchema<T>;
+    return unstableSchema;
   }
 }
 
-export class KeyedSchema<K extends string, S extends ISchema<unknown>>
-  implements IUnstableSchema<Keyed<K, S>>
+export class KeyedSchema<
+  TUnwrap extends ISchema<unknown>,
+  TKeyDef extends string,
+> implements ISchema<TUnwrap, TKeyDef>
 {
-  public readonly _infered!: Keyed<K, S>;
-  public innerType: S;
+  public readonly __unwrapped!: TUnwrap;
+  public readonly __keyDefinition!: TKeyDef;
+  public innerType: TUnwrap;
 
   constructor(
-    public readonly key: K,
-    innerResolver: (ref: IUnstableSchema<Ref<K>>) => S,
+    public readonly key: TKeyDef,
+    innerResolver: (ref: ISchema<Ref<TKeyDef>, never>) => TUnwrap,
   ) {
     this.innerType = innerResolver(new RefSchema(key));
-    this._infered = new Keyed(key, this.innerType);
 
     // Automatically resolving after keyed creation.
     this.resolve(new RefResolve());
@@ -99,18 +108,25 @@ export class KeyedSchema<K extends string, S extends ISchema<unknown>>
     }
   }
 
-  read(input: ISerialInput): Parsed<S> {
-    return this.innerType.read(input) as Parsed<S>;
+  read(input: ISerialInput): Parsed<TUnwrap> {
+    return this.innerType.read(input) as Parsed<TUnwrap>;
   }
 
-  write(output: ISerialOutput, value: Parsed<S>): void {
+  write(output: ISerialOutput, value: Parsed<TUnwrap>): void {
     this.innerType.write(output, value);
   }
 
   measure(
-    value: Parsed<S> | typeof MaxValue,
+    value: Parsed<TUnwrap> | typeof MaxValue,
     measurer: IMeasurer = new Measurer(),
   ): IMeasurer {
     return this.innerType.measure(value, measurer);
+  }
+
+  seekProperty(
+    reference: Parsed<TUnwrap> | typeof MaxValue,
+    prop: keyof TUnwrap,
+  ): PropertyDescription | null {
+    return this.innerType.seekProperty(reference, prop as never);
   }
 }

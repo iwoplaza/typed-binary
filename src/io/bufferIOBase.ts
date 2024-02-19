@@ -48,4 +48,12 @@ export class BufferIOBase {
   get currentByteOffset() {
     return this.byteOffset;
   }
+
+  seekTo(offset: number): void {
+    this.byteOffset = offset;
+  }
+
+  skipBytes(bytes: number): void {
+    this.byteOffset += bytes;
+  }
 }

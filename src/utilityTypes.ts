@@ -1,45 +1,63 @@
-import { IUnstableSchema, Keyed, Ref } from './structure/types';
+import { ISchema, Ref, UnwrapOf } from './structure/types';
+
+/**
+ * @example ```
+ * type ObjectUnion = ({ a: number, b: number } | { a: number, c: number });
+ *
+ * keyof ObjectUnion -> 'a'
+ * DistributedKeyOf<ObjectUnion> -> 'a' | 'b' | 'c'
+ * ```
+ */
+export type DistributedKeyOf<T> = T extends any ? keyof T : never;
+
+/**
+ * @example ```
+ * type ObjectArray = [{ a: number, b: number }, { a: number, c: number }];
+ *
+ * MergeRecords<ObjectArray> -> { a: number, b: number, c: number }
+ * ```
+ */
+export type MergeRecords<T extends any[]> = {
+  [K in DistributedKeyOf<T[number]>]: Filter<T[number], { [key in K]: any }>[K];
+};
+
+/**
+ * @example ```
+ * type ObjectUnion = { a: number, b: number } | { a: number, c: number };
+ *
+ * MergeRecordUnion<ObjectUnion> -> { a: number, b: number, c: number }
+ * ```
+ */
+export type MergeRecordUnion<T> = {
+  [K in DistributedKeyOf<T>]: Filter<T, { [key in K]: any }>[K];
+};
+
+// Remove types from T that are assignable to U
+export type Diff<T, U> = T extends U ? never : T;
+// Remove types from T that are not assignable to U
+export type Filter<T, U> = T extends U ? T : never;
 
 export type Parsed<
   T,
-  M extends { [key in keyof M]: M[key] } = Record<string, never>,
-> = T extends Keyed<infer TypeKey, infer Inner>
-  ? Parsed<Inner, M & { [key in TypeKey]: T['innerType'] }>
-  : T extends Ref<infer K>
-  ? K extends keyof M
-    ? Parsed<M[K], M>
+  /** type key dictionary */
+  TKeyDict extends { [key in keyof TKeyDict]: TKeyDict[key] } = Record<
+    string,
+    never
+  >,
+> = T extends ISchema<infer TUnwrap, never>
+  ? // A non-keyed schema
+    Parsed<TUnwrap, TKeyDict>
+  : T extends ISchema<infer TUnwrap, infer TKeyDefinition>
+  ? // A schema that defines themselves under a key in the dictionary
+    Parsed<TUnwrap, TKeyDict & { [key in TKeyDefinition]: T }>
+  : // A reference to a keyed schema
+  T extends Ref<infer K>
+  ? K extends keyof TKeyDict
+    ? Parsed<UnwrapOf<TKeyDict[K]>, TKeyDict>
     : never
-  : T extends IUnstableSchema<infer I>
-  ? Parsed<I, M>
-  : T extends Record<string, unknown>
-  ? { [K in keyof T]: Parsed<T[K], M> }
+  : // Compound types
+  T extends Record<string, unknown>
+  ? { [K in keyof T]: Parsed<T[K], TKeyDict> }
   : T extends (infer E)[]
-  ? Parsed<E>[]
-  : T;
-
-export type ValueOrProvider<T> = T | (() => T);
-
-type UndefinedKeys<T> = {
-  [P in keyof T]: undefined extends T[P] ? P : never;
-}[keyof T];
-
-export type OptionalUndefined<T> = Partial<Pick<T, UndefinedKeys<T>>> &
-  Omit<T, UndefinedKeys<T>>;
-
-export type Expand<T> = T extends (...args: infer A) => infer R
-  ? (...args: Expand<A>) => Expand<R>
-  : T extends Record<string, never> & infer O // Getting rid of Record<string, never>-s, which represent empty objects.
-  ? O
-  : T extends infer O
-  ? { [K in keyof O]: O[K] }
-  : never;
-
-export type ExpandRecursively<T> = T extends (...args: infer A) => infer R
-  ? (...args: ExpandRecursively<A>) => ExpandRecursively<R>
-  : T extends Record<string, never> & infer O // Getting rid of Record<string, never>-s, which represent empty objects.
-  ? ExpandRecursively<O>
-  : T extends object
-  ? T extends infer O
-    ? { [K in keyof O]: ExpandRecursively<O[K]> }
-    : never
+  ? Parsed<E, TKeyDict>[]
   : T;

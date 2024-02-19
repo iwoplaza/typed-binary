@@ -5,8 +5,10 @@ import { Server, Socket as ServerSocket } from 'socket.io';
 import { Socket as ClientSocket, io as ioClient } from 'socket.io-client';
 
 import { arrayOf, object } from '../describe';
-import { ISchema, byte, string, u32 } from '../structure';
+import { byte, string, u32 } from '../structure';
 import { BufferReader, BufferWriter } from '../io';
+import { AnySchema } from '../structure/types';
+import { Parsed } from '../utilityTypes';
 
 const expect = chai.expect;
 
@@ -35,10 +37,10 @@ describe('Socket IO Usage', () => {
     });
   });
 
-  async function sendAndReceive<T>(
+  async function sendAndReceive<TSchema extends AnySchema>(
     direction: 'server-to-client' | 'client-to-server',
-    schema: ISchema<T>,
-    value: T,
+    schema: TSchema,
+    value: Parsed<TSchema>,
   ) {
     const [from, to] =
       direction === 'server-to-client'

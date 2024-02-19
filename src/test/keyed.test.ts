@@ -1,8 +1,8 @@
 import * as chai from 'chai';
 import { encodeAndDecode } from './helpers/mock';
 import { i32, string } from '../structure/baseTypes';
+import { Parsed } from '../utilityTypes';
 import { keyed, object, generic, genericEnum, optional } from '../describe';
-import { Parsed } from '..';
 
 const expect = chai.expect;
 

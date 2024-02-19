@@ -4,30 +4,27 @@ import {
   type ISerialInput,
   type ISerialOutput,
 } from '../io';
-import {
-  IRefResolver,
-  IUnstableSchema,
-  ISchema,
-  MaxValue,
-  Schema,
-} from './types';
+import { Parsed } from '../utilityTypes';
+import { IRefResolver, MaxValue, Schema, AnySchema } from './types';
 
-export class OptionalSchema<T> extends Schema<T | undefined> {
-  private innerSchema: ISchema<T>;
+export class OptionalSchema<TUnwrap extends AnySchema> extends Schema<
+  TUnwrap | undefined
+> {
+  private innerSchema: TUnwrap;
 
-  constructor(private readonly _innerUnstableSchema: IUnstableSchema<T>) {
+  constructor(private readonly _innerUnstableSchema: TUnwrap) {
     super();
 
     // In case this optional isn't part of a keyed chain,
     // let's assume the inner type is stable.
-    this.innerSchema = _innerUnstableSchema as ISchema<T>;
+    this.innerSchema = _innerUnstableSchema;
   }
 
   resolve(ctx: IRefResolver): void {
     this.innerSchema = ctx.resolve(this._innerUnstableSchema);
   }
 
-  write(output: ISerialOutput, value: T | undefined): void {
+  write(output: ISerialOutput, value: Parsed<TUnwrap> | undefined): void {
     if (value !== undefined && value !== null) {
       output.writeBool(true);
       this.innerSchema.write(output, value);
@@ -36,18 +33,18 @@ export class OptionalSchema<T> extends Schema<T | undefined> {
     }
   }
 
-  read(input: ISerialInput): T | undefined {
+  read(input: ISerialInput): Parsed<TUnwrap> | undefined {
     const valueExists = input.readBool();
 
     if (valueExists) {
-      return this.innerSchema.read(input);
+      return this.innerSchema.read(input) as Parsed<TUnwrap>;
     }
 
     return undefined;
   }
 
   measure(
-    value: T | typeof MaxValue | undefined,
+    value: Parsed<TUnwrap> | MaxValue | undefined,
     measurer: IMeasurer = new Measurer(),
   ): IMeasurer {
     if (value !== undefined) {
