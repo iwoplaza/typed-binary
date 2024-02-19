@@ -2,4 +2,4 @@ export * from './structure';
 export * from './describe';
 export * from './io';
 
-export type { Parsed } from './utilityTypes';
+export type { Parsed, ParseUnwrapped } from './utilityTypes';

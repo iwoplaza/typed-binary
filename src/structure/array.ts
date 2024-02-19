@@ -12,12 +12,15 @@ import {
   MaxValue,
   AnySchema,
   PropertyDescription,
+  Unwrap,
 } from './types';
 
-export class ArraySchema<TUnwrap extends AnySchema> extends Schema<TUnwrap[]> {
-  public elementType: TUnwrap;
+export class ArraySchema<TElement extends AnySchema> extends Schema<
+  Unwrap<TElement>[]
+> {
+  public elementType: TElement;
 
-  constructor(private readonly _unstableElementType: TUnwrap) {
+  constructor(private readonly _unstableElementType: TElement) {
     super();
 
     // In case this array isn't part of a keyed chain,
@@ -29,7 +32,7 @@ export class ArraySchema<TUnwrap extends AnySchema> extends Schema<TUnwrap[]> {
     this.elementType = ctx.resolve(this._unstableElementType);
   }
 
-  write(output: ISerialOutput, values: Parsed<TUnwrap>[]): void {
+  write(output: ISerialOutput, values: Parsed<Unwrap<TElement>>[]): void {
     output.writeUint32(values.length);
 
     for (const value of values) {
@@ -37,20 +40,20 @@ export class ArraySchema<TUnwrap extends AnySchema> extends Schema<TUnwrap[]> {
     }
   }
 
-  read(input: ISerialInput): Parsed<TUnwrap>[] {
-    const array: Parsed<TUnwrap>[] = [];
+  read(input: ISerialInput): Parsed<Unwrap<TElement>>[] {
+    const array: Parsed<Unwrap<TElement>>[] = [];
 
     const len = input.readUint32();
 
     for (let i = 0; i < len; ++i) {
-      array.push(this.elementType.read(input) as Parsed<TUnwrap>);
+      array.push(this.elementType.read(input) as Parsed<Unwrap<TElement>>);
     }
 
     return array;
   }
 
   measure(
-    values: Parsed<TUnwrap>[] | typeof MaxValue,
+    values: Parsed<Unwrap<TElement>>[] | typeof MaxValue,
     measurer: IMeasurer = new Measurer(),
   ): IMeasurer {
     if (values === MaxValue) {
@@ -70,7 +73,7 @@ export class ArraySchema<TUnwrap extends AnySchema> extends Schema<TUnwrap[]> {
   }
 
   seekProperty(
-    reference: Parsed<TUnwrap>[] | MaxValue,
+    reference: Parsed<Unwrap<TElement>>[] | MaxValue,
     prop: number,
   ): PropertyDescription | null {
     if (typeof prop === 'symbol') {

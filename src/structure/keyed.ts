@@ -1,6 +1,6 @@
 import { TypedBinaryError } from '../error';
 import { IMeasurer, ISerialInput, ISerialOutput, Measurer } from '../io';
-import { Parsed } from '../utilityTypes';
+import { ParseUnwrapped, Parsed } from '../utilityTypes';
 import {
   IRefResolver,
   ISchema,
@@ -8,11 +8,12 @@ import {
   MaxValue,
   PropertyDescription,
   AnySchema,
+  Unwrap,
+  IKeyedSchema,
 } from './types';
 
 class RefSchema<TKeyDef extends string> implements ISchema<Ref<TKeyDef>> {
   public readonly __unwrapped!: Ref<TKeyDef>;
-  public readonly __keyDefinition!: never;
   public readonly ref: Ref<TKeyDef>;
 
   constructor(key: TKeyDef) {
@@ -82,17 +83,17 @@ class RefResolve implements IRefResolver {
 }
 
 export class KeyedSchema<
-  TUnwrap extends ISchema<unknown>,
+  TInner extends ISchema<unknown>,
   TKeyDef extends string,
-> implements ISchema<TUnwrap, TKeyDef>
+> implements IKeyedSchema<Unwrap<TInner>, TKeyDef>
 {
-  public readonly __unwrapped!: TUnwrap;
+  public readonly __unwrapped!: Unwrap<TInner>;
   public readonly __keyDefinition!: TKeyDef;
-  public innerType: TUnwrap;
+  public innerType: TInner;
 
   constructor(
     public readonly key: TKeyDef,
-    innerResolver: (ref: ISchema<Ref<TKeyDef>, never>) => TUnwrap,
+    innerResolver: (ref: ISchema<Ref<TKeyDef>>) => TInner,
   ) {
     this.innerType = innerResolver(new RefSchema(key));
 
@@ -108,24 +109,24 @@ export class KeyedSchema<
     }
   }
 
-  read(input: ISerialInput): Parsed<TUnwrap> {
-    return this.innerType.read(input) as Parsed<TUnwrap>;
+  read(input: ISerialInput): ParseUnwrapped<TInner> {
+    return this.innerType.read(input) as ParseUnwrapped<TInner>;
   }
 
-  write(output: ISerialOutput, value: Parsed<TUnwrap>): void {
+  write(output: ISerialOutput, value: ParseUnwrapped<TInner>): void {
     this.innerType.write(output, value);
   }
 
   measure(
-    value: Parsed<TUnwrap> | typeof MaxValue,
+    value: ParseUnwrapped<TInner> | typeof MaxValue,
     measurer: IMeasurer = new Measurer(),
   ): IMeasurer {
     return this.innerType.measure(value, measurer);
   }
 
   seekProperty(
-    reference: Parsed<TUnwrap> | typeof MaxValue,
-    prop: keyof TUnwrap,
+    reference: ParseUnwrapped<TInner> | typeof MaxValue,
+    prop: keyof Unwrap<TInner>,
   ): PropertyDescription | null {
     return this.innerType.seekProperty(reference, prop as never);
   }

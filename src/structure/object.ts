@@ -4,7 +4,7 @@ import {
   type ISerialInput,
   type ISerialOutput,
 } from '../io';
-import { Parsed } from '../utilityTypes';
+import { ParseUnwrappedRecord, Parsed } from '../utilityTypes';
 import { byte, string } from './baseTypes';
 import {
   Schema,
@@ -13,9 +13,10 @@ import {
   MaxValue,
   AnySchema,
   AnySchemaWithProperties,
-  UnwrapOf,
   ISchema,
   PropertyDescription,
+  Unwrap,
+  UnwrapRecord,
 } from './types';
 import { SubTypeKey } from './types';
 
@@ -40,13 +41,13 @@ export function resolveMap<T extends Record<string, AnySchema>>(
 
 export type AnyObjectSchema = ObjectSchema<Record<string, AnySchema>>;
 
-export class ObjectSchema<TUnwrap extends Record<string, AnySchema>>
-  extends Schema<TUnwrap>
-  implements ISchemaWithProperties<TUnwrap>
+export class ObjectSchema<TProps extends Record<string, AnySchema>>
+  extends Schema<UnwrapRecord<TProps>>
+  implements ISchemaWithProperties<TProps>
 {
-  public properties: TUnwrap;
+  public properties: TProps;
 
-  constructor(private readonly _properties: TUnwrap) {
+  constructor(private readonly _properties: TProps) {
     super();
 
     // In case this object isn't part of a keyed chain,
@@ -58,33 +59,33 @@ export class ObjectSchema<TUnwrap extends Record<string, AnySchema>>
     this.properties = resolveMap(ctx, this._properties);
   }
 
-  write(output: ISerialOutput, value: Parsed<TUnwrap>): void {
-    type Property = keyof Parsed<TUnwrap>;
+  write(output: ISerialOutput, value: ParseUnwrappedRecord<TProps>): void {
+    type Property = keyof ParseUnwrappedRecord<TProps>;
 
     for (const [key, property] of exactEntries(this.properties)) {
       property.write(output, value[key as Property]);
     }
   }
 
-  read(input: ISerialInput): Parsed<TUnwrap> {
-    type Property = keyof Parsed<TUnwrap>;
+  read(input: ISerialInput): ParseUnwrappedRecord<TProps> {
+    type Property = keyof ParseUnwrappedRecord<TProps>;
 
-    const result = {} as Parsed<TUnwrap>;
+    const result = {} as ParseUnwrappedRecord<TProps>;
 
     for (const [key, property] of exactEntries(this.properties)) {
-      result[key as Property] = property.read(
-        input,
-      ) as Parsed<TUnwrap>[Property];
+      result[key as Property] = property.read(input) as Parsed<
+        UnwrapRecord<TProps>
+      >[Property];
     }
 
     return result;
   }
 
   measure(
-    value: Parsed<TUnwrap> | typeof MaxValue,
+    value: ParseUnwrappedRecord<TProps> | typeof MaxValue,
     measurer: IMeasurer = new Measurer(),
   ): IMeasurer {
-    type Property = keyof Parsed<TUnwrap>;
+    type Property = keyof ParseUnwrappedRecord<TProps>;
 
     for (const [key, property] of exactEntries(this.properties)) {
       property.measure(
@@ -97,8 +98,8 @@ export class ObjectSchema<TUnwrap extends Record<string, AnySchema>>
   }
 
   seekProperty(
-    reference: Parsed<TUnwrap> | MaxValue,
-    prop: keyof TUnwrap,
+    reference: ParseUnwrappedRecord<TProps> | MaxValue,
+    prop: keyof UnwrapRecord<TProps>,
   ): PropertyDescription | null {
     let bufferOffset = 0;
 
@@ -117,26 +118,16 @@ export class ObjectSchema<TUnwrap extends Record<string, AnySchema>>
   }
 }
 
-export type AsSubTypes<T> = {
-  [K in keyof T]: T[K] extends ISchemaWithProperties<infer P>
-    ? P & { type: K }
-    : never;
-}[keyof T];
-
-export type StabilizedMap<T> = {
-  [K in keyof T]: T[K] extends ISchemaWithProperties<infer P>
-    ? ObjectSchema<P>
-    : never;
-};
-
-type UnwrapOfGeneric<Base extends Record<string, AnySchema>, Ext> = {
-  [TKey in keyof Ext]: ISchema<Base & { type: TKey } & UnwrapOf<Ext[TKey]>>;
+type UnwrapGeneric<Base extends Record<string, AnySchema>, Ext> = {
+  [TKey in keyof Ext]: ISchema<
+    UnwrapRecord<Base> & { type: TKey } & UnwrapRecord<Unwrap<Ext[TKey]>>
+  >;
 }[keyof Ext];
 
 export class GenericObjectSchema<
   TUnwrapBase extends Record<string, AnySchema>, // Base properties
   TUnwrapExt extends Record<string, AnySchemaWithProperties>, // Sub type map
-> extends Schema<UnwrapOfGeneric<TUnwrapBase, TUnwrapExt>> {
+> extends Schema<UnwrapGeneric<TUnwrapBase, TUnwrapExt>> {
   private _baseObject: ObjectSchema<TUnwrapBase>;
   public subTypeMap: TUnwrapExt;
 
@@ -161,7 +152,7 @@ export class GenericObjectSchema<
 
   write(
     output: ISerialOutput,
-    value: Parsed<UnwrapOfGeneric<TUnwrapBase, TUnwrapExt>>,
+    value: Parsed<UnwrapGeneric<TUnwrapBase, TUnwrapExt>>,
   ): void {
     // Figuring out sub-types
 
@@ -183,7 +174,7 @@ export class GenericObjectSchema<
     }
 
     // Writing the base properties
-    this._baseObject.write(output, value as Parsed<TUnwrapBase>);
+    this._baseObject.write(output, value as ParseUnwrappedRecord<TUnwrapBase>);
 
     // Extra sub-type fields
     for (const [key, extraProp] of exactEntries(
@@ -193,7 +184,7 @@ export class GenericObjectSchema<
     }
   }
 
-  read(input: ISerialInput): Parsed<UnwrapOfGeneric<TUnwrapBase, TUnwrapExt>> {
+  read(input: ISerialInput): Parsed<UnwrapGeneric<TUnwrapBase, TUnwrapExt>> {
     const subTypeKey =
       this.keyedBy === SubTypeKey.ENUM ? input.readByte() : input.readString();
 
@@ -208,7 +199,7 @@ export class GenericObjectSchema<
     }
 
     const result = this._baseObject.read(input) as Parsed<
-      UnwrapOfGeneric<TUnwrapBase, TUnwrapExt>
+      UnwrapGeneric<TUnwrapBase, TUnwrapExt>
     >;
 
     // Making the sub type key available to the result object.
@@ -228,10 +219,13 @@ export class GenericObjectSchema<
   }
 
   measure(
-    value: Parsed<UnwrapOfGeneric<TUnwrapBase, TUnwrapExt>> | MaxValue,
+    value: Parsed<UnwrapGeneric<TUnwrapBase, TUnwrapExt>> | MaxValue,
     measurer: IMeasurer = new Measurer(),
   ): IMeasurer {
-    this._baseObject.measure(value as Parsed<TUnwrapBase> | MaxValue, measurer);
+    this._baseObject.measure(
+      value as Parsed<UnwrapRecord<TUnwrapBase>> | MaxValue,
+      measurer,
+    );
 
     // We're a generic object trying to encode a concrete value.
     if (this.keyedBy === SubTypeKey.ENUM) {

@@ -7,7 +7,7 @@ import {
   ISchema,
   Ref,
   AnySchema,
-  UnwrapOf,
+  Unwrap,
   AnySchemaWithProperties,
 } from '../structure/types';
 import { KeyedSchema } from '../structure/keyed';
@@ -47,15 +47,15 @@ export const tupleOf = <TSchema extends AnySchema>(
 export const optional = <TSchema extends AnySchema>(innerType: TSchema) =>
   new OptionalSchema(innerType);
 
-export const keyed = <K extends string, P extends ISchema<unknown, never>>(
+export const keyed = <K extends string, P extends ISchema<unknown>>(
   key: K,
-  inner: (ref: ISchema<Ref<K>, never>) => P,
+  inner: (ref: ISchema<Ref<K>>) => P,
 ) => new KeyedSchema(key, inner);
 
 export const concat = <Objs extends AnyObjectSchema[]>(objs: Objs) => {
   return new ObjectSchema(
     Object.fromEntries(
       objs.map(({ properties }) => Object.entries(properties)).flat(),
-    ) as unknown as MergeRecordUnion<UnwrapOf<Objs[number]>>,
+    ) as unknown as MergeRecordUnion<Unwrap<Objs[number]>>,
   );
 };
