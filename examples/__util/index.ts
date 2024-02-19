@@ -1,10 +1,13 @@
-import { BufferWriter, BufferReader, Schema } from 'typed-binary';
+import { BufferWriter, BufferReader, AnySchema, Parsed } from 'typed-binary';
 
-export function writeAndRead<T>(schema: Schema<T>, value: T) {
-    const buffer = Buffer.alloc(schema.sizeOf(value));
-    const writer = new BufferWriter(buffer);
-    const reader = new BufferReader(buffer);
+export function writeAndRead<TSchema extends AnySchema>(
+  schema: TSchema,
+  value: Parsed<TSchema>,
+) {
+  const buffer = Buffer.alloc(schema.measure(value).size);
+  const writer = new BufferWriter(buffer);
+  const reader = new BufferReader(buffer);
 
-    schema.write(writer, value);
-    return schema.read(reader);
+  schema.write(writer, value);
+  return schema.read(reader);
 }

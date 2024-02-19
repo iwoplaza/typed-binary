@@ -1,5 +1,5 @@
 import { BufferReader, BufferWriter } from '../../io';
-import { ISchema } from '../../structure/types';
+import { AnySchema } from '../../structure/types';
 import { Parsed } from '../../utilityTypes';
 
 export function makeIO(bufferSize: number) {
@@ -10,7 +10,7 @@ export function makeIO(bufferSize: number) {
   };
 }
 
-export function encodeAndDecode<T extends ISchema<unknown>>(
+export function encodeAndDecode<T extends AnySchema>(
   schema: T,
   value: Parsed<T>,
 ): Parsed<T> {

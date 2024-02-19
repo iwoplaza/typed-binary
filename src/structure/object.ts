@@ -4,14 +4,18 @@ import {
   type ISerialInput,
   type ISerialOutput,
 } from '../io';
+import { Parsed } from '../utilityTypes';
 import { byte, string } from './baseTypes';
 import {
   Schema,
   IRefResolver,
   ISchemaWithProperties,
-  SchemaMap,
-  StableSchemaMap,
   MaxValue,
+  AnySchema,
+  AnySchemaWithProperties,
+  UnwrapOf,
+  ISchema,
+  PropertyDescription,
 } from './types';
 import { SubTypeKey } from './types';
 
@@ -21,18 +25,11 @@ export function exactEntries<T extends Record<keyof T, T[keyof T]>>(
   return Object.entries(record) as [keyof T, T[keyof T]][];
 }
 
-export function resolveMap<
-  T extends { [K in keyof T]: ISchemaWithProperties<Record<string, unknown>> },
->(ctx: IRefResolver, refs: T): StabilizedMap<T>;
-export function resolveMap<T>(
+export function resolveMap<T extends Record<string, AnySchema>>(
   ctx: IRefResolver,
-  refs: SchemaMap<T>,
-): StableSchemaMap<T>;
-export function resolveMap<T>(
-  ctx: IRefResolver,
-  refs: SchemaMap<T>,
-): StableSchemaMap<T> {
-  const props = {} as StableSchemaMap<T>;
+  refs: T,
+): T {
+  const props = {} as T;
 
   for (const [key, ref] of exactEntries(refs)) {
     props[key] = ctx.resolve(ref);
@@ -41,53 +38,82 @@ export function resolveMap<T>(
   return props;
 }
 
-export type StableObjectSchemaMap<
-  T extends Record<string, Record<string, unknown>>,
-> = { [key in keyof T]: ObjectSchema<T[key]> };
+export type AnyObjectSchema = ObjectSchema<Record<string, AnySchema>>;
 
-export class ObjectSchema<T extends { [key: string]: unknown }>
-  extends Schema<T>
-  implements ISchemaWithProperties<T>
+export class ObjectSchema<TUnwrap extends Record<string, AnySchema>>
+  extends Schema<TUnwrap>
+  implements ISchemaWithProperties<TUnwrap>
 {
-  public properties: StableSchemaMap<T>;
+  public properties: TUnwrap;
 
-  constructor(private readonly _properties: SchemaMap<T>) {
+  constructor(private readonly _properties: TUnwrap) {
     super();
 
     // In case this object isn't part of a keyed chain,
     // let's assume properties are stable.
-    this.properties = _properties as StableSchemaMap<T>;
+    this.properties = _properties;
   }
 
   resolve(ctx: IRefResolver): void {
     this.properties = resolveMap(ctx, this._properties);
   }
 
-  write<I extends T>(output: ISerialOutput, value: I): void {
+  write(output: ISerialOutput, value: Parsed<TUnwrap>): void {
+    type Property = keyof Parsed<TUnwrap>;
+
     for (const [key, property] of exactEntries(this.properties)) {
-      property.write(output, value[key]);
+      property.write(output, value[key as Property]);
     }
   }
 
-  read(input: ISerialInput): T {
-    const result = {} as T;
+  read(input: ISerialInput): Parsed<TUnwrap> {
+    type Property = keyof Parsed<TUnwrap>;
+
+    const result = {} as Parsed<TUnwrap>;
 
     for (const [key, property] of exactEntries(this.properties)) {
-      result[key] = property.read(input);
+      result[key as Property] = property.read(
+        input,
+      ) as Parsed<TUnwrap>[Property];
     }
 
     return result;
   }
 
   measure(
-    value: T | typeof MaxValue,
+    value: Parsed<TUnwrap> | typeof MaxValue,
     measurer: IMeasurer = new Measurer(),
   ): IMeasurer {
+    type Property = keyof Parsed<TUnwrap>;
+
     for (const [key, property] of exactEntries(this.properties)) {
-      property.measure(value === MaxValue ? MaxValue : value[key], measurer);
+      property.measure(
+        value === MaxValue ? MaxValue : value[key as Property],
+        measurer,
+      );
     }
 
     return measurer;
+  }
+
+  seekProperty(
+    reference: Parsed<TUnwrap> | MaxValue,
+    prop: keyof TUnwrap,
+  ): PropertyDescription | null {
+    let bufferOffset = 0;
+
+    for (const [key, property] of exactEntries(this.properties)) {
+      if (key === prop) {
+        return {
+          bufferOffset,
+          schema: property,
+        };
+      }
+
+      bufferOffset += property.measure(reference).size;
+    }
+
+    return null;
   }
 }
 
@@ -96,29 +122,28 @@ export type AsSubTypes<T> = {
     ? P & { type: K }
     : never;
 }[keyof T];
+
 export type StabilizedMap<T> = {
   [K in keyof T]: T[K] extends ISchemaWithProperties<infer P>
     ? ObjectSchema<P>
     : never;
 };
 
-type GenericInfered<T, E> = T extends Record<string, never>
-  ? AsSubTypes<E>
-  : T & AsSubTypes<E>;
+type UnwrapOfGeneric<Base extends Record<string, AnySchema>, Ext> = {
+  [TKey in keyof Ext]: ISchema<Base & { type: TKey } & UnwrapOf<Ext[TKey]>>;
+}[keyof Ext];
 
 export class GenericObjectSchema<
-  T extends Record<string, unknown>, // Base properties
-  E extends {
-    [key in keyof E]: ISchemaWithProperties<Record<string, unknown>>;
-  }, // Sub type map
-> extends Schema<GenericInfered<T, E>> {
-  private _baseObject: ObjectSchema<T>;
-  public subTypeMap: StabilizedMap<E>;
+  TUnwrapBase extends Record<string, AnySchema>, // Base properties
+  TUnwrapExt extends Record<string, AnySchemaWithProperties>, // Sub type map
+> extends Schema<UnwrapOfGeneric<TUnwrapBase, TUnwrapExt>> {
+  private _baseObject: ObjectSchema<TUnwrapBase>;
+  public subTypeMap: TUnwrapExt;
 
   constructor(
     public readonly keyedBy: SubTypeKey,
-    properties: SchemaMap<T>,
-    private readonly _subTypeMap: E,
+    properties: TUnwrapBase,
+    private readonly _subTypeMap: TUnwrapExt,
   ) {
     super();
 
@@ -126,7 +151,7 @@ export class GenericObjectSchema<
 
     // In case this object isn't part of a keyed chain,
     // let's assume sub types are stable.
-    this.subTypeMap = _subTypeMap as unknown as typeof this.subTypeMap;
+    this.subTypeMap = _subTypeMap;
   }
 
   resolve(ctx: IRefResolver): void {
@@ -134,13 +159,17 @@ export class GenericObjectSchema<
     this.subTypeMap = resolveMap(ctx, this._subTypeMap);
   }
 
-  write(output: ISerialOutput, value: GenericInfered<T, E>): void {
+  write(
+    output: ISerialOutput,
+    value: Parsed<UnwrapOfGeneric<TUnwrapBase, TUnwrapExt>>,
+  ): void {
     // Figuring out sub-types
 
-    const subTypeDescription = this.subTypeMap[value.type] || null;
+    const subTypeKey = value.type as keyof TUnwrapExt;
+    const subTypeDescription = this.subTypeMap[subTypeKey] || null;
     if (subTypeDescription === null) {
       throw new Error(
-        `Unknown sub-type '${value.type.toString()}' in among '${JSON.stringify(
+        `Unknown sub-type '${subTypeKey.toString()}' in among '${JSON.stringify(
           Object.keys(this.subTypeMap),
         )}'`,
       );
@@ -154,7 +183,7 @@ export class GenericObjectSchema<
     }
 
     // Writing the base properties
-    this._baseObject.write(output, value as T);
+    this._baseObject.write(output, value as Parsed<TUnwrapBase>);
 
     // Extra sub-type fields
     for (const [key, extraProp] of exactEntries(
@@ -164,11 +193,12 @@ export class GenericObjectSchema<
     }
   }
 
-  read(input: ISerialInput): GenericInfered<T, E> {
+  read(input: ISerialInput): Parsed<UnwrapOfGeneric<TUnwrapBase, TUnwrapExt>> {
     const subTypeKey =
       this.keyedBy === SubTypeKey.ENUM ? input.readByte() : input.readString();
 
-    const subTypeDescription = this.subTypeMap[subTypeKey as keyof E] || null;
+    const subTypeDescription =
+      this.subTypeMap[subTypeKey as keyof TUnwrapExt] || null;
     if (subTypeDescription === null) {
       throw new Error(
         `Unknown sub-type '${subTypeKey}' in among '${JSON.stringify(
@@ -177,10 +207,13 @@ export class GenericObjectSchema<
       );
     }
 
-    const result = this._baseObject.read(input) as GenericInfered<T, E>;
+    const result = this._baseObject.read(input) as Parsed<
+      UnwrapOfGeneric<TUnwrapBase, TUnwrapExt>
+    >;
 
     // Making the sub type key available to the result object.
-    result.type = subTypeKey as keyof E;
+    (result as { type: keyof TUnwrapExt }).type =
+      subTypeKey as keyof TUnwrapExt;
 
     if (subTypeDescription !== null) {
       for (const [key, extraProp] of exactEntries(
@@ -195,10 +228,10 @@ export class GenericObjectSchema<
   }
 
   measure(
-    value: GenericInfered<T, E> | MaxValue,
+    value: Parsed<UnwrapOfGeneric<TUnwrapBase, TUnwrapExt>> | MaxValue,
     measurer: IMeasurer = new Measurer(),
   ): IMeasurer {
-    this._baseObject.measure(value as T | MaxValue, measurer);
+    this._baseObject.measure(value as Parsed<TUnwrapBase> | MaxValue, measurer);
 
     // We're a generic object trying to encode a concrete value.
     if (this.keyedBy === SubTypeKey.ENUM) {
@@ -212,7 +245,9 @@ export class GenericObjectSchema<
 
     // Extra sub-type fields
     if (value === MaxValue) {
-      const biggestSubType = (Object.values(this.subTypeMap) as E[keyof E][])
+      const biggestSubType = (
+        Object.values(this.subTypeMap) as TUnwrapExt[keyof TUnwrapExt][]
+      )
         .map((subType) => {
           const forkedMeasurer = measurer.fork();
 
@@ -227,10 +262,11 @@ export class GenericObjectSchema<
       Object.values(biggestSubType.properties) // Going through extra properties
         .forEach((prop) => prop.measure(MaxValue, measurer));
     } else {
-      const subTypeDescription = this.subTypeMap[value.type] || null;
+      const subTypeKey = (value as { type: keyof TUnwrapExt }).type;
+      const subTypeDescription = this.subTypeMap[subTypeKey] || null;
       if (subTypeDescription === null) {
         throw new Error(
-          `Unknown sub-type '${value.type.toString()}', expected one of '${JSON.stringify(
+          `Unknown sub-type '${subTypeKey.toString()}', expected one of '${JSON.stringify(
             Object.keys(this.subTypeMap),
           )}'`,
         );
