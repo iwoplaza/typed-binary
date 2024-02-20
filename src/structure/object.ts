@@ -17,8 +17,8 @@ import {
   PropertyDescription,
   Unwrap,
   UnwrapRecord,
+  SubTypeKey,
 } from './types';
-import { SubTypeKey } from './types';
 
 export function exactEntries<T extends Record<keyof T, T[keyof T]>>(
   record: T,

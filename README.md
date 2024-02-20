@@ -29,7 +29,8 @@ The feature I am most proud of would have to be [recursive types](#recursive-typ
   - [Primitives](#primitives)
   - [Objects](#objects)
   - [Arrays](#arrays)
-  - [Tuples](#tuples)
+  - [Dynamic Arrays](#dynamic-arrays)
+  - [Tuple](#tuple)
   - [Optionals](#optionals)
   - [Recursive types](#recursive-types)
 - [Custom schema types](#custom-schema-types)
@@ -65,13 +66,20 @@ To properly enable type inference, **TypeScript 4.5** and up is required because
 # Basic usage
 
 ```ts
-import { Parsed, object, arrayOf, i32, string, bool } from 'typed-binary';
+import {
+  Parsed,
+  object,
+  dynamicArrayOf,
+  i32,
+  string,
+  bool,
+} from 'typed-binary';
 
 const GameState = object({
   nickname: string, // Variable-length string
   stage: i32, // 32-bit integer
   newGamePlus: bool, // byte-encoded boolean
-  collectables: arrayOf(string), // Variable-length string array
+  collectables: dynamicArrayOf(string), // Variable-length string array
   powerUpgrades: object({
     // Nested object
     health: bool,
@@ -321,24 +329,38 @@ else {
 
 ## Arrays
 
+The items are encoded right next to each other. No need to store length information, as that's constant (built into the schema).
+
+```ts
+import { f32, arrayOf } from 'typed-binary';
+
+const Vector2 = arrayOf(f32, 2);
+const Vector3 = arrayOf(f32, 3);
+const Vector4 = arrayOf(f32, 4);
+```
+
+## Dynamic Arrays
+
 First 4 bytes of encoding are the length of the array, then it's items next to one another.
 
+```ts
+import { i32, dynamicArrayOf } from 'typed-binary';
+
+const IntArray = dynamicArrayOf(i32);
 ```
-import { i32, arrayOf } from 'typed-binary';
 
-const IntArray = arrayOf(i32);
-```
+## Tuple
 
-## Tuples
+Encodes an ordered set of schemas, one next to another.
 
-The items are encoded right next to each other. No need to store length information, as that's constant (built into the tuple).
+```ts
+import { f32, string, tupleOf } from 'typed-binary';
 
-```
-import { f32, tupleOf } from 'typed-binary';
+const Vec3f = tupleOf([f32, f32, f32]);
+type Vec3f = Parsed<typeof Vec3f>; // [number, number, number]
 
-const Vector2 = tupleOf(f32, 2);
-const Vector3 = tupleOf(f32, 3);
-const Vector4 = tupleOf(f32, 4);
+const RecordEntry = tupleOf([string, Vec3f]);
+type RecordEntry = Parsed<typeof RecordEntry>; // [string, [number, number, number]]
 ```
 
 ## Optionals

@@ -1,9 +1,8 @@
-import * as chai from 'chai';
+import { describe, it, expect } from 'vitest';
+
 import { randIntBetween } from './random';
 import { i32, u32 } from '../structure';
 import { encodeAndDecode } from './helpers/mock';
-
-const expect = chai.expect;
 
 describe('Int32Schema', () => {
   it('should encode and decode an int value', () => {

@@ -85,7 +85,7 @@ class RefResolve implements IRefResolver {
 export class KeyedSchema<
   TInner extends ISchema<unknown>,
   TKeyDef extends string,
-> implements IKeyedSchema<Unwrap<TInner>, TKeyDef>
+> implements IKeyedSchema<TKeyDef, Unwrap<TInner>>
 {
   public readonly __unwrapped!: Unwrap<TInner>;
   public readonly __keyDefinition!: TKeyDef;

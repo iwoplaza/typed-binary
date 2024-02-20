@@ -6,10 +6,12 @@ export const MaxValue = Symbol(
   'The biggest (in amount of bytes needed) value a schema can represent',
 );
 
-export interface IKeyedSchema<TUnwrap, TKeyDef extends string = string>
-  extends ISchema<TUnwrap> {
+export interface IKeyedSchema<TKeyDef extends string, TUnwrapped>
+  extends ISchema<TUnwrapped> {
   readonly __keyDefinition: TKeyDef;
 }
+
+export type AnyKeyedSchema = IKeyedSchema<string, unknown>;
 
 /**
  * Removes one layer of schema wrapping.
@@ -22,12 +24,12 @@ export interface IKeyedSchema<TUnwrap, TKeyDef extends string = string>
  * Keyed schemas are bypassed.
  *
  * @example ```
- * Unwrap<IKeyedSchema<ISchema<number>>> -> IKeyedSchema<number>
+ * Unwrap<IKeyedSchema<'abc', ISchema<number>>> -> IKeyedSchema<'abc', number>
  * ```
  */
-export type Unwrap<T> = T extends IKeyedSchema<infer TInner, infer TKeyDef>
+export type Unwrap<T> = T extends IKeyedSchema<infer TKeyDef, infer TInner>
   ? // bypassing keyed schemas, as that information has to be preserved for parsing
-    IKeyedSchema<Unwrap<TInner>, TKeyDef>
+    IKeyedSchema<TKeyDef, Unwrap<TInner>>
   : T extends ISchema<infer TInner>
   ? TInner
   : T;
@@ -48,12 +50,34 @@ export type Unwrap<T> = T extends IKeyedSchema<infer TInner, infer TKeyDef>
  * ```
  */
 export type UnwrapRecord<T> = T extends IKeyedSchema<
-  Record<infer K, any>,
-  infer TKeyDef
+  infer TKeyDef,
+  Record<infer K, any>
 >
-  ? IKeyedSchema<{ [key in K]: Unwrap<T['__unwrapped'][key]> }, TKeyDef>
+  ? IKeyedSchema<TKeyDef, { [key in K]: Unwrap<T['__unwrapped'][key]> }>
   : T extends Record<infer K, any>
   ? { [key in K]: Unwrap<T[key]> }
+  : T;
+
+/* helper type for UnwrapArray */
+type __UnwrapArray<T> = T extends any[]
+  ? {
+      [key in keyof T]: Unwrap<T[key]>;
+    }
+  : never;
+
+/**
+ * Removes one layer of schema wrapping of array elements.
+ *
+ * @example ```
+ * Unwrap<[a: ISchema<number>, b: ISchema<ISchema<string>>]>
+ * // <=>
+ * [a: number, b: ISchema<string>]
+ * ```
+ */
+export type UnwrapArray<T> = T extends IKeyedSchema<infer TKeyDef, any[]>
+  ? IKeyedSchema<TKeyDef, __UnwrapArray<T['__unwrapped']>>
+  : T extends any[]
+  ? __UnwrapArray<T>
   : T;
 
 export interface ISchemaWithProperties<TProps extends Record<string, AnySchema>>

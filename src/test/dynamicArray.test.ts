@@ -1,15 +1,13 @@
-import * as chai from 'chai';
+import { describe, it, expect } from 'vitest';
 
-import { ArraySchema, i32, MaxValue } from '../structure';
-import { arrayOf } from '../describe';
+import { i32, MaxValue, DynamicArraySchema } from '../structure';
+import { dynamicArrayOf } from '../describe';
 import { randIntBetween } from './random';
 import { makeIO } from './helpers/mock';
 
-const expect = chai.expect;
-
-describe('ArraySchema', () => {
+describe('DynamicArraySchema', () => {
   it('should estimate an int-array encoding size', () => {
-    const IntArray = arrayOf(i32);
+    const IntArray = dynamicArrayOf(i32);
 
     const length = randIntBetween(0, 200);
     const values = [];
@@ -23,7 +21,7 @@ describe('ArraySchema', () => {
   });
 
   it('should fail to estimate size of max value', () => {
-    const IntArray = arrayOf(i32);
+    const IntArray = dynamicArrayOf(i32);
 
     expect(IntArray.measure(MaxValue).isUnbounded).to.be.true;
   });
@@ -35,7 +33,7 @@ describe('ArraySchema', () => {
       value.push(randIntBetween(-10000, 10000));
     }
 
-    const description = new ArraySchema(i32);
+    const description = new DynamicArraySchema(i32);
 
     const { output, input } = makeIO(length * 4 + 4); // Extra 4 bytes for the length of the array
     description.write(output, value);

@@ -1,8 +1,8 @@
-import * as chai from 'chai';
+import { describe, it, expect } from 'vitest';
+
 import { bool } from '../structure';
 import { encodeAndDecode } from './helpers/mock';
 
-const expect = chai.expect;
 describe('BoolSchema', () => {
   it('should encode and decode a bool value', () => {
     const value = Math.random() < 0.5;

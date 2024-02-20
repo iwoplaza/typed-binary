@@ -1,9 +1,8 @@
-import * as chai from 'chai';
+import { describe, it, expect } from 'vitest';
+
 import { randIntBetween } from './random';
 import { encodeAndDecode } from './helpers/mock';
 import { CharsSchema } from '../structure';
-
-const expect = chai.expect;
 
 describe('CharsSchema', () => {
   it('should encode and decode fixed-size char array', () => {

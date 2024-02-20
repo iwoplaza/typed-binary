@@ -1,16 +1,15 @@
-import * as chai from 'chai';
+import { describe, it, expect, beforeAll, afterAll } from 'vitest';
+
 import { createServer } from 'http';
 import { type AddressInfo } from 'net';
 import { Server, Socket as ServerSocket } from 'socket.io';
 import { Socket as ClientSocket, io as ioClient } from 'socket.io-client';
 
-import { arrayOf, object } from '../describe';
+import { dynamicArrayOf, object } from '../describe';
 import { byte, string, u32 } from '../structure';
 import { BufferReader, BufferWriter } from '../io';
 import { AnySchema } from '../structure/types';
 import { Parsed } from '../utilityTypes';
-
-const expect = chai.expect;
 
 function waitFor(socket: ServerSocket | ClientSocket, event = 'message') {
   return new Promise<Buffer>((resolve) => {
@@ -21,21 +20,24 @@ function waitFor(socket: ServerSocket | ClientSocket, event = 'message') {
 describe('Socket IO Usage', () => {
   let io: Server, serverSocket: ServerSocket, clientSocket: ClientSocket;
 
-  before((done) => {
-    const httpServer = createServer();
-    io = new Server(httpServer);
+  beforeAll(
+    () =>
+      new Promise((resolve) => {
+        const httpServer = createServer();
+        io = new Server(httpServer);
 
-    httpServer.listen(() => {
-      const port = (httpServer.address() as AddressInfo).port;
-      clientSocket = ioClient(`http://localhost:${port}`);
+        httpServer.listen(() => {
+          const port = (httpServer.address() as AddressInfo).port;
+          clientSocket = ioClient(`http://localhost:${port}`);
 
-      io.on('connection', (socket) => {
-        serverSocket = socket;
-      });
+          io.on('connection', (socket) => {
+            serverSocket = socket;
+          });
 
-      clientSocket.on('connect', done);
-    });
-  });
+          clientSocket.on('connect', resolve);
+        });
+      }),
+  );
 
   async function sendAndReceive<TSchema extends AnySchema>(
     direction: 'server-to-client' | 'client-to-server',
@@ -57,13 +59,13 @@ describe('Socket IO Usage', () => {
     expect(response).to.deep.equal(value);
   }
 
-  after(() => {
+  afterAll(() => {
     io.close();
     clientSocket.disconnect();
   });
 
   it('should send a byte array successfully', async () => {
-    const schema = arrayOf(byte);
+    const schema = dynamicArrayOf(byte);
 
     await sendAndReceive('server-to-client', schema, [1, 2, 254, 255]);
   });

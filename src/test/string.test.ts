@@ -1,9 +1,8 @@
-import * as chai from 'chai';
+import { describe, it, expect } from 'vitest';
 import { randIntBetween } from './random';
 import { string } from '../structure';
 import { encodeAndDecode } from './helpers/mock';
 
-const expect = chai.expect;
 describe('StringSchema', () => {
   it('should encode and decode an empty string value', () => {
     const decoded = encodeAndDecode(string, '');

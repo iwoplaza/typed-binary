@@ -1,9 +1,8 @@
-import * as chai from 'chai';
+import { describe, it, expect } from 'vitest';
 import { BufferWriter } from './bufferWriter';
 import { BufferReader } from './bufferReader';
 import { randBetween, randIntBetween } from '../test/random';
 
-const expect = chai.expect;
 describe('BufferWriter/BufferReader', () => {
   it('should encode and decode int sequence', () => {
     // Generating random int sequence

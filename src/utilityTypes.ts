@@ -45,27 +45,26 @@ export type Filter<T, U> = T extends U ? T : never;
 
 export type Parsed<
   T,
-  /** type key dictionary */
+  /** type key dictionary, gets populated during recursive parsing */
   TKeyDict extends { [key in keyof TKeyDict]: TKeyDict[key] } = Record<
     string,
     never
   >,
-> = T extends IKeyedSchema<infer TUnwrapped, infer TKeyDefinition>
+> = T extends IKeyedSchema<infer TKeyDefinition, infer TUnwrapped>
   ? // A schema that defines themselves under a key in the dictionary
-    Parsed<TUnwrapped, TKeyDict & { [key in TKeyDefinition]: T }>
+    Parsed<TUnwrapped, TKeyDict & { [key in TKeyDefinition]: Unwrap<T> }>
   : T extends ISchema<infer TUnwrapped>
   ? // A non-keyed schema
     Parsed<TUnwrapped, TKeyDict>
   : // A reference to a keyed schema
   T extends Ref<infer K>
   ? K extends keyof TKeyDict
-    ? Parsed<Unwrap<TKeyDict[K]>, TKeyDict>
+    ? Parsed<TKeyDict[K], TKeyDict>
     : never
-  : // Compound types
-  T extends Record<string, unknown>
+  : T extends Record<string, unknown>
   ? { [K in keyof T]: Parsed<T[K], TKeyDict> }
-  : T extends (infer E)[]
-  ? Parsed<E, TKeyDict>[]
+  : T extends unknown[]
+  ? { [K in keyof T]: Parsed<T[K], TKeyDict> }
   : T;
 
 export type ParseUnwrapped<T> = Parsed<Unwrap<T>>;

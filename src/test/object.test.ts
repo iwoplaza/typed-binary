@@ -1,10 +1,9 @@
-import * as chai from 'chai';
+import { describe, it, expect } from 'vitest';
+
 import { encodeAndDecode, makeIO } from './helpers/mock';
 import { concat, generic, genericEnum, object, optional } from '../describe';
 import { byte, i32, string, MaxValue } from '../structure';
 import { Parsed } from '../utilityTypes';
-
-const expect = chai.expect;
 
 describe('ObjectSchema', () => {
   it('should properly estimate size of max value', () => {

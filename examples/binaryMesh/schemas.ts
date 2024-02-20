@@ -1,5 +1,5 @@
 import { Parsed } from 'typed-binary';
-import { object, arrayOf, tupleOf, i32 } from 'typed-binary';
+import { object, dynamicArrayOf, arrayOf, i32 } from 'typed-binary';
 
 export const Vertex = object({
   x: i32,
@@ -8,11 +8,11 @@ export const Vertex = object({
 });
 
 export const Polygon = object({
-  vertices: tupleOf(Vertex, 3),
+  vertices: arrayOf(Vertex, 3),
 });
 
 export const Mesh = object({
-  faces: arrayOf(Polygon),
+  faces: dynamicArrayOf(Polygon),
 });
 
 // Helpful for the top-most level element
