@@ -4,7 +4,7 @@ import {
   type ISerialInput,
   type ISerialOutput,
 } from '../io';
-import { TypedBinaryError } from '../error';
+import { ValidationError } from '../error';
 import { Schema } from './types';
 
 export class CharsSchema extends Schema<string> {
@@ -14,7 +14,7 @@ export class CharsSchema extends Schema<string> {
 
   write(output: ISerialOutput, value: string): void {
     if (value.length !== this.length) {
-      throw new TypedBinaryError(
+      throw new ValidationError(
         `Expected char-string of length ${this.length}, got ${value.length}`,
       );
     }

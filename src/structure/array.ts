@@ -1,4 +1,4 @@
-import { TypedBinaryError } from '../error';
+import { ValidationError } from '../error';
 import {
   Measurer,
   type IMeasurer,
@@ -30,7 +30,7 @@ export class ArraySchema<TElement extends AnySchema> extends Schema<
 
   write(output: ISerialOutput, values: ParseUnwrapped<TElement>[]): void {
     if (values.length !== this.length) {
-      throw new TypedBinaryError(
+      throw new ValidationError(
         `Expected array of length ${this.length}, got ${values.length}`,
       );
     }

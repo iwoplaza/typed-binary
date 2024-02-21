@@ -1,4 +1,4 @@
-import { TypedBinaryError } from '../error';
+import { ValidationError } from '../error';
 import {
   Measurer,
   type IMeasurer,
@@ -40,7 +40,7 @@ export class TupleSchema<
 
   write(output: ISerialOutput, values: Parsed<UnwrapArray<TSequence>>): void {
     if (values.length !== this.schemas.length) {
-      throw new TypedBinaryError(
+      throw new ValidationError(
         `Expected tuple of length ${this.schemas.length}, got ${values.length}`,
       );
     }

@@ -1,4 +1,4 @@
-import { TypedBinaryError } from '../error';
+import { UnresolvedReferenceError } from '../error';
 import { IMeasurer, ISerialInput, ISerialOutput, Measurer } from '../io';
 import { ParseUnwrapped, Parsed } from '../utilityTypes';
 import {
@@ -21,31 +21,31 @@ class RefSchema<TKeyDef extends string> implements ISchema<Ref<TKeyDef>> {
   }
 
   resolve(): void {
-    throw new TypedBinaryError(
+    throw new UnresolvedReferenceError(
       `Tried to resolve a reference directly. Do it through a RefResolver instead.`,
     );
   }
 
   read(): Parsed<Ref<TKeyDef>> {
-    throw new TypedBinaryError(
+    throw new UnresolvedReferenceError(
       `Tried to read a reference directly. Resolve it instead.`,
     );
   }
 
   write(): void {
-    throw new TypedBinaryError(
+    throw new UnresolvedReferenceError(
       `Tried to write a reference directly. Resolve it instead.`,
     );
   }
 
   measure(): IMeasurer {
-    throw new TypedBinaryError(
+    throw new UnresolvedReferenceError(
       `Tried to measure size of a reference directly. Resolve it instead.`,
     );
   }
 
   seekProperty(): PropertyDescription | null {
-    throw new TypedBinaryError(
+    throw new UnresolvedReferenceError(
       `Tried to seek property of a reference directly. Resolve it instead.`,
     );
   }
@@ -70,7 +70,7 @@ class RefResolve implements IRefResolver {
         return this.registry[key] as TSchema;
       }
 
-      throw new TypedBinaryError(
+      throw new UnresolvedReferenceError(
         `Couldn't resolve reference to ${key}. Unknown key.`,
       );
     }
