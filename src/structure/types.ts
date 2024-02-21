@@ -100,7 +100,7 @@ export type PropertyDescription = {
 export interface ISchema<TUnwrapped> {
   readonly __unwrapped: TUnwrapped;
 
-  resolve(ctx: IRefResolver): void;
+  resolveReferences(ctx: IRefResolver): void;
   write(output: ISerialOutput, value: Parsed<TUnwrapped>): void;
   read(input: ISerialInput): Parsed<TUnwrapped>;
   measure(
@@ -119,7 +119,7 @@ export abstract class Schema<TUnwrapped> implements ISchema<TUnwrapped> {
   readonly __unwrapped!: TUnwrapped;
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  resolve(ctx: IRefResolver): void {
+  resolveReferences(ctx: IRefResolver): void {
     // override this if you need to resolve internal references.
   }
   abstract write(output: ISerialOutput, value: Parsed<TUnwrapped>): void;

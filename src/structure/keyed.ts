@@ -20,7 +20,7 @@ class RefSchema<TKeyDef extends string> implements ISchema<Ref<TKeyDef>> {
     this.ref = new Ref(key);
   }
 
-  resolve(): void {
+  resolveReferences(): void {
     throw new UnresolvedReferenceError(
       `Tried to resolve a reference directly. Do it through a RefResolver instead.`,
     );
@@ -76,7 +76,7 @@ class RefResolve implements IRefResolver {
     }
 
     // Since it's not a RefSchema, we assume it can be resolved.
-    unstableSchema.resolve(this);
+    unstableSchema.resolveReferences(this);
 
     return unstableSchema;
   }
@@ -98,14 +98,14 @@ export class KeyedSchema<
     this.innerType = innerResolver(new RefSchema(key));
 
     // Automatically resolving after keyed creation.
-    this.resolve(new RefResolve());
+    this.resolveReferences(new RefResolve());
   }
 
-  resolve(ctx: IRefResolver): void {
+  resolveReferences(ctx: IRefResolver): void {
     if (!ctx.hasKey(this.key)) {
       ctx.register(this.key, this.innerType);
 
-      this.innerType.resolve(ctx);
+      this.innerType.resolveReferences(ctx);
     }
   }
 
