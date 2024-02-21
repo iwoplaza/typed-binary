@@ -28,7 +28,7 @@ export class DynamicArraySchema<TElement extends AnySchema> extends Schema<
     this.elementType = _unstableElementType;
   }
 
-  resolve(ctx: IRefResolver): void {
+  resolveReferences(ctx: IRefResolver): void {
     this.elementType = ctx.resolve(this._unstableElementType);
   }
 

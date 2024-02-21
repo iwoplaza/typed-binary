@@ -12,7 +12,7 @@ import {
  * A schema storing radians with 2 bytes of precision.
  */
 class RadiansSchema extends Schema<number> {
-  resolve(ctx: IRefResolver): void {
+  resolveReferences(ctx: IRefResolver): void {
     // No inner references to resolve
   }
 

@@ -55,7 +55,7 @@ export class ObjectSchema<TProps extends Record<string, AnySchema>>
     this.properties = _properties;
   }
 
-  resolve(ctx: IRefResolver): void {
+  resolveReferences(ctx: IRefResolver): void {
     this.properties = resolveMap(ctx, this._properties);
   }
 
@@ -145,8 +145,8 @@ export class GenericObjectSchema<
     this.subTypeMap = _subTypeMap;
   }
 
-  resolve(ctx: IRefResolver): void {
-    this._baseObject.resolve(ctx);
+  resolveReferences(ctx: IRefResolver): void {
+    this._baseObject.resolveReferences(ctx);
     this.subTypeMap = resolveMap(ctx, this._subTypeMap);
   }
 

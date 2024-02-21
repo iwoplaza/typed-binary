@@ -20,7 +20,7 @@ export class OptionalSchema<TInner extends AnySchema> extends Schema<
     this.innerSchema = _innerUnstableSchema;
   }
 
-  resolve(ctx: IRefResolver): void {
+  resolveReferences(ctx: IRefResolver): void {
     this.innerSchema = ctx.resolve(this._innerUnstableSchema);
   }
 

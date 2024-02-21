@@ -24,7 +24,7 @@ export class ArraySchema<TElement extends AnySchema> extends Schema<
     this.elementSchema = _unstableElementSchema;
   }
 
-  resolve(ctx: IRefResolver): void {
+  resolveReferences(ctx: IRefResolver): void {
     this.elementSchema = ctx.resolve(this._unstableElementSchema);
   }
 

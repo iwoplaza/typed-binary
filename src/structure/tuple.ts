@@ -34,7 +34,7 @@ export class TupleSchema<
     this.schemas = _unstableSchemas;
   }
 
-  resolve(ctx: IRefResolver): void {
+  resolveReferences(ctx: IRefResolver): void {
     this.schemas = resolveArray(ctx, this._unstableSchemas);
   }
 
