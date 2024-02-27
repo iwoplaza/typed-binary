@@ -2,7 +2,6 @@ import {
   ISerialInput,
   ISerialOutput,
   Schema,
-  IRefResolver,
   MaxValue,
   IMeasurer,
   Measurer,
@@ -12,10 +11,6 @@ import {
  * A schema storing radians with 2 bytes of precision.
  */
 class RadiansSchema extends Schema<number> {
-  resolveReferences(ctx: IRefResolver): void {
-    // No inner references to resolve
-  }
-
   read(input: ISerialInput): number {
     const low = input.readByte();
     const high = input.readByte();
@@ -27,7 +22,7 @@ class RadiansSchema extends Schema<number> {
   write(output: ISerialOutput, value: number): void {
     // The value will be wrapped to be in range of [0, Math.PI)
     const wrapped = ((value % Math.PI) + Math.PI) % Math.PI;
-    // Discretising the value to be ints in range of [0, 65535]
+    // Clipping the value to be ints in range of [0, 65535]
     const discrete = Math.min(Math.floor((wrapped / Math.PI) * 65535), 65535);
 
     const low = discrete & 0xff;
@@ -47,4 +42,4 @@ class RadiansSchema extends Schema<number> {
   }
 }
 
-export const RADIANS = new RadiansSchema();
+export const radians = new RadiansSchema();

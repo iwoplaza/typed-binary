@@ -1,3 +1,5 @@
+export type Endianness = 'big' | 'little';
+
 export interface ISerialInput {
   readBool(): boolean;
   readByte(): number;
@@ -7,6 +9,7 @@ export interface ISerialInput {
   readString(): string;
   seekTo(offset: number): void;
   skipBytes(bytes: number): void;
+  readonly endianness: Endianness;
   readonly currentByteOffset: number;
 }
 
@@ -19,6 +22,7 @@ export interface ISerialOutput {
   writeString(value: string): void;
   seekTo(offset: number): void;
   skipBytes(bytes: number): void;
+  readonly endianness: Endianness;
   readonly currentByteOffset: number;
 }
 

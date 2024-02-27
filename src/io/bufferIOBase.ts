@@ -1,4 +1,5 @@
-import { isBigEndian } from '../util';
+import { getSystemEndianness } from '../util';
+import { Endianness } from './types';
 
 export type BufferIOOptions = {
   /**
@@ -8,7 +9,7 @@ export type BufferIOOptions = {
   /**
    * @default 'system'
    */
-  endianness: 'big' | 'little' | 'system';
+  endianness: Endianness | 'system';
 };
 
 export class BufferIOBase {
@@ -20,6 +21,8 @@ export class BufferIOBase {
   protected readonly switchEndianness: boolean;
 
   protected byteOffset = 0;
+
+  public readonly endianness: Endianness;
 
   constructor(buffer: ArrayBufferLike, options?: BufferIOOptions) {
     this.byteOffset = options?.byteOffset ?? 0;
@@ -38,11 +41,14 @@ export class BufferIOBase {
     this.helperFloatView = new Float32Array(helperBuffer);
     this.helperByteView = new Uint8Array(helperBuffer);
 
-    const isSystemBigEndian = isBigEndian();
-    const endianness = options?.endianness ?? 'system';
-    this.switchEndianness =
-      (endianness === 'big' && !isSystemBigEndian) ||
-      (endianness === 'little' && isSystemBigEndian);
+    const systemEndianness = getSystemEndianness();
+
+    this.endianness =
+      !options || options.endianness === 'system'
+        ? systemEndianness
+        : options.endianness;
+
+    this.switchEndianness = this.endianness !== systemEndianness;
   }
 
   get currentByteOffset() {

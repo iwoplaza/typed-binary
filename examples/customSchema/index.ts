@@ -4,7 +4,7 @@
 
 import { Parsed, object } from 'typed-binary';
 import { writeAndRead } from '../__util';
-import { RADIANS } from './radians';
+import { radians } from './radians';
 
 /*
  * ROTATION
@@ -12,9 +12,9 @@ import { RADIANS } from './radians';
 
 type Rotation = Parsed<typeof Rotation>;
 const Rotation = object({
-  roll: RADIANS,
-  pitch: RADIANS,
-  yaw: RADIANS,
+  roll: radians,
+  pitch: radians,
+  yaw: radians,
 });
 
 console.log(
