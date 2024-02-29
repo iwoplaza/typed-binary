@@ -13,7 +13,7 @@ Serialise and deserialise typed schemas without the need for redundant interface
 
 ![Basic Type and Documentation Inference](/docs/media/basic-type-and-doc-inferrence.gif)
 
-Above is a self-contained code snippet using typed-binary. The IDE can properly infer what `Dog` is. What's even more interesting, is that the "parsed" properties inherit the schema's **JSDocs** (seen on the gif above).
+Above is a self-contained code snippet using typed-binary. The IDE can properly infer what `Dog` is.
 
 ## Highlight feature
 
@@ -39,7 +39,6 @@ The feature I am most proud of would have to be [recursive types](#recursive-typ
 # Features:
 
 - [Type-safe schema definition system](#defining-schemas) (your IDE will know what structure the parsed binary is in).
-- [JSDoc inheritance](#prioritising-developer-experience)
 - [Estimating the size of any resulting binary object (helpful for creating buffered storage)](#serialization-and-deserialization)
 
 ### Why Typed Binary over other libraries?
