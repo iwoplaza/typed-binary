@@ -1,5 +1,5 @@
 import { BufferIOBase, BufferIOOptions } from './bufferIOBase';
-import { ISerialInput } from './types';
+import { ISerialInput, MutableBufferView } from './types';
 
 export class BufferReader extends BufferIOBase implements ISerialInput {
   constructor(buffer: ArrayBufferLike, options?: BufferIOOptions) {
@@ -49,5 +49,13 @@ export class BufferReader extends BufferIOBase implements ISerialInput {
     }
 
     return contents;
+  }
+
+  readSlice(
+    bufferView: MutableBufferView,
+    offset: number,
+    length: number,
+  ): void {
+    bufferView.set(this.uint8View.subarray(this.byteOffset, length), offset);
   }
 }

@@ -4,10 +4,12 @@ import {
   SubTypeKey,
   TupleSchema,
 } from '../structure';
-import { DynamicArraySchema } from '../structure/dynamicArray';
-import { OptionalSchema } from '../structure/optional';
-import { AnyObjectSchema, GenericObjectSchema } from '../structure/object';
 import { ArraySchema } from '../structure/array';
+import { KeyedSchema } from '../structure/keyed';
+import { OptionalSchema } from '../structure/optional';
+import { TypedArraySchema } from '../structure/typedArray';
+import { DynamicArraySchema } from '../structure/dynamicArray';
+import { AnyObjectSchema, GenericObjectSchema } from '../structure/object';
 import {
   ISchema,
   Ref,
@@ -15,7 +17,6 @@ import {
   Unwrap,
   AnySchemaWithProperties,
 } from '../structure/types';
-import { KeyedSchema } from '../structure/keyed';
 import { MergeRecordUnion } from '../utilityTypes';
 
 export const chars = <T extends number>(length: T) => new CharsSchema(length);
@@ -55,6 +56,33 @@ export const arrayOf = <TSchema extends AnySchema>(
 export const tupleOf = <TSchema extends [AnySchema, ...AnySchema[]]>(
   schemas: TSchema,
 ) => new TupleSchema(schemas);
+
+export const u8Array = (length: number) =>
+  new TypedArraySchema(length, Uint8Array);
+
+export const u8ClampedArray = (length: number) =>
+  new TypedArraySchema(length, Uint8ClampedArray);
+
+export const u16Array = (length: number) =>
+  new TypedArraySchema(length, Uint16Array);
+
+export const u32Array = (length: number) =>
+  new TypedArraySchema(length, Uint32Array);
+
+export const i8Array = (length: number) =>
+  new TypedArraySchema(length, Int8Array);
+
+export const i16Array = (length: number) =>
+  new TypedArraySchema(length, Int16Array);
+
+export const i32Array = (length: number) =>
+  new TypedArraySchema(length, Int32Array);
+
+export const f32Array = (length: number) =>
+  new TypedArraySchema(length, Float32Array);
+
+export const f64Array = (length: number) =>
+  new TypedArraySchema(length, Float64Array);
 
 export const optional = <TSchema extends AnySchema>(innerType: TSchema) =>
   new OptionalSchema(innerType);

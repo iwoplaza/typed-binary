@@ -46,4 +46,9 @@ export class BufferWriter extends BufferIOBase implements ISerialOutput {
     // Extra null character
     this.uint8View[this.byteOffset++] = 0;
   }
+
+  writeSlice(bufferView: ArrayLike<number> & ArrayBufferView): void {
+    this.uint8View.set(bufferView, this.byteOffset);
+    this.byteOffset += bufferView.byteLength;
+  }
 }
