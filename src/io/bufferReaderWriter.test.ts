@@ -59,4 +59,49 @@ describe('BufferWriter/BufferReader', () => {
       expect(reader.readFloat32()).to.be.closeTo(floatList[i], 0.001);
     }
   });
+
+  it('should encode a Uint8Array', () => {
+    const uint8s = new Uint8Array([0, 1, 1, 2, 3, 5, 8, 255]);
+
+    const buffer = Buffer.alloc(8);
+    const writer = new BufferWriter(buffer);
+    writer.writeSlice(uint8s);
+
+    const reader = new BufferReader(buffer);
+    expect(reader.readByte()).to.eq(0);
+    expect(reader.readByte()).to.eq(1);
+    expect(reader.readByte()).to.eq(1);
+    expect(reader.readByte()).to.eq(2);
+    expect(reader.readByte()).to.eq(3);
+    expect(reader.readByte()).to.eq(5);
+    expect(reader.readByte()).to.eq(8);
+    expect(reader.readByte()).to.eq(255);
+  });
+
+  it('should encode a Uint32Array', () => {
+    const uint32s = new Uint32Array([
+      0,
+      1,
+      1,
+      2,
+      3,
+      5,
+      8,
+      Number.MAX_SAFE_INTEGER,
+    ]);
+
+    const buffer = Buffer.alloc(8 * 4);
+    const writer = new BufferWriter(buffer);
+    writer.writeSlice(uint32s);
+
+    const reader = new BufferReader(buffer);
+    expect(reader.readUint32()).to.eq(0);
+    expect(reader.readUint32()).to.eq(1);
+    expect(reader.readUint32()).to.eq(1);
+    expect(reader.readUint32()).to.eq(2);
+    expect(reader.readUint32()).to.eq(3);
+    expect(reader.readUint32()).to.eq(5);
+    expect(reader.readUint32()).to.eq(8);
+    expect(reader.readUint32()).to.eq(Number.MAX_SAFE_INTEGER);
+  });
 });
