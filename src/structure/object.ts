@@ -210,7 +210,7 @@ export class GenericObjectSchema<
       for (const [key, extraProp] of exactEntries(
         subTypeDescription.properties,
       )) {
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         (result as any)[key] = extraProp.read(input);
       }
     }

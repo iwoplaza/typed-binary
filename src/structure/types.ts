@@ -51,15 +51,15 @@ export type Unwrap<T> = T extends IKeyedSchema<infer TKeyDef, infer TInner>
  */
 export type UnwrapRecord<T> = T extends IKeyedSchema<
   infer TKeyDef,
-  Record<infer K, any>
+  Record<infer K, unknown>
 >
   ? IKeyedSchema<TKeyDef, { [key in K]: Unwrap<T['__unwrapped'][key]> }>
-  : T extends Record<infer K, any>
+  : T extends Record<infer K, unknown>
   ? { [key in K]: Unwrap<T[key]> }
   : T;
 
 /* helper type for UnwrapArray */
-type __UnwrapArray<T> = T extends any[]
+type __UnwrapArray<T> = T extends unknown[]
   ? {
       [key in keyof T]: Unwrap<T[key]>;
     }
@@ -74,9 +74,9 @@ type __UnwrapArray<T> = T extends any[]
  * [a: number, b: ISchema<string>]
  * ```
  */
-export type UnwrapArray<T> = T extends IKeyedSchema<infer TKeyDef, any[]>
+export type UnwrapArray<T> = T extends IKeyedSchema<infer TKeyDef, unknown[]>
   ? IKeyedSchema<TKeyDef, __UnwrapArray<T['__unwrapped']>>
-  : T extends any[]
+  : T extends unknown[]
   ? __UnwrapArray<T>
   : T;
 

@@ -18,3 +18,5 @@ const dog: Dog = {
   age: 123,
   name: 'Spikey',
 };
+
+console.log(dog);
