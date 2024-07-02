@@ -14,7 +14,7 @@ import {
  * DistributedKeyOf<ObjectUnion> -> 'a' | 'b' | 'c'
  * ```
  */
-export type DistributedKeyOf<T> = T extends any ? keyof T : never;
+export type DistributedKeyOf<T> = T extends unknown ? keyof T : never;
 
 /**
  * @example ```
@@ -23,8 +23,11 @@ export type DistributedKeyOf<T> = T extends any ? keyof T : never;
  * MergeRecords<ObjectArray> -> { a: number, b: number, c: number }
  * ```
  */
-export type MergeRecords<T extends any[]> = {
-  [K in DistributedKeyOf<T[number]>]: Filter<T[number], { [key in K]: any }>[K];
+export type MergeRecords<T extends unknown[]> = {
+  [K in DistributedKeyOf<T[number]>]: Extract<
+    T[number],
+    { [key in K]: unknown }
+  >[K];
 };
 
 /**
@@ -35,13 +38,8 @@ export type MergeRecords<T extends any[]> = {
  * ```
  */
 export type MergeRecordUnion<T> = {
-  [K in DistributedKeyOf<T>]: Filter<T, { [key in K]: any }>[K];
+  [K in DistributedKeyOf<T>]: Extract<T, { [key in K]: unknown }>[K];
 };
-
-// Remove types from T that are assignable to U
-export type Diff<T, U> = T extends U ? never : T;
-// Remove types from T that are not assignable to U
-export type Filter<T, U> = T extends U ? T : never;
 
 export type Parsed<
   T,
