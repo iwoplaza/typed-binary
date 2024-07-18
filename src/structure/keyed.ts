@@ -1,15 +1,20 @@
 import { UnresolvedReferenceError } from '../error';
-import { IMeasurer, ISerialInput, ISerialOutput, Measurer } from '../io';
-import { ParseUnwrapped, Parsed } from '../utilityTypes';
 import {
-  IRefResolver,
-  ISchema,
+  type IMeasurer,
+  type ISerialInput,
+  type ISerialOutput,
+  Measurer,
+} from '../io';
+import type { ParseUnwrapped, Parsed } from '../utilityTypes';
+import {
+  type AnySchema,
+  type IKeyedSchema,
+  type IRefResolver,
+  type ISchema,
+  type MaxValue,
+  type PropertyDescription,
   Ref,
-  MaxValue,
-  PropertyDescription,
-  AnySchema,
-  Unwrap,
-  IKeyedSchema,
+  type Unwrap,
 } from './types';
 
 class RefSchema<TKeyDef extends string> implements ISchema<Ref<TKeyDef>> {
@@ -22,31 +27,31 @@ class RefSchema<TKeyDef extends string> implements ISchema<Ref<TKeyDef>> {
 
   resolveReferences(): void {
     throw new UnresolvedReferenceError(
-      `Tried to resolve a reference directly. Do it through a RefResolver instead.`,
+      'Tried to resolve a reference directly. Do it through a RefResolver instead.',
     );
   }
 
   read(): Parsed<Ref<TKeyDef>> {
     throw new UnresolvedReferenceError(
-      `Tried to read a reference directly. Resolve it instead.`,
+      'Tried to read a reference directly. Resolve it instead.',
     );
   }
 
   write(): void {
     throw new UnresolvedReferenceError(
-      `Tried to write a reference directly. Resolve it instead.`,
+      'Tried to write a reference directly. Resolve it instead.',
     );
   }
 
   measure(): IMeasurer {
     throw new UnresolvedReferenceError(
-      `Tried to measure size of a reference directly. Resolve it instead.`,
+      'Tried to measure size of a reference directly. Resolve it instead.',
     );
   }
 
   seekProperty(): PropertyDescription | null {
     throw new UnresolvedReferenceError(
-      `Tried to seek property of a reference directly. Resolve it instead.`,
+      'Tried to seek property of a reference directly. Resolve it instead.',
     );
   }
 }

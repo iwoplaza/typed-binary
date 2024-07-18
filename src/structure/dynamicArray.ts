@@ -1,18 +1,18 @@
 import {
+  type IMeasurer,
   type ISerialInput,
   type ISerialOutput,
-  type IMeasurer,
   Measurer,
 } from '../io';
-import { ParseUnwrapped } from '../utilityTypes';
+import type { ParseUnwrapped } from '../utilityTypes';
 import { u32 } from './baseTypes';
 import {
-  IRefResolver,
-  Schema,
+  type AnySchema,
+  type IRefResolver,
   MaxValue,
-  AnySchema,
-  PropertyDescription,
-  Unwrap,
+  type PropertyDescription,
+  Schema,
+  type Unwrap,
 } from './types';
 
 export class DynamicArraySchema<TElement extends AnySchema> extends Schema<

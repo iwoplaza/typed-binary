@@ -1,9 +1,9 @@
-import { describe, it, expect } from 'vitest';
+import { describe, expect, it } from 'vitest';
 
-import { encodeAndDecode, makeIO } from './helpers/mock';
 import { concat, generic, genericEnum, object, optional } from '../describe';
-import { byte, i32, string, MaxValue } from '../structure';
-import { Parsed } from '../utilityTypes';
+import { MaxValue, byte, i32, string } from '../structure';
+import type { Parsed } from '../utilityTypes';
+import { encodeAndDecode, makeIO } from './helpers/mock';
 
 describe('ObjectSchema', () => {
   it('should properly estimate size of max value', () => {

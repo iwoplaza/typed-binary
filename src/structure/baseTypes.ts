@@ -1,5 +1,10 @@
-import { ISerialInput, ISerialOutput, IMeasurer, Measurer } from '../io';
-import { Schema, MaxValue } from './types';
+import {
+  type IMeasurer,
+  type ISerialInput,
+  type ISerialOutput,
+  Measurer,
+} from '../io';
+import { MaxValue, Schema } from './types';
 
 ////
 // BOOL

@@ -1,8 +1,8 @@
-import { describe, it, expect } from 'vitest';
+import { describe, expect, it } from 'vitest';
 
-import { randIntBetween } from './random';
-import { encodeAndDecode } from './helpers/mock';
 import { CharsSchema } from '../structure';
+import { encodeAndDecode } from './helpers/mock';
+import { randIntBetween } from './random';
 
 describe('CharsSchema', () => {
   it('should encode and decode fixed-size char array', () => {

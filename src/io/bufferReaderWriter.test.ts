@@ -1,7 +1,7 @@
-import { describe, it, expect } from 'vitest';
-import { BufferWriter } from './bufferWriter';
-import { BufferReader } from './bufferReader';
+import { describe, expect, it } from 'vitest';
 import { randBetween, randIntBetween } from '../test/random';
+import { BufferReader } from './bufferReader';
+import { BufferWriter } from './bufferWriter';
 
 describe('BufferWriter/BufferReader', () => {
   it('should encode and decode int sequence', () => {

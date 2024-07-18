@@ -1,11 +1,7 @@
-import { BufferIOBase, BufferIOOptions } from './bufferIOBase';
-import { ISerialInput } from './types';
+import { BufferIOBase } from './bufferIOBase';
+import type { ISerialInput } from './types';
 
 export class BufferReader extends BufferIOBase implements ISerialInput {
-  constructor(buffer: ArrayBufferLike, options?: BufferIOOptions) {
-    super(buffer, options);
-  }
-
   private copyInputToHelper(bytes: number) {
     for (let i = 0; i < bytes; ++i) {
       this.helperByteView[this.switchEndianness ? bytes - 1 - i : i] =

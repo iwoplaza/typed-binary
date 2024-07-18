@@ -1,12 +1,18 @@
 import { ValidationError } from '../error';
 import {
-  Measurer,
   type IMeasurer,
   type ISerialInput,
   type ISerialOutput,
+  Measurer,
 } from '../io';
-import { ParseUnwrapped } from '../utilityTypes';
-import { IRefResolver, MaxValue, Schema, AnySchema, Unwrap } from './types';
+import type { ParseUnwrapped } from '../utilityTypes';
+import {
+  type AnySchema,
+  type IRefResolver,
+  MaxValue,
+  Schema,
+  type Unwrap,
+} from './types';
 
 export class ArraySchema<TElement extends AnySchema> extends Schema<
   Unwrap<TElement>[]

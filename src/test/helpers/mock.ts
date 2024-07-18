@@ -1,6 +1,6 @@
 import { BufferReader, BufferWriter } from '../../io';
-import { AnySchema } from '../../structure/types';
-import { Parsed } from '../../utilityTypes';
+import type { AnySchema } from '../../structure/types';
+import type { Parsed } from '../../utilityTypes';
 
 export function makeIO(bufferSize: number) {
   const buffer = Buffer.alloc(bufferSize);

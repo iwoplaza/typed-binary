@@ -1,7 +1,7 @@
-import { describe, it, expect } from 'vitest';
-import { randIntBetween } from './random';
+import { describe, expect, it } from 'vitest';
 import { string } from '../structure';
 import { encodeAndDecode } from './helpers/mock';
+import { randIntBetween } from './random';
 
 describe('StringSchema', () => {
   it('should encode and decode an empty string value', () => {

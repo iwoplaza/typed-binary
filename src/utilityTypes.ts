@@ -1,4 +1,4 @@
-import {
+import type {
   IKeyedSchema,
   ISchema,
   Ref,
@@ -52,18 +52,18 @@ export type Parsed<
   ? // A schema that defines themselves under a key in the dictionary
     Parsed<TUnwrapped, TKeyDict & { [key in TKeyDefinition]: Unwrap<T> }>
   : T extends ISchema<infer TUnwrapped>
-  ? // A non-keyed schema
-    Parsed<TUnwrapped, TKeyDict>
-  : // A reference to a keyed schema
-  T extends Ref<infer K>
-  ? K extends keyof TKeyDict
-    ? Parsed<TKeyDict[K], TKeyDict>
-    : never
-  : T extends Record<string, unknown>
-  ? { [K in keyof T]: Parsed<T[K], TKeyDict> }
-  : T extends unknown[]
-  ? { [K in keyof T]: Parsed<T[K], TKeyDict> }
-  : T;
+    ? // A non-keyed schema
+      Parsed<TUnwrapped, TKeyDict>
+    : // A reference to a keyed schema
+      T extends Ref<infer K>
+      ? K extends keyof TKeyDict
+        ? Parsed<TKeyDict[K], TKeyDict>
+        : never
+      : T extends Record<string, unknown>
+        ? { [K in keyof T]: Parsed<T[K], TKeyDict> }
+        : T extends unknown[]
+          ? { [K in keyof T]: Parsed<T[K], TKeyDict> }
+          : T;
 
 export type ParseUnwrapped<T> = Parsed<Unwrap<T>>;
 

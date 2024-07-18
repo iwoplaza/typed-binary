@@ -1,7 +1,11 @@
-import { it, expectTypeOf, describe } from 'vitest';
+import { describe, expectTypeOf, it } from 'vitest';
 
-import { Unwrap, ISchema } from '..';
-import { IKeyedSchema, UnwrapArray, UnwrapRecord } from '../structure/types';
+import type { ISchema, Unwrap } from '..';
+import type {
+  IKeyedSchema,
+  UnwrapArray,
+  UnwrapRecord,
+} from '../structure/types';
 
 describe('Unwrap<T>', () => {
   it('unwraps one level of wrapping properly', () => {

@@ -1,22 +1,22 @@
 import {
-  ObjectSchema,
   CharsSchema,
+  ObjectSchema,
   SubTypeKey,
   TupleSchema,
 } from '../structure';
-import { DynamicArraySchema } from '../structure/dynamicArray';
-import { OptionalSchema } from '../structure/optional';
-import { AnyObjectSchema, GenericObjectSchema } from '../structure/object';
 import { ArraySchema } from '../structure/array';
-import {
+import { DynamicArraySchema } from '../structure/dynamicArray';
+import { KeyedSchema } from '../structure/keyed';
+import { type AnyObjectSchema, GenericObjectSchema } from '../structure/object';
+import { OptionalSchema } from '../structure/optional';
+import type {
+  AnySchema,
+  AnySchemaWithProperties,
   ISchema,
   Ref,
-  AnySchema,
   Unwrap,
-  AnySchemaWithProperties,
 } from '../structure/types';
-import { KeyedSchema } from '../structure/keyed';
-import { MergeRecordUnion } from '../utilityTypes';
+import type { MergeRecordUnion } from '../utilityTypes';
 
 export const chars = <T extends number>(length: T) => new CharsSchema(length);
 
@@ -67,7 +67,7 @@ export const keyed = <K extends string, P extends ISchema<unknown>>(
 export const concat = <Objs extends AnyObjectSchema[]>(objs: Objs) => {
   return new ObjectSchema(
     Object.fromEntries(
-      objs.map(({ properties }) => Object.entries(properties)).flat(),
+      objs.flatMap(({ properties }) => Object.entries(properties)),
     ) as unknown as MergeRecordUnion<Unwrap<Objs[number]>>,
   );
 };

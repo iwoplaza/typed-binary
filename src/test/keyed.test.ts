@@ -1,9 +1,9 @@
-import { describe, it, expect } from 'vitest';
+import { describe, expect, it } from 'vitest';
 
-import { encodeAndDecode } from './helpers/mock';
+import { generic, genericEnum, keyed, object, optional } from '../describe';
 import { i32, string } from '../structure/baseTypes';
-import { Parsed } from '../utilityTypes';
-import { keyed, object, generic, genericEnum, optional } from '../describe';
+import type { Parsed } from '../utilityTypes';
+import { encodeAndDecode } from './helpers/mock';
 
 describe('KeyedSchema', () => {
   it('should encode and decode a keyed object, no references', () => {

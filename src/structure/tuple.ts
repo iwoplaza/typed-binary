@@ -1,17 +1,17 @@
 import { ValidationError } from '../error';
 import {
-  Measurer,
   type IMeasurer,
   type ISerialInput,
   type ISerialOutput,
+  Measurer,
 } from '../io';
-import { Parsed } from '../utilityTypes';
+import type { Parsed } from '../utilityTypes';
 import {
-  IRefResolver,
+  type AnySchema,
+  type IRefResolver,
   MaxValue,
   Schema,
-  AnySchema,
-  UnwrapArray,
+  type UnwrapArray,
 } from './types';
 
 export function resolveArray<T extends AnySchema[]>(

@@ -1,9 +1,9 @@
-import { describe, it, expect } from 'vitest';
+import { describe, expect, it } from 'vitest';
 
-import { i32, MaxValue, DynamicArraySchema } from '../structure';
 import { dynamicArrayOf } from '../describe';
-import { randIntBetween } from './random';
+import { DynamicArraySchema, MaxValue, i32 } from '../structure';
 import { makeIO } from './helpers/mock';
+import { randIntBetween } from './random';
 
 describe('DynamicArraySchema', () => {
   it('should estimate an int-array encoding size', () => {
