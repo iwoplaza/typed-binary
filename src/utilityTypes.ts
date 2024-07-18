@@ -38,7 +38,8 @@ export type MergeRecords<T extends unknown[]> = {
  * ```
  */
 export type MergeRecordUnion<T> = {
-  [K in DistributedKeyOf<T>]: Extract<T, { [key in K]: unknown }>[K];
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  [K in DistributedKeyOf<T>]: Extract<T, { [key in K]: any }>[K];
 };
 
 export type Parsed<
