@@ -10,7 +10,7 @@
     "lint": "eslint .",
     "build": "rollup -c",
     "prepublishOnly": "pnpm lint && pnpm build",
-    "dryPublish": "npm publish --dry-run",
+    "dryPublish": "pnpm publish --dry-run",
     "test": "vitest",
     "ts-version": "tsc -v"
   },
