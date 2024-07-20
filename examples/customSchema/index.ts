@@ -2,7 +2,7 @@
 // Run with `npm run example:customSchema`
 //
 
-import { Parsed, object } from 'typed-binary';
+import { type Parsed, object } from 'typed-binary';
 import { writeAndRead } from '../__util';
 import { radians } from './radians';
 

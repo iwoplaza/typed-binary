@@ -1,4 +1,4 @@
-import type { ISerialInput, ISerialOutput, IMeasurer } from '../io';
+import type { IMeasurer, ISerialInput, ISerialOutput } from '../io';
 import type { Parsed } from '../utilityTypes';
 
 export type MaxValue = typeof MaxValue;
@@ -31,8 +31,8 @@ export type Unwrap<T> = T extends IKeyedSchema<infer TKeyDef, infer TInner>
   ? // bypassing keyed schemas, as that information has to be preserved for parsing
     IKeyedSchema<TKeyDef, Unwrap<TInner>>
   : T extends ISchema<infer TInner>
-  ? TInner
-  : T;
+    ? TInner
+    : T;
 
 /**
  * Removes one layer of schema wrapping of record properties.
@@ -55,8 +55,8 @@ export type UnwrapRecord<T> = T extends IKeyedSchema<
 >
   ? IKeyedSchema<TKeyDef, { [key in K]: Unwrap<T['__unwrapped'][key]> }>
   : T extends Record<infer K, unknown>
-  ? { [key in K]: Unwrap<T[key]> }
-  : T;
+    ? { [key in K]: Unwrap<T[key]> }
+    : T;
 
 /* helper type for UnwrapArray */
 type __UnwrapArray<T> = T extends unknown[]
@@ -77,8 +77,8 @@ type __UnwrapArray<T> = T extends unknown[]
 export type UnwrapArray<T> = T extends IKeyedSchema<infer TKeyDef, unknown[]>
   ? IKeyedSchema<TKeyDef, __UnwrapArray<T['__unwrapped']>>
   : T extends unknown[]
-  ? __UnwrapArray<T>
-  : T;
+    ? __UnwrapArray<T>
+    : T;
 
 export interface ISchemaWithProperties<TProps extends Record<string, AnySchema>>
   extends ISchema<UnwrapRecord<TProps>> {
@@ -88,6 +88,8 @@ export interface ISchemaWithProperties<TProps extends Record<string, AnySchema>>
 export type AnySchemaWithProperties = ISchemaWithProperties<
   Record<string, AnySchema>
 >;
+
+export type PropertiesOf<T extends AnySchemaWithProperties> = T['properties'];
 
 export type PropertyDescription = {
   bufferOffset: number;

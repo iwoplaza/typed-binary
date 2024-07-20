@@ -1,22 +1,22 @@
 import {
-  ObjectSchema,
   CharsSchema,
+  ObjectSchema,
   SubTypeKey,
   TupleSchema,
 } from '../structure';
-import { DynamicArraySchema } from '../structure/dynamicArray';
-import { OptionalSchema } from '../structure/optional';
-import { AnyObjectSchema, GenericObjectSchema } from '../structure/object';
 import { ArraySchema } from '../structure/array';
-import {
-  ISchema,
-  Ref,
-  AnySchema,
-  Unwrap,
-  AnySchemaWithProperties,
-} from '../structure/types';
+import { DynamicArraySchema } from '../structure/dynamicArray';
 import { KeyedSchema } from '../structure/keyed';
-import { MergeRecordUnion } from '../utilityTypes';
+import { type AnyObjectSchema, GenericObjectSchema } from '../structure/object';
+import { OptionalSchema } from '../structure/optional';
+import type {
+  AnySchema,
+  AnySchemaWithProperties,
+  ISchema,
+  PropertiesOf,
+  Ref,
+} from '../structure/types';
+import type { MergeRecordUnion } from '../utilityTypes';
 
 export const chars = <T extends number>(length: T) => new CharsSchema(length);
 
@@ -64,10 +64,16 @@ export const keyed = <K extends string, P extends ISchema<unknown>>(
   inner: (ref: ISchema<Ref<K>>) => P,
 ) => new KeyedSchema(key, inner);
 
-export const concat = <Objs extends AnyObjectSchema[]>(objs: Objs) => {
+type Concat<Objs extends AnyObjectSchema[]> = ObjectSchema<
+  MergeRecordUnion<PropertiesOf<Objs[number]>>
+>;
+
+export const concat = <Objs extends AnyObjectSchema[]>(
+  objs: Objs,
+): Concat<Objs> => {
   return new ObjectSchema(
     Object.fromEntries(
-      objs.map(({ properties }) => Object.entries(properties)).flat(),
-    ) as unknown as MergeRecordUnion<Unwrap<Objs[number]>>,
+      objs.flatMap(({ properties }) => Object.entries(properties)),
+    ) as unknown as Concat<Objs>['properties'],
   );
 };

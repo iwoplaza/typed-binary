@@ -1,4 +1,4 @@
-import { object, string, i32, Parsed } from 'typed-binary';
+import { type Parsed, i32, object, string } from 'typed-binary';
 
 // Describing the Dog schema.
 const Dog = object({

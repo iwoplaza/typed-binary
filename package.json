@@ -3,15 +3,32 @@
   "version": "4.0.1",
   "description": "Describe binary structures with full TypeScript support. Encode and decode into pure JavaScript objects.",
   "packageManager": "pnpm@8.15.8+sha256.691fe176eea9a8a80df20e4976f3dfb44a04841ceb885638fe2a26174f81e65e",
-  "main": "dist/cjs/index.js",
-  "module": "dist/esm/index.js",
-  "types": "dist/index.d.ts",
+  "type": "module",
+  "main": "./dist/index.js",
+  "types": "./index.d.ts",
+  "exports": {
+    "./package.json": "./package.json",
+    ".": {
+      "types": "./dist/index.d.ts",
+      "module": "./dist/index.js",
+      "import": "./dist/index.js",
+      "default": "./dist/index.cjs"
+    },
+    "./*": {
+      "types": "./*.d.ts",
+      "module": "./dist/*.js",
+      "import": "./dist/*.js",
+      "default": "./dist/*.cjs"
+    }
+  },
   "scripts": {
-    "lint": "eslint .",
-    "build": "rollup -c",
-    "prepublishOnly": "pnpm lint && pnpm build",
+    "check": "biome check --write .",
+    "dev": "tsup --watch",
+    "build": "tsup",
+    "prepublishOnly": "pnpm check && pnpm build",
     "dryPublish": "pnpm publish --dry-run",
-    "test": "vitest",
+    "test": "vitest run",
+    "dev:test": "vitest",
     "ts-version": "tsc -v"
   },
   "keywords": [
@@ -37,34 +54,16 @@
     "deserialization",
     "deserialize"
   ],
-  "files": [
-    "README.md",
-    "LICENSE",
-    "dist/index.d.ts",
-    "dist/cjs/index.js",
-    "dist/cjs/index.js.map",
-    "dist/esm/index.js",
-    "dist/esm/index.js.map"
-  ],
+  "files": ["README.md", "LICENSE", "dist"],
   "author": "Iwo Plaza <iwoplaza@gmail.com>",
   "license": "MIT",
   "devDependencies": {
-    "@eslint/js": "^9.6.0",
-    "@rollup/plugin-commonjs": "^26.0.1",
-    "@rollup/plugin-node-resolve": "^15.2.3",
-    "@rollup/plugin-terser": "^0.4.4",
-    "@rollup/plugin-typescript": "^11.1.6",
-    "@types/eslint__js": "^8.42.3",
-    "@typescript-eslint/eslint-plugin": "^7.15.0",
-    "@typescript-eslint/parser": "^7.15.0",
-    "eslint": "^9.6.0",
-    "rollup": "^4.18.0",
-    "rollup-plugin-dts": "^6.1.1",
-    "rollup-plugin-peer-deps-external": "^2.2.4",
+    "@biomejs/biome": "^1.8.3",
+    "@types/node": "^20.14.11",
     "socket.io": "^4.7.5",
     "socket.io-client": "^4.7.5",
+    "tsup": "^8.2.0",
     "typescript": "^5.5.2",
-    "typescript-eslint": "^7.15.0",
     "vitest": "^1.6.0"
   },
   "repository": {

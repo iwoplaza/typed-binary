@@ -52,10 +52,22 @@ The feature I am most proud of would have to be [recursive types](#recursive-typ
 
 # Instalation
 
-Using NPM:
+Using `npm`
 
 ```sh
-$ npm i --save typed-binary
+npm install typed-binary
+```
+
+Using `pnpm`:
+
+```sh
+pnpm add typed-binary
+```
+
+Using `yarn`:
+
+```sh
+yarn add typed-binary
 ```
 
 # Requirements
@@ -138,9 +150,9 @@ async function saveGameState(state: GameState): Promise<void> {
 
 # Running examples
 
-There are a handful of examples provided. To run any one of them make sure to clone the [typed-binary](https://github.com/iwoplaza/typed-binary) repository first, then go into the `examples/` directory. To setup the examples environment, run `npm run link`, which will build the parent project and link it to dependencies of the child 'examples' project.
+There are a handful of examples provided. To run any one of them make sure to clone the [typed-binary](https://github.com/iwoplaza/typed-binary) repository first, then go into the `examples/` directory. To setup the examples environment, run `pnpm install`, which will fetch dependencies, build the parent project and link it to the 'examples' project.
 
-Pick an example that peaks interest, and run `npm run example:exampleName`.
+Pick an example that peaks interest, and run `pnpm example:exampleName`.
 
 # Defining schemas
 
@@ -237,7 +249,7 @@ const Animal = generic(
       // Animal can be a cat
       striped: bool,
     }),
-  },
+  }
 );
 
 // A buffer to serialize into/out of
@@ -447,7 +459,7 @@ const Recursive = keyed('recursive-key', (Recursive) =>
   object({
     value: i32,
     next: optional(Recursive),
-  }),
+  })
 );
 ```
 
@@ -471,8 +483,8 @@ const Expression = keyed('expression', (Expression) =>
       int_literal: object({
         value: i32,
       }),
-    },
-  ),
+    }
+  )
 );
 
 const expr: Parsed<typeof Expression> = {

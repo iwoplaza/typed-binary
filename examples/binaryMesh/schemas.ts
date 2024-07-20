@@ -1,5 +1,5 @@
-import { Parsed } from 'typed-binary';
-import { object, dynamicArrayOf, arrayOf, i32 } from 'typed-binary';
+import type { Parsed } from 'typed-binary';
+import { arrayOf, dynamicArrayOf, i32, object } from 'typed-binary';
 
 export const Vertex = object({
   x: i32,

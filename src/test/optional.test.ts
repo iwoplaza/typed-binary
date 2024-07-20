@@ -1,8 +1,8 @@
-import { describe, it, expect } from 'vitest';
+import { describe, expect, it } from 'vitest';
 
-import { randIntBetween } from './random';
 import { OptionalSchema, i32 } from '../structure';
 import { makeIO } from './helpers/mock';
+import { randIntBetween } from './random';
 
 describe('OptionalSchema', () => {
   it('should encode and decode an optional int, with a value', () => {

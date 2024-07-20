@@ -1,8 +1,8 @@
-import { describe, it, expect } from 'vitest';
+import { describe, expect, it } from 'vitest';
 
-import { randBetween } from './random';
 import { f32 } from '../structure';
 import { encodeAndDecode } from './helpers/mock';
+import { randBetween } from './random';
 
 describe('Float32Schema', () => {
   it('should encode and decode a f32 value', () => {

@@ -1,4 +1,9 @@
-import { BufferWriter, BufferReader, AnySchema, Parsed } from 'typed-binary';
+import {
+  type AnySchema,
+  BufferReader,
+  BufferWriter,
+  type Parsed,
+} from 'typed-binary';
 
 export function writeAndRead<TSchema extends AnySchema>(
   schema: TSchema,

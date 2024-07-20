@@ -17,7 +17,6 @@ export {
   ISchemaWithProperties,
   AnySchema,
   AnySchemaWithProperties,
-
   // Specific schemas
   BoolSchema,
   StringSchema,

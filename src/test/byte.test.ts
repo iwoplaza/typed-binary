@@ -1,8 +1,8 @@
-import { describe, it, expect } from 'vitest';
+import { describe, expect, it } from 'vitest';
 
-import { randIntBetween } from './random';
 import { byte } from '../structure';
 import { encodeAndDecode } from './helpers/mock';
+import { randIntBetween } from './random';
 
 describe('ByteSchema', () => {
   it('should encode and decode a byte value', () => {

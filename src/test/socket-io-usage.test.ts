@@ -1,15 +1,15 @@
-import { describe, it, expect, beforeAll, afterAll } from 'vitest';
+import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 
-import { createServer } from 'http';
-import { type AddressInfo } from 'net';
-import { Server, Socket as ServerSocket } from 'socket.io';
-import { Socket as ClientSocket, io as ioClient } from 'socket.io-client';
+import { createServer } from 'node:http';
+import type { AddressInfo } from 'node:net';
+import { Server, type Socket as ServerSocket } from 'socket.io';
+import { type Socket as ClientSocket, io as ioClient } from 'socket.io-client';
 
 import { dynamicArrayOf, object } from '../describe';
-import { byte, string, u32 } from '../structure';
 import { BufferReader, BufferWriter } from '../io';
-import { AnySchema } from '../structure/types';
-import { Parsed } from '../utilityTypes';
+import { byte, string, u32 } from '../structure';
+import type { AnySchema } from '../structure/types';
+import type { Parsed } from '../utilityTypes';
 
 function waitFor(socket: ServerSocket | ClientSocket, event = 'message') {
   return new Promise<Buffer>((resolve) => {
@@ -18,7 +18,9 @@ function waitFor(socket: ServerSocket | ClientSocket, event = 'message') {
 }
 
 describe('Socket IO Usage', () => {
-  let io: Server, serverSocket: ServerSocket, clientSocket: ClientSocket;
+  let io: Server;
+  let serverSocket: ServerSocket;
+  let clientSocket: ClientSocket;
 
   beforeAll(
     () =>

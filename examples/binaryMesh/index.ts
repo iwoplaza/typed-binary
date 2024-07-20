@@ -1,5 +1,5 @@
+import fs from 'node:fs/promises';
 import { BufferReader, BufferWriter } from 'typed-binary';
-import fs from 'fs/promises';
 import { Mesh } from './schemas';
 
 const DEFAULT_MESH: Mesh = {
@@ -34,7 +34,7 @@ async function saveMesh(mesh: Mesh): Promise<void> {
 
     await fs.writeFile('./binaryMesh/mesh.bin', buffer);
   } catch (e) {
-    console.error(`Error occurred during mesh saving.`);
+    console.error('Error occurred during mesh saving.');
     console.error(e);
   }
 }
@@ -55,11 +55,11 @@ async function init() {
   console.log(meshToString(mesh));
 
   // Translating the mesh
-  mesh.faces.forEach((f) => {
-    f.vertices.forEach((v) => {
+  for (const f of mesh.faces) {
+    for (const v of f.vertices) {
       v.x += 1;
-    });
-  });
+    }
+  }
 
   // Storing the mesh
   await saveMesh(mesh);

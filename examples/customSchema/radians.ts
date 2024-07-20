@@ -1,10 +1,10 @@
 import {
-  ISerialInput,
-  ISerialOutput,
-  Schema,
-  MaxValue,
-  IMeasurer,
+  type IMeasurer,
+  type ISerialInput,
+  type ISerialOutput,
+  type MaxValue,
   Measurer,
+  Schema,
 } from 'typed-binary';
 
 /**

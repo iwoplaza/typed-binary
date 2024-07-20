@@ -1,23 +1,23 @@
 import {
-  Measurer,
   type IMeasurer,
   type ISerialInput,
   type ISerialOutput,
+  Measurer,
 } from '../io';
-import { ParseUnwrappedRecord, Parsed } from '../utilityTypes';
+import type { ParseUnwrappedRecord, Parsed } from '../utilityTypes';
 import { byte, string } from './baseTypes';
 import {
-  Schema,
-  IRefResolver,
-  ISchemaWithProperties,
+  type AnySchema,
+  type AnySchemaWithProperties,
+  type IRefResolver,
+  type ISchema,
+  type ISchemaWithProperties,
   MaxValue,
-  AnySchema,
-  AnySchemaWithProperties,
-  ISchema,
-  PropertyDescription,
-  Unwrap,
-  UnwrapRecord,
+  type PropertyDescription,
+  Schema,
   SubTypeKey,
+  type Unwrap,
+  type UnwrapRecord,
 } from './types';
 
 export function exactEntries<T extends Record<keyof T, T[keyof T]>>(
@@ -210,7 +210,7 @@ export class GenericObjectSchema<
       for (const [key, extraProp] of exactEntries(
         subTypeDescription.properties,
       )) {
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        // biome-ignore lint/suspicious/noExplicitAny: <covered by tests>
         (result as any)[key] = extraProp.read(input);
       }
     }
@@ -245,16 +245,21 @@ export class GenericObjectSchema<
         .map((subType) => {
           const forkedMeasurer = measurer.fork();
 
-          Object.values(subType.properties) // Going through extra properties
-            .forEach((prop) => prop.measure(MaxValue, forkedMeasurer)); // Measuring them
+          // Going through extra properties
+          for (const prop of Object.values(subType.properties)) {
+            // Measuring them
+            prop.measure(MaxValue, forkedMeasurer);
+          }
 
           return [subType, forkedMeasurer.size] as const;
         })
         .reduce((a, b) => (a[1] > b[1] ? a : b))[0];
 
-      // Measuring for real this time
-      Object.values(biggestSubType.properties) // Going through extra properties
-        .forEach((prop) => prop.measure(MaxValue, measurer));
+      // Going through extra properties
+      for (const prop of Object.values(biggestSubType.properties)) {
+        // Measuring for real this time
+        prop.measure(MaxValue, measurer);
+      }
     } else {
       const subTypeKey = (value as { type: keyof TUnwrapExt }).type;
       const subTypeDescription = this.subTypeMap[subTypeKey] || null;
@@ -266,8 +271,11 @@ export class GenericObjectSchema<
         );
       }
 
-      exactEntries(subTypeDescription.properties) // Going through extra properties
-        .forEach(([key, prop]) => prop.measure(value[key], measurer)); // Measuring them
+      // Going through extra properties
+      for (const [key, prop] of exactEntries(subTypeDescription.properties)) {
+        // Measuring them
+        prop.measure(value[key], measurer);
+      }
     }
 
     return measurer;

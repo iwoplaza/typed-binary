@@ -1,10 +1,10 @@
+import { ValidationError } from '../error';
 import {
-  Measurer,
   type IMeasurer,
   type ISerialInput,
   type ISerialOutput,
+  Measurer,
 } from '../io';
-import { ValidationError } from '../error';
 import { Schema } from './types';
 
 export class CharsSchema extends Schema<string> {

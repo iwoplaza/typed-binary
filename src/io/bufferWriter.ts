@@ -1,11 +1,7 @@
-import { BufferIOBase, BufferIOOptions } from './bufferIOBase';
-import { ISerialOutput } from './types';
+import { BufferIOBase } from './bufferIOBase';
+import type { ISerialOutput } from './types';
 
 export class BufferWriter extends BufferIOBase implements ISerialOutput {
-  constructor(buffer: ArrayBufferLike, options?: BufferIOOptions) {
-    super(buffer, options);
-  }
-
   private copyHelperToOutput(bytes: number) {
     for (let i = 0; i < bytes; ++i)
       this.uint8View[this.byteOffset++] =

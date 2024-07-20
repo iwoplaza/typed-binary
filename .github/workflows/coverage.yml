@@ -13,7 +13,7 @@ jobs:
 
     strategy:
       matrix:
-        os: [ubuntu-latest, windows-latest, macos-latest]
+        os: [ubuntu-latest]
         node-version: [16.x, 20.x, 22.x]
 
     steps:
@@ -32,4 +32,4 @@ jobs:
           cache: 'pnpm'
 
       - run: pnpm i --frozen-lockfile
-      - run: pnpm test
+      - run: pnpm biome check . && pnpm test && pnpm build

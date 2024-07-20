@@ -1,7 +1,7 @@
-import { IMeasurer } from './types';
+import type { IMeasurer } from './types';
 
 class UnboundedMeasurer implements IMeasurer {
-  size = NaN;
+  size = Number.NaN;
   unbounded: IMeasurer = this;
   isUnbounded = true;
 

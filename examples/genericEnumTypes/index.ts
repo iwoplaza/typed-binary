@@ -3,13 +3,13 @@
 //
 
 import {
-  BufferWriter,
   BufferReader,
-  i32,
-  string,
+  BufferWriter,
   bool,
   genericEnum,
+  i32,
   object,
+  string,
 } from 'typed-binary';
 
 enum AnimalType {

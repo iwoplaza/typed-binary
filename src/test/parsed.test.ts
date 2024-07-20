@@ -1,18 +1,18 @@
-import { it, expectTypeOf } from 'vitest';
+import { expectTypeOf, it } from 'vitest';
 
 import {
-  generic,
-  dynamicArrayOf,
-  i32,
-  string,
+  type Parsed,
   bool,
-  object,
-  Parsed,
-  genericEnum,
-  keyed,
-  optional,
-  tupleOf,
+  dynamicArrayOf,
   f32,
+  generic,
+  genericEnum,
+  i32,
+  keyed,
+  object,
+  optional,
+  string,
+  tupleOf,
 } from '..';
 
 it('parses `i32` properly', () => {
@@ -52,7 +52,7 @@ it('parses `object({ a: i32, b: string, c: bool })` properly', () => {
 });
 
 it('parses `genericEnum` properly', () => {
-  const enum ExpressionType {
+  enum ExpressionType {
     ADD = 0,
     NEGATE = 1,
   }
