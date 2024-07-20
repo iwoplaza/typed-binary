@@ -13,8 +13,8 @@ import type {
   AnySchema,
   AnySchemaWithProperties,
   ISchema,
+  PropertiesOf,
   Ref,
-  Unwrap,
 } from '../structure/types';
 import type { MergeRecordUnion } from '../utilityTypes';
 
@@ -64,10 +64,16 @@ export const keyed = <K extends string, P extends ISchema<unknown>>(
   inner: (ref: ISchema<Ref<K>>) => P,
 ) => new KeyedSchema(key, inner);
 
-export const concat = <Objs extends AnyObjectSchema[]>(objs: Objs) => {
+type Concat<Objs extends AnyObjectSchema[]> = ObjectSchema<
+  MergeRecordUnion<PropertiesOf<Objs[number]>>
+>;
+
+export const concat = <Objs extends AnyObjectSchema[]>(
+  objs: Objs,
+): Concat<Objs> => {
   return new ObjectSchema(
     Object.fromEntries(
       objs.flatMap(({ properties }) => Object.entries(properties)),
-    ) as unknown as MergeRecordUnion<Unwrap<Objs[number]>>,
+    ) as unknown as Concat<Objs>['properties'],
   );
 };

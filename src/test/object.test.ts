@@ -1,7 +1,14 @@
-import { describe, expect, it } from 'vitest';
+import { describe, expect, expectTypeOf, it } from 'vitest';
 
 import { concat, generic, genericEnum, object, optional } from '../describe';
-import { MaxValue, byte, i32, string } from '../structure';
+import {
+  type ISchema,
+  MaxValue,
+  type ObjectSchema,
+  byte,
+  i32,
+  string,
+} from '../structure';
 import type { Parsed } from '../utilityTypes';
 import { encodeAndDecode, makeIO } from './helpers/mock';
 
@@ -113,7 +120,7 @@ describe('ObjectSchema', () => {
       b: i32,
     });
 
-    // Purpusefully out-of-order.
+    // Purposefully out-of-order.
     const value: Parsed<typeof schema> = {
       a: 1,
       b: 2,
@@ -186,5 +193,19 @@ describe('ObjectSchema', () => {
     expect(input.readInt32()).to.equal(4); // d
     expect(input.readInt32()).to.equal(1); // a
     expect(input.readInt32()).to.equal(2); // b
+  });
+
+  it('has a type of ISchema with its properties all unwrapped', () => {
+    type FlatActual = ObjectSchema<{ a: ISchema<number> }>;
+    type FlatExpected = ISchema<{ a: number }>;
+
+    type NestedActual = ObjectSchema<{
+      a: ISchema<number>;
+      b: ObjectSchema<{ c: ISchema<number> }>;
+    }>;
+    type NestedExpected = ISchema<{ a: number; b: { c: number } }>;
+
+    expectTypeOf<FlatActual>().toMatchTypeOf<FlatExpected>();
+    expectTypeOf<NestedActual>().toMatchTypeOf<NestedExpected>();
   });
 });

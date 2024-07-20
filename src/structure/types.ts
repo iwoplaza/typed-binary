@@ -89,6 +89,8 @@ export type AnySchemaWithProperties = ISchemaWithProperties<
   Record<string, AnySchema>
 >;
 
+export type PropertiesOf<T extends AnySchemaWithProperties> = T['properties'];
+
 export type PropertyDescription = {
   bufferOffset: number;
   schema: ISchema<unknown>;
