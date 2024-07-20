@@ -12,6 +12,19 @@ export type BufferIOOptions = {
   endianness?: Endianness | 'system';
 };
 
+interface BufferView {
+  byteOffset: number;
+  buffer: ArrayBufferLike;
+}
+
+function isBufferView(value: unknown): value is BufferView {
+  const BufferImpl =
+    typeof global !== 'undefined' && 'Buffer' in global
+      ? global.Buffer
+      : undefined;
+  return !!BufferImpl && value instanceof BufferImpl;
+}
+
 export class BufferIOBase {
   protected readonly uint8View: Uint8Array;
   protected readonly helperInt32View: Int32Array;
@@ -34,7 +47,7 @@ export class BufferIOBase {
     this.switchEndianness = this.endianness !== systemEndianness;
 
     let innerBuffer = buffer;
-    if (typeof Buffer !== 'undefined' && innerBuffer instanceof Buffer) {
+    if (isBufferView(innerBuffer)) {
       // Getting rid of the outer shell, which causes the Uint8Array line to create a copy, instead of a view.
       this.byteOffset += innerBuffer.byteOffset;
       innerBuffer = innerBuffer.buffer;
