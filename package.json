@@ -55,11 +55,7 @@
     "deserialization",
     "deserialize"
   ],
-  "files": [
-    "README.md",
-    "LICENSE",
-    "dist"
-  ],
+  "files": ["README.md", "LICENSE", "dist"],
   "author": "Iwo Plaza <iwoplaza@gmail.com>",
   "license": "MIT",
   "devDependencies": {
