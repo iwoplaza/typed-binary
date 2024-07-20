@@ -1,9 +1,30 @@
 import { describe, expect, it } from 'vitest';
 import { randBetween, randIntBetween } from '../test/random';
+import { getSystemEndianness } from '../util';
 import { BufferReader } from './bufferReader';
 import { BufferWriter } from './bufferWriter';
 
 describe('BufferWriter/BufferReader', () => {
+  it('parses options correctly', () => {
+    const buffer = Buffer.alloc(16);
+
+    const noOptions = new BufferWriter(buffer);
+    expect(noOptions.endianness).toEqual(getSystemEndianness());
+    expect(noOptions.currentByteOffset).toEqual(0);
+
+    const withByteOffset = new BufferWriter(buffer, { byteOffset: 16 });
+    expect(withByteOffset.endianness).toEqual(getSystemEndianness());
+    expect(withByteOffset.currentByteOffset).toEqual(16);
+
+    const withBigEndian = new BufferWriter(buffer, { endianness: 'big' });
+    expect(withBigEndian.endianness).toEqual('big');
+    expect(withBigEndian.currentByteOffset).toEqual(0);
+
+    const withLittleEndian = new BufferWriter(buffer, { endianness: 'little' });
+    expect(withLittleEndian.endianness).toEqual('little');
+    expect(withLittleEndian.currentByteOffset).toEqual(0);
+  });
+
   it('should encode and decode int sequence', () => {
     // Generating random int sequence
     const intList = [];
