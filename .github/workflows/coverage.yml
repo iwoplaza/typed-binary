@@ -29,7 +29,7 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: ${{ matrix.node-version }}
-          cache: "pnpm"
+          cache: 'pnpm'
 
       - run: pnpm i --frozen-lockfile
-      - run: pnpm check && pnpm test && pnpm build
+      - run: pnpm biome check . && pnpm test && pnpm build

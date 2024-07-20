@@ -29,8 +29,7 @@
     "dryPublish": "pnpm publish --dry-run",
     "test": "vitest run",
     "dev:test": "vitest",
-    "ts-version": "tsc -v",
-    "prepare": "husky"
+    "ts-version": "tsc -v"
   },
   "keywords": [
     "typescript",
@@ -61,7 +60,6 @@
   "devDependencies": {
     "@biomejs/biome": "^1.8.3",
     "@types/node": "^20.14.11",
-    "husky": "^9.1.1",
     "socket.io": "^4.7.5",
     "socket.io-client": "^4.7.5",
     "tsup": "^8.2.0",
