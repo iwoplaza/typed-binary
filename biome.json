@@ -15,6 +15,9 @@
       }
     }
   },
+  "formatter": {
+    "lineEnding": "lf"
+  },
   "json": {
     "formatter": {
       "indentStyle": "space"
