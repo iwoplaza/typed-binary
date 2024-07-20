@@ -1,4 +1,4 @@
-import { i32, dynamicArrayOf, object } from 'typed-binary';
+import { dynamicArrayOf, i32, object } from 'typed-binary';
 import { NodeTemplate } from './node';
 
 export const Graph = object({

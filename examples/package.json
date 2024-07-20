@@ -1,14 +1,15 @@
 {
   "name": "typed-binary-examples",
   "scripts": {
-    "link": "cd .. && npm run build && cd examples/ && npm link ../",
+    "prepare": "cd .. && pnpm run build && cd examples/ && pnpm link ../",
     "example:binaryMesh": "tsx binaryMesh/index.ts",
-    "example:recursiveTypes": "tsx recursiveTypes/index.ts",
-    "example:genericTypes": "tsx genericTypes/index.ts",
-    "example:genericEnumTypes": "tsx genericEnumTypes/index.ts",
-    "example:stateMachine": "tsx stateMachine/index.ts",
     "example:customSchema": "tsx customSchema/index.ts",
-    "example:inferredShowcase": "tsx inferredShowcase/index.ts"
+    "example:dog": "tsx dog/index.ts",
+    "example:genericEnumTypes": "tsx genericEnumTypes/index.ts",
+    "example:genericTypes": "tsx genericTypes/index.ts",
+    "example:inferredShowcase": "tsx inferredShowcase/index.ts",
+    "example:recursiveTypes": "tsx recursiveTypes/index.ts",
+    "example:stateMachine": "tsx stateMachine/index.ts"
   },
   "devDependencies": {
     "tsx": "^4.7.1",

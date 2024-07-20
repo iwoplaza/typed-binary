@@ -2,8 +2,8 @@
 // Run with `npm run example:recursiveTypes`
 //
 
-import { Parsed } from 'typed-binary';
-import { i32, string, keyed, generic, object, optional } from 'typed-binary';
+import type { Parsed } from 'typed-binary';
+import { generic, i32, keyed, object, optional, string } from 'typed-binary';
 
 type Expression = Parsed<typeof Expression>;
 const Expression = keyed('expression', (Expression) =>

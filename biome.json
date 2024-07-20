@@ -4,13 +4,7 @@
     "enabled": true
   },
   "files": {
-    "ignore": [
-      "node_modules",
-      "dist",
-      "rollup.config.js",
-      "examples",
-      "tsconfig.test.json"
-    ]
+    "ignore": ["node_modules", "dist", "rollup.config.js", "tsconfig.test.json"]
   },
   "linter": {
     "enabled": true,

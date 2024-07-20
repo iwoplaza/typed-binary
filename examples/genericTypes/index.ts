@@ -3,13 +3,13 @@
 //
 
 import {
-  BufferWriter,
   BufferReader,
-  i32,
-  string,
+  BufferWriter,
   bool,
   generic,
+  i32,
   object,
+  string,
 } from 'typed-binary';
 
 // Generic object schema

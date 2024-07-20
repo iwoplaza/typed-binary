@@ -1,4 +1,4 @@
-import { bool, f32, i32, string, dynamicArrayOf, object } from 'typed-binary';
+import { bool, dynamicArrayOf, f32, i32, object, string } from 'typed-binary';
 import { ConnectionTemplate } from './connection';
 
 export const NodeTemplate = object({
