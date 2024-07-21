@@ -22,4 +22,5 @@ jobs:
         uses: cypress-io/github-action@v6
         with:
           install-command: pnpm i --frozen-lockfile
+          build: pnpm build
           command: pnpm cypress run
