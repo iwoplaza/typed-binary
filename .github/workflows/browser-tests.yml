@@ -18,10 +18,8 @@ jobs:
         with:
           run_install: false
 
-      - name: Install dependencies
-        run: pnpm i --frozen-lockfile
-
       - name: Cypress run
         uses: cypress-io/github-action@v6
         with:
-          install: false
+          install-command: pnpm i --frozen-lockfile
+          command: pnpm cypress run
