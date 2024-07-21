@@ -24,7 +24,7 @@
   "scripts": {
     "dev": "tsup --watch",
     "build": "tsup",
-    "prepublishOnly": "pnpm check && pnpm build",
+    "prepublishOnly": "pnpm -w run check && pnpm -w run build",
     "dryPublish": "pnpm publish --dry-run"
   },
   "keywords": [
