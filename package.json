@@ -5,7 +5,8 @@
   "private": true,
   "packageManager": "pnpm@8.15.8+sha256.691fe176eea9a8a80df20e4976f3dfb44a04841ceb885638fe2a26174f81e65e",
   "scripts": {
-    "check": "biome check --write .",
+    "check": "biome check .",
+    "fix": "biome check --write .",
     "test": "vitest run",
     "build": "pnpm -r build",
     "dev": "pnpm -r dev",
