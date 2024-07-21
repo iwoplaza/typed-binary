@@ -60,11 +60,13 @@
   "devDependencies": {
     "@biomejs/biome": "^1.8.3",
     "@types/node": "^20.14.11",
+    "cypress": "^13.13.1",
     "socket.io": "^4.7.5",
     "socket.io-client": "^4.7.5",
     "tsup": "^8.2.0",
     "typescript": "^5.5.2",
-    "vitest": "^1.6.0"
+    "vitest": "^1.6.0",
+    "typed-binary": "workspace:*"
   },
   "repository": {
     "type": "git",

@@ -1,0 +1,26 @@
+name: Browser compatibility tests
+
+on:
+  push:
+    branches: [master]
+  pull_request:
+    branches: [master]
+
+jobs:
+  cypress-run:
+    runs-on: ubuntu-22.04
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          run_install: false
+
+      - name: Cypress run
+        uses: cypress-io/github-action@v6
+        with:
+          install-command: pnpm i --frozen-lockfile
+          build: pnpm build
+          command: pnpm cypress run
