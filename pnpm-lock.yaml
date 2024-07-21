@@ -23,6 +23,33 @@ importers:
       socket.io-client:
         specifier: ^4.7.5
         version: 4.7.5
+      typed-binary:
+        specifier: workspace:*
+        version: link:packages/typed-binary
+      typescript:
+        specifier: ^5.5.2
+        version: 5.5.3
+      vitest:
+        specifier: ^1.6.0
+        version: 1.6.0(@types/node@20.14.11)
+
+  packages/typed-binary:
+    devDependencies:
+      '@biomejs/biome':
+        specifier: ^1.8.3
+        version: 1.8.3
+      '@types/node':
+        specifier: ^20.14.11
+        version: 20.14.11
+      cypress:
+        specifier: ^13.13.1
+        version: 13.13.1
+      socket.io:
+        specifier: ^4.7.5
+        version: 4.7.5
+      socket.io-client:
+        specifier: ^4.7.5
+        version: 4.7.5
       tsup:
         specifier: ^8.2.0
         version: 8.2.0(typescript@5.5.3)
