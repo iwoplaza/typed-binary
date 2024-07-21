@@ -33,17 +33,24 @@ importers:
         specifier: ^1.6.0
         version: 1.6.0(@types/node@20.14.11)
 
+  apps/examples:
+    dependencies:
+      typed-binary:
+        specifier: workspace:*
+        version: link:../../packages/typed-binary
+    devDependencies:
+      tsx:
+        specifier: ^4.7.1
+        version: 4.16.2
+      typescript:
+        specifier: ^5.3.3
+        version: 5.5.3
+
   packages/typed-binary:
     devDependencies:
-      '@biomejs/biome':
-        specifier: ^1.8.3
-        version: 1.8.3
       '@types/node':
         specifier: ^20.14.11
         version: 20.14.11
-      cypress:
-        specifier: ^13.13.1
-        version: 13.13.1
       socket.io:
         specifier: ^4.7.5
         version: 4.7.5
@@ -53,9 +60,6 @@ importers:
       tsup:
         specifier: ^8.2.0
         version: 8.2.0(typescript@5.5.3)
-      typed-binary:
-        specifier: workspace:*
-        version: 'link:'
       typescript:
         specifier: ^5.5.2
         version: 5.5.3
@@ -1874,6 +1878,12 @@ packages:
     engines: {node: '>=16'}
     dev: true
 
+  /get-tsconfig@4.7.6:
+    resolution: {integrity: sha512-ZAqrLlu18NbDdRaHq+AKXzAmqIUPswPWKUchfytdAjiRFnCe5ojG2bstg6mRiZabkKfCoL/e98pbBELIV/YCeA==}
+    dependencies:
+      resolve-pkg-maps: 1.0.0
+    dev: true
+
   /getos@3.2.1:
     resolution: {integrity: sha512-U56CfOK17OKgTVqozZjUKNdkfEv6jk5WISBJ8SHoagjE6L69zOwl3Z+O8myjY9MEW3i2HPWQBt/LTbCgcC973Q==}
     dependencies:
@@ -2558,6 +2568,10 @@ packages:
     engines: {node: '>=8'}
     dev: true
 
+  /resolve-pkg-maps@1.0.0:
+    resolution: {integrity: sha512-seS2Tj26TBVOC2NIc2rOe2y2ZO7efxITtLZcGSOnHHNOQ7CkiUBfw0Iw2ck6xkIhPwLhKNLS8BO+hEpngQlqzw==}
+    dev: true
+
   /restore-cursor@3.1.0:
     resolution: {integrity: sha512-l+sSefzHpj5qimhFSE5a8nufZYAM3sBSVMAPtYkmC+4EH2anSGaEMXSD0izRQbu9nfyQ9y5JrVmp7E8oZrUjvA==}
     engines: {node: '>=8'}
@@ -3003,6 +3017,17 @@ packages:
       - supports-color
       - tsx
       - yaml
+    dev: true
+
+  /tsx@4.16.2:
+    resolution: {integrity: sha512-C1uWweJDgdtX2x600HjaFaucXTilT7tgUZHbOE4+ypskZ1OP8CRCSDkCxG6Vya9EwaFIVagWwpaVAn5wzypaqQ==}
+    engines: {node: '>=18.0.0'}
+    hasBin: true
+    dependencies:
+      esbuild: 0.21.5
+      get-tsconfig: 4.7.6
+    optionalDependencies:
+      fsevents: 2.3.3
     dev: true
 
   /tunnel-agent@0.6.0:

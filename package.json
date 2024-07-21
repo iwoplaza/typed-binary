@@ -7,6 +7,8 @@
   "scripts": {
     "check": "biome check --write .",
     "test": "vitest run",
+    "build": "pnpm -r build",
+    "dev": "pnpm -r dev",
     "dev:test": "vitest",
     "ts-version": "tsc -v"
   },

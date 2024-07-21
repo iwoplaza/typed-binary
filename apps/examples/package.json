@@ -1,7 +1,7 @@
 {
-  "name": "typed-binary-examples",
+  "name": "@typed-binary/examples",
   "scripts": {
-    "prepare": "cd .. && pnpm run build && cd examples/ && pnpm link ../",
+    "prepare": "cd ../ && pnpm build",
     "example:binaryMesh": "tsx binaryMesh/index.ts",
     "example:customSchema": "tsx customSchema/index.ts",
     "example:dog": "tsx dog/index.ts",
@@ -10,6 +10,9 @@
     "example:inferredShowcase": "tsx inferredShowcase/index.ts",
     "example:recursiveTypes": "tsx recursiveTypes/index.ts",
     "example:stateMachine": "tsx stateMachine/index.ts"
+  },
+  "dependencies": {
+    "typed-binary": "workspace:*"
   },
   "devDependencies": {
     "tsx": "^4.7.1",
