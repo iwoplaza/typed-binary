@@ -1,7 +1,7 @@
 import { BufferReader, BufferWriter } from 'typed-binary';
 
 describe('BufferWriter', () => {
-  it('passes', () => {
+  it('writes and reads from an ArrayBuffer', () => {
     const buffer = new ArrayBuffer(64);
     const writer = new BufferWriter(buffer);
 
