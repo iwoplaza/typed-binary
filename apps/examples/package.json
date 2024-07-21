@@ -1,7 +1,7 @@
 {
   "name": "@typed-binary/examples",
   "scripts": {
-    "prepare": "cd ../ && pnpm build",
+    "prepare": "pnpm -w run build",
     "example:binaryMesh": "tsx binaryMesh/index.ts",
     "example:customSchema": "tsx customSchema/index.ts",
     "example:dog": "tsx dog/index.ts",
