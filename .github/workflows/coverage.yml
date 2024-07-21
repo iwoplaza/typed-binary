@@ -1,4 +1,4 @@
-name: CI
+name: Code analysis & unit tests
 
 on:
   push:
