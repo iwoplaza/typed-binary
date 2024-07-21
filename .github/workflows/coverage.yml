@@ -25,13 +25,13 @@ jobs:
         with:
           run_install: false
 
-      - name: Install Node.js
+      - name: Use Node.js ${{ matrix.node-version }} on ${{ matrix.os }}
         uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: ${{ matrix.node-version }}
           cache: 'pnpm'
 
       - name: Install dependencies
-        run: pnpm install
+        run: pnpm install --recursive --frozen-lockfile
 
       - run: pnpm biome check . && pnpm test && pnpm build
