@@ -1,5 +1,6 @@
 import starlight from '@astrojs/starlight';
 import { defineConfig } from 'astro/config';
+import starlightTypeDoc, { typeDocSidebarGroup } from 'starlight-typedoc';
 
 // https://astro.build/config
 export default defineConfig({
@@ -20,13 +21,25 @@ export default defineConfig({
           label: 'Guides',
           items: [
             // Each item here is one entry in the navigation menu.
-            { label: 'Example Guide', slug: 'guides/example' },
+            { label: 'Why Typed Binary?', slug: 'guides/why-typed-binary' },
+            { label: 'Getting Started', slug: 'guides/getting-started' },
           ],
         },
         {
-          label: 'Reference',
-          autogenerate: { directory: 'reference' },
+          label: 'Learn the Basics',
+          items: [
+            // Each item here is one entry in the navigation menu.
+            { label: 'Getting Started', slug: 'guides/getting-started' },
+          ],
         },
+        typeDocSidebarGroup,
+      ],
+      plugins: [
+        // Generate the documentation.
+        starlightTypeDoc({
+          entryPoints: ['../../packages/typed-binary/src'],
+          tsconfig: '../../packages/typed-binary/tsconfig.json',
+        }),
       ],
     }),
   ],
