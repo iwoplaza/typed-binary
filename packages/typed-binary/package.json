@@ -25,7 +25,8 @@
     "dev": "tsup --watch",
     "build": "tsup",
     "prepublishOnly": "pnpm -w run check && pnpm -w run build",
-    "dryPublish": "pnpm publish --dry-run"
+    "dryPublish": "pnpm publish --dry-run",
+    "check": "tsup"
   },
   "keywords": [
     "typescript",

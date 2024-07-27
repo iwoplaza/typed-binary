@@ -1,0 +1,43 @@
+---
+title: Why Typed Binary?
+description: Here is how Typed Binary can be used in your project, and what are its strengths.
+---
+
+## Prioritising developer experience
+
+Serialise and deserialise typed schemas without the need for redundant interfaces or an external DSL.
+Schemas themselves define what type they encode and decode, and **your IDE knows it**!
+
+```ts
+// schema.ts
+
+import { object, u32, f32 } from 'typed-binary';
+
+const vec2f = tupleOf([f32, f32]);
+
+export const PlayerUpdatePacket = object({
+  id: u32,
+  pos: vec2f,
+});
+
+```
+
+```ts
+// main.ts
+
+import { BufferWriter } from 'typed-binary';
+import { PlayerUpdatePacket } from './schema.ts';
+
+const buffer = new ArrayBuffer(64);
+
+PlayerUpdatePacket.write(
+  new BufferWriter(buffer),
+  // Only accepts values that match the schema:
+  // { id: number, pos: [number, number] }
+  {
+    id: 0,
+    pos: [0.5, 3.14],
+  }
+);
+```
+
