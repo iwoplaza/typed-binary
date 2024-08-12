@@ -1,0 +1,70 @@
+---
+title: Recursive Types
+description: A guide on how to describe recursive types in Typed Binary
+---
+
+If you want an object type to be able to contain one of itself (recursion), then you have to start using **keyed** types. The basic pattern is this:
+
+```ts
+/**
+ * Wrapping a schema with a 'keyed' call allows the inner code to
+ * use a reference to the type we're currently creating, instead
+ * of the type itself.
+ *
+ * The reference variable 'Recursive' doesn't have to be called
+ * the same as the actual variable we're storing the schema in,
+ * but it's a neat trick that makes the schema code more readable.
+ *
+ * The 'recursive-key' has to uniquely identify this type in this tree.
+ * There may be other distinct types using the same key, as long as they do
+ * not interact with each other (one doesn't contain the other).
+ * This is because references are resolved recursively once the method
+ * passed as the 2nd argument to 'keyed' returns the schema.
+ */
+const Recursive = keyed('recursive-key', (Recursive) =>
+  object({
+    value: i32,
+    next: optional(Recursive),
+  })
+);
+```
+
+### Recursive types alongside generics
+
+```ts
+import { i32, string, object, keyed } from 'typed-binary';
+
+type Expression = Parsed<typeof Expression>;
+const Expression = keyed('expression', (Expression) =>
+  generic(
+    {},
+    {
+      multiply: object({
+        a: Expression,
+        b: Expression,
+      }),
+      negate: object({
+        inner: Expression,
+      }),
+      int_literal: object({
+        value: i32,
+      }),
+    }
+  )
+);
+
+const expr: Parsed<typeof Expression> = {
+  type: 'multiply',
+  a: {
+    type: 'negate',
+    inner: {
+      type: 'int_literal',
+      value: 15,
+    },
+  },
+  b: {
+    type: 'int_literal',
+    value: 2,
+  },
+};
+```

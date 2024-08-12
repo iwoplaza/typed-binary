@@ -1,0 +1,63 @@
+---
+title: Optionals
+description: A guide on how optionals can be used to create variable-length schemas.
+---
+
+Optionals are a good way of ensuring that no excessive data is stored as binary.
+
+They are encoded as:
+
+- `0` given `value === undefined`.
+- `1 encoded(value)` given `value !== undefined`.
+
+```ts
+import {
+  BufferWriter,
+  BufferReader,
+  i32,
+  string,
+  object,
+  optional,
+} from 'typed-binary';
+
+const buffer = Buffer.alloc(16);
+const writer = new BufferWriter(buffer);
+const reader = new BufferReader(buffer);
+
+// Simple object schema
+const Address = object({
+  city: string,
+  street: string,
+  postalCode: string,
+});
+
+// Simple object schema (with optional field)
+const Person = object({
+  firstName: string,
+  lastName: string,
+  age: i32,
+  address: optional(Address),
+});
+
+// Writing a Person (no address)
+Person.write(writer, {
+  firstName: 'John',
+  lastName: 'Doe',
+  age: 43,
+});
+
+// Writing a Person (with an address)
+Person.write(writer, {
+  firstName: 'Jesse',
+  lastName: 'Doe',
+  age: 38,
+  address: {
+    city: 'New York',
+    street: 'Binary St.',
+    postalCode: '11-111',
+  },
+});
+
+console.log(JSON.stringify(Person.read(reader).address)); // undefined
+console.log(JSON.stringify(Person.read(reader).address)); // { "city": "New York", ... }
+```

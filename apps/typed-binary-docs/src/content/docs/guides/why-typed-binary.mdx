@@ -1,0 +1,20 @@
+---
+title: Why Typed Binary?
+description: Here is how Typed Binary can be used in your project, and what its strength are.
+---
+
+**Typed Binary** introduces a composable TypeScript API for defining how JavaScript values are encoded into binary, and decoded from binary.
+No need for manual type definitions or an external DSL.
+Schemas themselves define what type they encode and decode, and **your IDE knows it**!
+
+
+#### Customizable, with good defaults
+
+Schemas can be simple primitives (integers, floats, null-terminated strings, and many more) or compositions
+in the form of arrays or objects. Custom schema types can also be made to further customize the encoding and
+decoding.
+
+#### Binary protocols no longer a last resort
+
+**Typed Binary** aims to be environment agnostic, so schemas can be shared between the server and client to easily transport
+compact binary packets when the network bandwith is of utmost importance.

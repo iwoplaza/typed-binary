@@ -1,0 +1,51 @@
+---
+title: Custom Schema Types
+description: A guide on how to create custom schema types in Typed Binary
+---
+
+Custom schema types can be defined. They are, under the hood, classes that extend the `Schema<T>` base class. The generic `T` type represents what kind of data this schema serializes from and deserializes into.
+
+```ts
+import {
+  ISerialInput,
+  ISerialOutput,
+  Schema,
+  IRefResolver,
+} from 'typed-binary';
+
+/**
+ * A schema storing radians with 2 bytes of precision.
+ */
+class RadiansSchema extends Schema<number> {
+  read(input: ISerialInput): number {
+    const low = input.readByte();
+    const high = input.readByte();
+
+    const discrete = (high << 8) | low;
+    return (discrete / 65535) * Math.PI;
+  }
+
+  write(output: ISerialOutput, value: number): void {
+    // The value will be wrapped to be in range of [0, Math.PI)
+    const wrapped = ((value % Math.PI) + Math.PI) % Math.PI;
+    // Quantizing the value to range of [0, 65535]
+    const discrete = Math.min(Math.floor((wrapped / Math.PI) * 65535), 65535);
+
+    const low = discrete & 0xff;
+    const high = (discrete >> 8) & 0xff;
+
+    output.writeByte(low);
+    output.writeByte(high);
+  }
+
+  measure(_: number, measurer: IMeasurer = new Measurer()): IMeasurer {
+    // The size of the data serialized by this schema
+    // doesn't depend on the actual value. It's always 2 bytes.
+    return measurer.add(2);
+  }
+}
+
+// Creating a singleton instance of the schema,
+// since it has no configuration properties.
+export const radians = new RadiansSchema();
+```

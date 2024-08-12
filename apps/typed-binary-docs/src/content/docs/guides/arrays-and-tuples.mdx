@@ -1,0 +1,40 @@
+---
+title: Arrays and Tuples
+description: A guide on how arrays and tuples can be represented in Typed Binary
+---
+
+## Arrays
+
+The items are encoded right next to each other. No need to store length information, as that is constant (built into the schema).
+
+```ts
+import { f32, arrayOf } from 'typed-binary';
+
+const Vector2 = arrayOf(f32, 2);
+const Vector3 = arrayOf(f32, 3);
+const Vector4 = arrayOf(f32, 4);
+```
+
+## Dynamic Arrays
+
+First 4 bytes of encoding are the length of the array, then its items next to one another.
+
+```ts
+import { i32, dynamicArrayOf } from 'typed-binary';
+
+const IntArray = dynamicArrayOf(i32);
+```
+
+## Tuple
+
+Encodes an ordered set of schemas, one next to another.
+
+```ts
+import { f32, string, tupleOf } from 'typed-binary';
+
+const Vec3f = tupleOf([f32, f32, f32]);
+type Vec3f = Parsed<typeof Vec3f>; // [number, number, number]
+
+const RecordEntry = tupleOf([string, Vec3f]);
+type RecordEntry = Parsed<typeof RecordEntry>; // [string, [number, number, number]]
+```
