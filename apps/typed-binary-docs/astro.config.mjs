@@ -4,6 +4,7 @@ import { defineConfig } from 'astro/config';
 // https://astro.build/config
 export default defineConfig({
   site: 'https://iwoplaza.github.io/typed-binary',
+  base: 'typed-binary',
   integrations: [
     starlight({
       title: 'Typed Binary',
