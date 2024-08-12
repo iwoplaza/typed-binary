@@ -23,7 +23,7 @@ jobs:
       - name: Install, build, and upload your site
         uses: withastro/action@v2
         with:
-          path: apps/docs # The root location of your Astro project inside the repository.
+          path: apps/typed-binary-docs # The root location of your Astro project inside the repository.
 
   deploy:
     needs: build
