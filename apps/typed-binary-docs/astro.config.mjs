@@ -1,6 +1,5 @@
 import starlight from '@astrojs/starlight';
 import { defineConfig } from 'astro/config';
-import starlightTypeDoc, { typeDocSidebarGroup } from 'starlight-typedoc';
 
 // https://astro.build/config
 export default defineConfig({
@@ -17,29 +16,26 @@ export default defineConfig({
         github: 'https://github.com/iwoplaza/typed-binary',
       },
       sidebar: [
-        {
-          label: 'Guides',
-          items: [
-            // Each item here is one entry in the navigation menu.
-            { label: 'Why Typed Binary?', slug: 'guides/why-typed-binary' },
-            { label: 'Getting Started', slug: 'guides/getting-started' },
-          ],
-        },
+        { label: 'Why Typed Binary?', slug: 'guides/why-typed-binary' },
         {
           label: 'Learn the Basics',
           items: [
-            // Each item here is one entry in the navigation menu.
             { label: 'Getting Started', slug: 'guides/getting-started' },
+            {
+              label: 'Serialization and Deserialization',
+              slug: 'guides/serialization-and-deserialization',
+            },
+            { label: 'Primitive Values', slug: 'guides/primitive-values' },
+            { label: 'Objects', slug: 'guides/objects' },
+            { label: 'Arrays and Tuples', slug: 'guides/arrays-and-tuples' },
+            { label: 'Optionals', slug: 'guides/optionals' },
+            { label: 'Recursive Types', slug: 'guides/recursive-types' },
+            {
+              label: 'Custom Schema Types',
+              slug: 'guides/custom-schema-types',
+            },
           ],
         },
-        typeDocSidebarGroup,
-      ],
-      plugins: [
-        // Generate the documentation.
-        starlightTypeDoc({
-          entryPoints: ['../../packages/typed-binary/src'],
-          tsconfig: '../../packages/typed-binary/tsconfig.json',
-        }),
       ],
     }),
   ],

@@ -1,0 +1,33 @@
+---
+title: Primitive Values
+description: There are a few primitives to choose from in Typed Binary, here is a quick rundown.
+---
+
+There are a few primitives to choose from:
+
+- `bool` is an 8-bit value representing either `true` or `false`.
+  - Encoded as `1` if true, and as `0` if false.
+- `byte` is an 8-bit value representing an unsigned number between 0 and 255.
+  - Encoded as-is
+- `i32` is a 32-bit signed integer number container.
+  - Encoded as-is
+- `f32` is a 32-bit signed floating-point number container.
+  - Encoded as-is
+- `string` is a variable-length string of ASCII characters.
+  - A string of characters followed by a `\0` terminal character.
+
+```ts
+import { BufferWriter, BufferReader, byte, string } from 'typed-binary';
+
+const buffer = Buffer.alloc(16);
+
+// Writing four bytes into the buffer
+const writer = new BufferWriter(buffer);
+byte.write(writer, 'W'.charCodeAt(0));
+byte.write(writer, 'o'.charCodeAt(0));
+byte.write(writer, 'w'.charCodeAt(0));
+byte.write(writer, 0);
+
+const reader = new BufferReader(buffer);
+console.log(string.read(reader)); // > Wow
+```
