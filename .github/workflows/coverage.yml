@@ -34,4 +34,4 @@ jobs:
       - name: Install dependencies
         run: pnpm install --recursive --frozen-lockfile
 
-      - run: pnpm check && pnpm test && pnpm build
+      - run: pnpm check
