@@ -1,14 +1,14 @@
-import { describe, it, expect } from 'vitest';
+import { describe, expect, it } from 'vitest';
 import {
   f32Array,
   f64Array,
+  i8Array,
   i16Array,
   i32Array,
-  i8Array,
-  u16Array,
-  u32Array,
   u8Array,
   u8ClampedArray,
+  u16Array,
+  u32Array,
 } from '../describe';
 import { encodeAndDecode } from './helpers/mock';
 

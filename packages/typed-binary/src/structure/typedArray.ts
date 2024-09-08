@@ -1,12 +1,12 @@
 import {
+  type IMeasurer,
   type ISerialInput,
   type ISerialOutput,
-  type IMeasurer,
   Measurer,
 } from '../io';
 import type { MutableBufferView } from '../io/types';
 import type { Parsed } from '../utilityTypes';
-import { Schema, type MaxValue } from './types';
+import { type MaxValue, Schema } from './types';
 
 type TypedArrayConstructor<T> = {
   readonly BYTES_PER_ELEMENT: number;
