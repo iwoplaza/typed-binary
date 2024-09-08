@@ -4,7 +4,6 @@ import {
   type ISerialOutput,
   Measurer,
 } from '../io';
-import type { MutableBufferView } from '../io/types';
 import type { Parsed } from '../utilityTypes';
 import { type MaxValue, Schema } from './types';
 
@@ -14,7 +13,7 @@ type TypedArrayConstructor<T> = {
 };
 
 export class TypedArraySchema<
-  TTypedArray extends MutableBufferView,
+  TTypedArray extends ArrayLike<number> & ArrayBufferView,
 > extends Schema<TTypedArray> {
   public readonly byteLength: number;
 
