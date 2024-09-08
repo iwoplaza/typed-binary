@@ -1,0 +1,55 @@
+---
+title: Getting Started
+description: A guide on how to get started using Typed Binary.
+---
+
+Gives tools to describe binary structures with full TypeScript support. Encodes and decodes into pure JavaScript
+objects, while giving type context for the parsed data.
+
+import { Tabs, TabItem } from '@astrojs/starlight/components';
+
+## Install
+
+<Tabs syncKey="package-manager">
+  <TabItem label="npm" icon="seti:npm">
+    ```sh frame=none
+    npm install --save typed-binary
+    ```
+  </TabItem>
+  <TabItem label="pnpm" icon="pnpm">
+    ```sh frame=none
+    pnpm add typed-binary
+    ```
+  </TabItem>
+  <TabItem label="yarn" icon="seti:yarn">
+    ```sh frame=none
+    yarn add typed-binary
+    ```
+  </TabItem>
+</Tabs>
+
+## Use in the browser
+
+```ts {7}
+import { tupleOf, f32, MaxValue, BufferWriter } from 'typed-binary';
+
+// Define a schema
+const Vec2f = tupleOf([f32, f32]);
+const Vec2fSize = Vec2f.measure(MaxValue).size;
+
+const buffer = new ArrayBuffer(Vec2fSize);
+Vec2f.write(new BufferWriter(buffer), [0.5, 3.14]);
+```
+
+## Use in Node.js
+
+```ts {7}
+import { tupleOf, f32, MaxValue, BufferWriter } from 'typed-binary';
+
+// Define a schema
+const Vec2f = tupleOf([f32, f32]);
+const Vec2fSize = Vec2f.measure(MaxValue).size;
+
+const buffer = Buffer.alloc(Vec2fSize);
+Vec2f.write(new BufferWriter(buffer), [0.5, 3.14]);
+```

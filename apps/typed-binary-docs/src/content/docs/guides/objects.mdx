@@ -1,0 +1,146 @@
+---
+title: Objects
+description: Objects store their properties in key-ascending-alphabetical order, one next to another.
+---
+
+Primitive values in JavaScript can be composed into *Plain-Old-JavaScript-Objects*. This can be
+easily represented using the `object()` schema constructor function.
+
+## Simple objects
+
+```ts
+import { i32, string, object } from 'typed-binary';
+
+// Simple object schema
+const Person = object({
+  firstName: string,
+  lastName: string,
+  age: i32,
+});
+
+// Writing a Person
+Person.write(writer, {
+  firstName: 'John',
+  lastName: 'Doe',
+  age: 43,
+});
+
+console.log(JSON.stringify(Person.read(reader))); // { "firstName": "John", ... }
+```
+
+:::note
+Objects store their properties in the order they are defined in the record passed into the `object()` constructor function.
+:::
+
+## Generic objects
+
+This feature allows for the parsing of a type that contains different fields depending on its previous values. For example, if you want to store an animal description, certain animal types might have differing features from one another.
+
+### Keyed by strings
+
+```ts
+import {
+  i32,
+  string,
+  bool,
+  generic,
+  object,
+} from 'typed-binary';
+
+// Generic object schema
+const Animal = generic(
+  {
+    nickname: string,
+    age: i32,
+  },
+  {
+    dog: object({
+      // Animal can be a dog
+      breed: string,
+    }),
+    cat: object({
+      // Animal can be a cat
+      striped: bool,
+    }),
+  }
+);
+
+// Writing an Animal
+Animal.write(writer, {
+  type: 'cat', // We're specyfing which concrete type we want this object to be.
+
+  // Base properties
+  nickname: 'James',
+  age: 5,
+
+  // Concrete type specific properties
+  striped: true,
+});
+
+// Deserializing the animal
+const animal = Animal.read(reader);
+console.log(JSON.stringify(animal)); // { "age": 5, "striped": true ... }
+
+// -- Type checking works here! --
+// animal.type => 'cat' | 'dog'
+if (animal.type === 'cat') {
+  // animal.type => 'cat'
+  console.log("It's a cat!");
+  // animal.striped => bool
+  console.log(animal.striped ? 'Striped' : 'Not striped');
+} else {
+  // animal.type => 'dog'
+  console.log("It's a dog!");
+  // animal.breed => string
+  console.log(`More specifically, a ${animal.breed}`);
+
+  // This would result in a type error (Static typing FTW!)
+  // console.log(`Striped: ${animal.striped}`);
+}
+```
+
+### Keyed by an enum (byte)
+
+```ts
+import { BufferWriter, BufferReader, i32, string, genericEnum, object } from 'typed-binary';
+
+enum AnimalType = {
+  DOG = 0,
+  CAT = 1,
+};
+
+// Generic (enum) object schema
+const Animal = genericEnum({
+  nickname: string,
+  age: i32,
+}, {
+  [AnimalType.DOG]: object({ // Animal can be a dog
+    breed: string,
+  }),
+  [AnimalType.CAT]: object({ // Animal can be a cat
+    striped: bool,
+  }),
+});
+
+// ...
+// Same as for the string keyed case
+// ...
+
+// -- Type checking works here! --
+// animal.type => AnimalType
+if (animal.type === AnimalType.CAT) {
+  // animal.type => AnimalType.CAT
+  console.log("It's a cat!");
+  // animal.striped => bool
+  console.log(animal.striped ? "Striped" : "Not striped");
+}
+else {
+  // animal.type => AnimalType.DOG
+  console.log("It's a dog!");
+  // animal.breed => string
+  console.log(`More specifically, a ${animal.breed}`);
+
+  // This would result in a type error (Static typing FTW!)
+  // console.log(`Striped: ${animal.striped}`);
+}
+```

@@ -1,0 +1,38 @@
+{
+  "$schema": "https://biomejs.dev/schemas/1.8.3/schema.json",
+  "organizeImports": {
+    "enabled": true
+  },
+  "files": {
+    "ignore": [
+      "node_modules",
+      "dist",
+      "tsconfig.test.json",
+      "tsconfig.base.json",
+      ".astro"
+    ]
+  },
+  "linter": {
+    "enabled": true,
+    "rules": {
+      "recommended": true,
+      "correctness": {
+        "noUnusedImports": "error"
+      }
+    }
+  },
+  "formatter": {
+    "lineEnding": "lf"
+  },
+  "json": {
+    "formatter": {
+      "indentStyle": "space"
+    }
+  },
+  "javascript": {
+    "formatter": {
+      "indentStyle": "space",
+      "quoteStyle": "single"
+    }
+  }
+}

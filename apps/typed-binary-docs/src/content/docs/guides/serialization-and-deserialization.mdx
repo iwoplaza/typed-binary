@@ -1,0 +1,84 @@
+---
+title: Serialization and Deserialization
+description: A guide on how to serialize and deserialize values in Typed Binary.
+---
+
+Each schema has the following methods:
+
+```ts
+/**
+ * Writes the value (according to the schema's structure) to the output.
+ */
+write(output: ISerialOutput, value: T): void;
+
+/**
+ * Reads a value (according to the schema's structure) from the input.
+ */
+read(input: ISerialInput): T;
+
+/**
+ * Estimates the size of the value (according to the schema's structure)
+ */
+measure(value: T | MaxValue, measurer: IMeasurer): IMeasurer;
+```
+
+The `ISerialInput/Output` interfaces have a basic built-in implementation that reads/writes to a buffer:
+
+```ts
+import { BufferReader, BufferWriter, byte, string } from 'typed-binary';
+
+// Creating a fixed-length buffer of arbitrary size (64 bytes).
+const buffer = Buffer.alloc(64); // Or new ArrayBuffer(64); on browsers.
+
+// Writing four bytes into the buffer
+const writer = new BufferWriter(buffer); // Implements ISerialOutput
+byte.write(writer, 'W'.charCodeAt(0));
+byte.write(writer, 'o'.charCodeAt(0));
+byte.write(writer, 'w'.charCodeAt(0));
+byte.write(writer, 0);
+
+const reader = new BufferReader(buffer); // Implements ISerialInput
+console.log(string.read(reader)); // > Wow
+```
+
+### Creating a buffer with the most optimal size
+
+Schemas can measure how many bytes a particular value will take up, which can be used
+to create a buffer that will fit that value perfectly.
+
+```ts
+import { object, u32, f32 } from 'typed-binary';
+
+export const PlayerUpdatePacket = object({
+  id: u32,
+  x: f32,
+  y: f32,
+});
+
+const packet = {
+  id: 0,
+  x: 2.4,
+  y: 1.6,
+} as const;
+
+const packetSize = PlayerUpdatePacket.measure(packet).size;
+const buffer = Buffer.alloc(packetSize); // or new ArrayBuffer(packetSize) on the browser
+```
+
+### Creating a shared buffer that fits all possible values
+
+If a schema's size is bounded (there is a max size that no value encodings will surpass), we can create a shared buffer
+of the maximum size the schema can take.
+
+```ts "MaxValue"
+import { object, u32, f32, MaxValue } from 'typed-binary';
+
+export const PlayerUpdatePacket = object({
+  id: u32,
+  x: f32,
+  y: f32,
+});
+
+const maxPacketSize = PlayerUpdatePacket.measure(MaxValue).size;
+const sharedBuffer = Buffer.alloc(maxPacketSize); // or new ArrayBuffer(maxPacketSize) on the browser
+```
