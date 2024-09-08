@@ -16,7 +16,7 @@ export interface ISerialInput {
   readSlice(
     bufferView: MutableBufferView,
     offset: number,
-    length: number,
+    byteLength: number,
   ): void;
   seekTo(offset: number): void;
   skipBytes(bytes: number): void;

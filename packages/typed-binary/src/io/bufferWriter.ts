@@ -45,8 +45,8 @@ export class BufferWriter extends BufferIOBase implements ISerialOutput {
   }
 
   writeSlice(bufferView: ArrayLike<number> & ArrayBufferView): void {
-    const srcBuffer = unwrapBuffer(bufferView);
-    const srcU8 = new Uint8Array(srcBuffer.buffer, srcBuffer.byteOffset);
+    const unwrapped = unwrapBuffer(bufferView);
+    const srcU8 = new Uint8Array(unwrapped.buffer, unwrapped.byteOffset);
     for (const srcByte of srcU8) {
       this.uint8View[this.byteOffset++] = srcByte;
     }
