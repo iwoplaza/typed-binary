@@ -99,6 +99,33 @@ describe('BufferWriter/BufferReader', () => {
     expect(reader.readByte()).to.eq(255);
   });
 
+  it('should encode a Int32Array', () => {
+    const int32s = new Int32Array([
+      0,
+      1,
+      1,
+      2,
+      3,
+      5,
+      -2_147_483_648, // min signed 32-bit integer value
+      2_147_483_647, // max signed 32-bit integer value
+    ]);
+
+    const buffer = Buffer.alloc(8 * 4);
+    const writer = new BufferWriter(buffer);
+    writer.writeSlice(int32s);
+
+    const reader = new BufferReader(buffer);
+    expect(reader.readInt32()).to.eq(0);
+    expect(reader.readInt32()).to.eq(1);
+    expect(reader.readInt32()).to.eq(1);
+    expect(reader.readInt32()).to.eq(2);
+    expect(reader.readInt32()).to.eq(3);
+    expect(reader.readInt32()).to.eq(5);
+    expect(reader.readInt32()).to.eq(-2_147_483_648);
+    expect(reader.readInt32()).to.eq(2_147_483_647);
+  });
+
   it('should encode a Uint32Array', () => {
     const uint32s = new Uint32Array([
       0,
@@ -108,7 +135,7 @@ describe('BufferWriter/BufferReader', () => {
       3,
       5,
       8,
-      Number.MAX_SAFE_INTEGER,
+      4_294_967_295, // max unsigned 32-bit integer value
     ]);
 
     const buffer = Buffer.alloc(8 * 4);
@@ -123,6 +150,6 @@ describe('BufferWriter/BufferReader', () => {
     expect(reader.readUint32()).to.eq(3);
     expect(reader.readUint32()).to.eq(5);
     expect(reader.readUint32()).to.eq(8);
-    expect(reader.readUint32()).to.eq(Number.MAX_SAFE_INTEGER);
+    expect(reader.readUint32()).to.eq(4_294_967_295);
   });
 });

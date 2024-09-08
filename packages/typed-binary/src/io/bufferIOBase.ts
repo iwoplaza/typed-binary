@@ -1,5 +1,6 @@
 import { getSystemEndianness } from '../util';
 import type { Endianness } from './types';
+import { unwrapBuffer } from './unwrapBuffer';
 
 export type BufferIOOptions = {
   /**
@@ -33,14 +34,11 @@ export class BufferIOBase {
     this.endianness = endianness === 'system' ? systemEndianness : endianness;
     this.switchEndianness = this.endianness !== systemEndianness;
 
-    let innerBuffer = buffer;
-    if (typeof Buffer !== 'undefined' && innerBuffer instanceof Buffer) {
-      // Getting rid of the outer shell, which causes the Uint8Array line to create a copy, instead of a view.
-      this.byteOffset += innerBuffer.byteOffset;
-      innerBuffer = innerBuffer.buffer;
-    }
+    // Getting rid of the outer shell, which causes the Uint8Array line to create a copy, instead of a view.
+    const unwrapped = unwrapBuffer(buffer);
+    this.byteOffset += unwrapped.byteOffset;
 
-    this.uint8View = new Uint8Array(innerBuffer, 0);
+    this.uint8View = new Uint8Array(unwrapped.buffer, 0);
 
     const helperBuffer = new ArrayBuffer(4);
     this.helperInt32View = new Int32Array(helperBuffer);
