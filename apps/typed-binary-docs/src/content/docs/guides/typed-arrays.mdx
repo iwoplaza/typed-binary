@@ -1,0 +1,37 @@
+---
+title: Typed Arrays
+description: A guide on how typed arrays can be represented in Typed Binary
+---
+
+Sometimes binary is the format that we want to work with directly. [Typed array](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Guide/Typed_arrays) schemas
+allow that data to be nested in plain objects or arrays.
+
+```ts
+const Image = object({
+  size: tupleOf([u32, u32]),
+  bitmap: u8Array(256 * 256),
+});
+
+// {
+//   size: [number, number];
+//   bitmap: Uint8Array;
+// }
+const image = Image.read(...);
+
+image.size // [number, number]
+image.bitmap // Uint8Array
+```
+
+Below is the list of available typed array schemas.
+
+Schema constructor | Encoded as | JavaScript value
+---|---|---
+`u8Array` | consecutive 8-bit unsigned integers | `Uint8Array`
+`u8ClampedArray` | consecutive 8-bit unsigned integers | `Uint8ClampedArray`
+`u16Array` | consecutive 16-bit unsigned integers | `Uint16Array`
+`u32Array` | consecutive 32-bit unsigned integers | `Uint32Array`
+`i8Array` | consecutive 8-bit signed integers | `Int8Array`
+`i16Array` | consecutive 16-bit signed integers | `Int16Array`
+`i32Array` | consecutive 32-bit signed integers | `Int32Array`
+`f32Array` | consecutive 32-bit floats | `Float32Array`
+`f64Array` | consecutive 64-bit floats | `Float64Array`

@@ -30,6 +30,7 @@ export default defineConfig({
             { label: 'Objects', slug: 'guides/objects' },
             { label: 'Arrays and Tuples', slug: 'guides/arrays-and-tuples' },
             { label: 'Optionals', slug: 'guides/optionals' },
+            { label: 'Typed Arrays', slug: 'guides/typed-arrays' },
             { label: 'Recursive Types', slug: 'guides/recursive-types' },
             {
               label: 'Custom Schema Types',
