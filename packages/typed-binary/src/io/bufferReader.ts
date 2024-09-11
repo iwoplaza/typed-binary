@@ -1,5 +1,6 @@
 import { BufferIOBase } from './bufferIOBase';
 import type { ISerialInput } from './types';
+import { unwrapBuffer } from './unwrapBuffer';
 
 export class BufferReader extends BufferIOBase implements ISerialInput {
   private copyInputToHelper(bytes: number) {
@@ -45,5 +46,21 @@ export class BufferReader extends BufferIOBase implements ISerialInput {
     }
 
     return contents;
+  }
+
+  readSlice(
+    bufferView: ArrayLike<number> & ArrayBufferView,
+    offset: number,
+    byteLength: number,
+  ): void {
+    const unwrapped = unwrapBuffer(bufferView);
+    const destU8 = new Uint8Array(
+      unwrapped.buffer,
+      unwrapped.byteOffset + offset,
+    );
+
+    for (let i = 0; i < byteLength; ++i) {
+      destU8[i] = this.uint8View[this.byteOffset++];
+    }
   }
 }
