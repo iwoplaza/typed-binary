@@ -2,38 +2,30 @@
 // Run with `npm run example:genericTypes`
 //
 
-import {
-  BufferReader,
-  BufferWriter,
-  bool,
-  generic,
-  i32,
-  object,
-  string,
-} from 'typed-binary';
+import bin from 'typed-binary';
 
 // Generic object schema
-const Animal = generic(
+const Animal = bin.generic(
   {
-    nickname: string,
-    age: i32,
+    nickname: bin.string,
+    age: bin.i32,
   },
   {
-    dog: object({
+    dog: bin.object({
       // Animal can be a dog
-      breed: string,
+      breed: bin.string,
     }),
-    cat: object({
+    cat: bin.object({
       // Animal can be a cat
-      striped: bool,
+      striped: bin.bool,
     }),
   },
 );
 
 // A buffer to serialize into/out of
 const buffer = Buffer.alloc(16);
-const writer = new BufferWriter(buffer);
-const reader = new BufferReader(buffer);
+const writer = new bin.BufferWriter(buffer);
+const reader = new bin.BufferReader(buffer);
 
 // Writing an Animal
 Animal.write(writer, {

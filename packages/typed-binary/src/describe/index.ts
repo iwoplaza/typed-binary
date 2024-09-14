@@ -1,14 +1,21 @@
 import {
+  BoolSchema,
   CharsSchema,
   ObjectSchema,
   SubTypeKey,
   TupleSchema,
+  ArraySchema,
+  DynamicArraySchema,
+  KeyedSchema,
+  OptionalSchema,
+  type AnyObjectSchema,
+  GenericObjectSchema,
+  StringSchema,
+  ByteSchema,
+  Int32Schema,
+  Uint32Schema,
+  Float32Schema,
 } from '../structure';
-import { ArraySchema } from '../structure/array';
-import { DynamicArraySchema } from '../structure/dynamicArray';
-import { KeyedSchema } from '../structure/keyed';
-import { type AnyObjectSchema, GenericObjectSchema } from '../structure/object';
-import { OptionalSchema } from '../structure/optional';
 import type {
   AnySchema,
   AnySchemaWithProperties,
@@ -17,6 +24,18 @@ import type {
   Ref,
 } from '../structure/types';
 import type { MergeRecordUnion } from '../utilityTypes';
+
+export const bool = new BoolSchema();
+
+export const string = new StringSchema();
+
+export const byte = new ByteSchema();
+
+export const i32 = new Int32Schema();
+
+export const u32 = new Uint32Schema();
+
+export const f32 = new Float32Schema();
 
 export const chars = <T extends number>(length: T) => new CharsSchema(length);
 

@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import { bool } from '../structure';
+import { bool } from '../describe';
 import { encodeAndDecode } from './helpers/mock';
 
 describe('BoolSchema', () => {

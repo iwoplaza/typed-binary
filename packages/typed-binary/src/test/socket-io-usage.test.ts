@@ -5,9 +5,8 @@ import type { AddressInfo } from 'node:net';
 import { Server, type Socket as ServerSocket } from 'socket.io';
 import { type Socket as ClientSocket, io as ioClient } from 'socket.io-client';
 
-import { dynamicArrayOf, object } from '../describe';
+import { byte, string, u32, dynamicArrayOf, object } from '../describe';
 import { BufferReader, BufferWriter } from '../io';
-import { byte, string, u32 } from '../structure';
 import type { AnySchema } from '../structure/types';
 import type { Parsed } from '../utilityTypes';
 

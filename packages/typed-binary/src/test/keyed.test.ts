@@ -1,7 +1,14 @@
 import { describe, expect, it } from 'vitest';
 
-import { generic, genericEnum, keyed, object, optional } from '../describe';
-import { i32, string } from '../structure/baseTypes';
+import {
+  generic,
+  genericEnum,
+  keyed,
+  object,
+  optional,
+  i32,
+  string,
+} from '../describe';
 import type { Parsed } from '../utilityTypes';
 import { encodeAndDecode } from './helpers/mock';
 

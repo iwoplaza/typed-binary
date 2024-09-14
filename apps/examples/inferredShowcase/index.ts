@@ -1,15 +1,15 @@
-import { type Parsed, i32, object, string } from 'typed-binary';
+import bin from 'typed-binary';
 
 // Describing the Dog schema.
-const Dog = object({
+const Dog = bin.object({
   /** The name of the doggy. */
-  name: string,
+  name: bin.string,
   /** The dog's age in dog years. */
-  age: i32,
+  age: bin.i32,
 });
 
 // Creating a type-alias for ease-of-use.
-type Dog = Parsed<typeof Dog>;
+type Dog = bin.Parsed<typeof Dog>;
 
 // Creating a 'Dog' object.
 const dog: Dog = {

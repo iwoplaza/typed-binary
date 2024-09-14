@@ -27,8 +27,6 @@ export class BoolSchema extends Schema<boolean> {
   }
 }
 
-export const bool = new BoolSchema();
-
 ////
 // STRING
 ////
@@ -54,8 +52,6 @@ export class StringSchema extends Schema<string> {
   }
 }
 
-export const string = new StringSchema();
-
 ////
 // BYTE
 ////
@@ -76,8 +72,6 @@ export class ByteSchema extends Schema<number> {
     return measurer.add(1);
   }
 }
-
-export const byte = new ByteSchema();
 
 ////
 // i32
@@ -100,8 +94,6 @@ export class Int32Schema extends Schema<number> {
   }
 }
 
-export const i32 = new Int32Schema();
-
 ////
 // u32
 ////
@@ -123,8 +115,6 @@ export class Uint32Schema extends Schema<number> {
   }
 }
 
-export const u32 = new Uint32Schema();
-
 ////
 // FLOAT
 ////
@@ -145,5 +135,3 @@ export class Float32Schema extends Schema<number> {
     return measurer.add(4);
   }
 }
-
-export const f32 = new Float32Schema();

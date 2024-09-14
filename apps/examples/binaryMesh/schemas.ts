@@ -1,19 +1,18 @@
-import type { Parsed } from 'typed-binary';
-import { arrayOf, dynamicArrayOf, i32, object } from 'typed-binary';
+import bin from 'typed-binary';
 
-export const Vertex = object({
-  x: i32,
-  y: i32,
-  z: i32,
+export const Vertex = bin.object({
+  x: bin.i32,
+  y: bin.i32,
+  z: bin.i32,
 });
 
-export const Polygon = object({
-  vertices: arrayOf(Vertex, 3),
+export const Polygon = bin.object({
+  vertices: bin.arrayOf(Vertex, 3),
 });
 
-export const Mesh = object({
-  faces: dynamicArrayOf(Polygon),
+export const Mesh = bin.object({
+  faces: bin.dynamicArrayOf(Polygon),
 });
 
 // Helpful for the top-most level element
-export type Mesh = Parsed<typeof Mesh>;
+export type Mesh = bin.Parsed<typeof Mesh>;

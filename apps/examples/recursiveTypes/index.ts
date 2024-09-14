@@ -2,29 +2,28 @@
 // Run with `npm run example:recursiveTypes`
 //
 
-import type { Parsed } from 'typed-binary';
-import { generic, i32, keyed, object, optional, string } from 'typed-binary';
+import bin from 'typed-binary';
 
-type Expression = Parsed<typeof Expression>;
-const Expression = keyed('expression', (Expression) =>
-  generic(
+type Expression = bin.Parsed<typeof Expression>;
+const Expression = bin.keyed('expression', (Expression) =>
+  bin.generic(
     {},
     {
-      multiply: object({
+      multiply: bin.object({
         a: Expression,
         b: Expression,
       }),
-      negate: object({
+      negate: bin.object({
         inner: Expression,
       }),
-      int_literal: object({
-        value: i32,
+      int_literal: bin.object({
+        value: bin.i32,
       }),
     },
   ),
 );
 
-const expr: Parsed<typeof Expression> = {
+const expr: bin.Parsed<typeof Expression> = {
   type: 'multiply',
   a: {
     type: 'negate',
@@ -39,21 +38,21 @@ const expr: Parsed<typeof Expression> = {
   },
 };
 
-type Instruction = Parsed<typeof Instruction>;
-const Instruction = object({
-  target_variable: string,
-  expression: optional(Expression),
+type Instruction = bin.Parsed<typeof Instruction>;
+const Instruction = bin.object({
+  target_variable: bin.string,
+  expression: bin.optional(Expression),
 });
 
-type Complex = Parsed<typeof Complex>;
-const Complex = keyed('complex' as const, (Complex) =>
-  object({
-    label: string,
-    inner: optional(Complex),
-    cycle: keyed('cycle' as const, (Cycle) =>
-      object({
-        value: string,
-        next: optional(Cycle),
+type Complex = bin.Parsed<typeof Complex>;
+const Complex = bin.keyed('complex' as const, (Complex) =>
+  bin.object({
+    label: bin.string,
+    inner: bin.optional(Complex),
+    cycle: bin.keyed('cycle' as const, (Cycle) =>
+      bin.object({
+        value: bin.string,
+        next: bin.optional(Cycle),
       }),
     ),
   }),

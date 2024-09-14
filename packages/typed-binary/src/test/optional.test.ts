@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 
-import { OptionalSchema, i32 } from '../structure';
+import { OptionalSchema } from '../structure';
+import { i32 } from '../describe';
 import { makeIO } from './helpers/mock';
 import { randIntBetween } from './random';
 

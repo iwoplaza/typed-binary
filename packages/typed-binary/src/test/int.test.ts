@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import { i32, u32 } from '../structure';
+import { i32, u32 } from '../describe';
 import { encodeAndDecode } from './helpers/mock';
 import { randIntBetween } from './random';
 

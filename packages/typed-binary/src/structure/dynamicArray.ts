@@ -5,7 +5,6 @@ import {
   Measurer,
 } from '../io';
 import type { ParseUnwrapped } from '../utilityTypes';
-import { u32 } from './baseTypes';
 import {
   type AnySchema,
   type IRefResolver,
@@ -62,7 +61,7 @@ export class DynamicArraySchema<TElement extends AnySchema> extends Schema<
     }
 
     // Length encoding
-    u32.measure(values.length, measurer);
+    measurer.add(4); // u32
 
     // Values encoding
     for (const value of values) {

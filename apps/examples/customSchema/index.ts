@@ -2,7 +2,7 @@
 // Run with `npm run example:customSchema`
 //
 
-import { type Parsed, object } from 'typed-binary';
+import bin from 'typed-binary';
 import { writeAndRead } from '../__util';
 import { radians } from './radians';
 
@@ -10,8 +10,8 @@ import { radians } from './radians';
  * ROTATION
  */
 
-type Rotation = Parsed<typeof Rotation>;
-const Rotation = object({
+type Rotation = bin.Parsed<typeof Rotation>;
+const Rotation = bin.object({
   roll: radians,
   pitch: radians,
   yaw: radians,
