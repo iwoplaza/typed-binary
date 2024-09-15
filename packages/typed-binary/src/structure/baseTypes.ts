@@ -11,6 +11,13 @@ import { MaxValue, Schema } from './types';
 ////
 
 export class BoolSchema extends Schema<boolean> {
+  /**
+   * The maximum number of bytes this schema can take up.
+   *
+   * Alias for `.measure(MaxValue).size`
+   */
+  readonly maxSize = 1;
+
   read(input: ISerialInput): boolean {
     return input.readBool();
   }
@@ -57,6 +64,13 @@ export class StringSchema extends Schema<string> {
 ////
 
 export class ByteSchema extends Schema<number> {
+  /**
+   * The maximum number of bytes this schema can take up.
+   *
+   * Alias for `.measure(MaxValue).size`
+   */
+  readonly maxSize = 1;
+
   read(input: ISerialInput): number {
     return input.readByte();
   }
@@ -78,6 +92,13 @@ export class ByteSchema extends Schema<number> {
 ////
 
 export class Int32Schema extends Schema<number> {
+  /**
+   * The maximum number of bytes this schema can take up.
+   *
+   * Alias for `.measure(MaxValue).size`
+   */
+  readonly maxSize = 4;
+
   read(input: ISerialInput): number {
     return input.readInt32();
   }
@@ -99,6 +120,13 @@ export class Int32Schema extends Schema<number> {
 ////
 
 export class Uint32Schema extends Schema<number> {
+  /**
+   * The maximum number of bytes this schema can take up.
+   *
+   * Alias for `.measure(MaxValue).size`
+   */
+  readonly maxSize = 4;
+
   read(input: ISerialInput): number {
     return input.readUint32();
   }
@@ -120,6 +148,13 @@ export class Uint32Schema extends Schema<number> {
 ////
 
 export class Float32Schema extends Schema<number> {
+  /**
+   * The maximum number of bytes this schema can take up.
+   *
+   * Alias for `.measure(MaxValue).size`
+   */
+  readonly maxSize = 4;
+
   read(input: ISerialInput): number {
     return input.readFloat32();
   }
