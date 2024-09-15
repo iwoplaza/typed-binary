@@ -80,6 +80,24 @@ export class ObjectSchema<TProps extends Record<string, AnySchema>>
     return result;
   }
 
+  /**
+   * The maximum number of bytes this schema can take up.
+   *
+   * Is `NaN` if the schema is unbounded. If you would like to know
+   * how many bytes a particular value encoding will take up, use `.measure(value)`.
+   *
+   * Alias for `.measure(MaxValue).size`
+   */
+  get maxSize(): number {
+    const measurer = new Measurer();
+
+    for (const property of Object.values(this.properties)) {
+      property.measure(MaxValue, measurer);
+    }
+
+    return measurer.size;
+  }
+
   measure(
     value: ParseUnwrappedRecord<TProps> | typeof MaxValue,
     measurer: IMeasurer = new Measurer(),
