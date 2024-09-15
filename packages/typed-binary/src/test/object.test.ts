@@ -1,13 +1,13 @@
 import { describe, expect, expectTypeOf, it } from 'vitest';
 
 import {
+  byte,
   concat,
   generic,
   genericEnum,
+  i32,
   object,
   optional,
-  byte,
-  i32,
   string,
 } from '../describe';
 import { type ISchema, MaxValue, type ObjectSchema } from '../structure';

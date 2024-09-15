@@ -3,10 +3,10 @@ import { describe, expect, it } from 'vitest';
 import {
   generic,
   genericEnum,
+  i32,
   keyed,
   object,
   optional,
-  i32,
   string,
 } from '../describe';
 import type { Parsed } from '../utilityTypes';

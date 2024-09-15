@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import { tupleOf, bool, i32 } from '../describe';
+import { bool, i32, tupleOf } from '../describe';
 import { MaxValue } from '../structure';
 import { encodeAndDecode } from './helpers/mock';
 
