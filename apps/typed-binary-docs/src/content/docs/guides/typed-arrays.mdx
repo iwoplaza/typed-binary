@@ -7,9 +7,9 @@ Sometimes binary is the format that we want to work with directly. [Typed array]
 allow that data to be nested in plain objects or arrays.
 
 ```ts
-const Image = object({
-  size: tupleOf([u32, u32]),
-  bitmap: u8Array(256 * 256),
+const Image = bin.object({
+  size: bin.tupleOf([bin.u32, bin.u32]),
+  bitmap: bin.u8Array(256 * 256),
 });
 
 // {
@@ -26,12 +26,12 @@ Below is the list of available typed array schemas.
 
 Schema constructor | Encoded as | JavaScript value
 ---|---|---
-`u8Array` | consecutive 8-bit unsigned integers | `Uint8Array`
-`u8ClampedArray` | consecutive 8-bit unsigned integers | `Uint8ClampedArray`
-`u16Array` | consecutive 16-bit unsigned integers | `Uint16Array`
-`u32Array` | consecutive 32-bit unsigned integers | `Uint32Array`
-`i8Array` | consecutive 8-bit signed integers | `Int8Array`
-`i16Array` | consecutive 16-bit signed integers | `Int16Array`
-`i32Array` | consecutive 32-bit signed integers | `Int32Array`
-`f32Array` | consecutive 32-bit floats | `Float32Array`
-`f64Array` | consecutive 64-bit floats | `Float64Array`
+`bin.u8Array` | consecutive 8-bit unsigned integers | `Uint8Array`
+`bin.u8ClampedArray` | consecutive 8-bit unsigned integers | `Uint8ClampedArray`
+`bin.u16Array` | consecutive 16-bit unsigned integers | `Uint16Array`
+`bin.u32Array` | consecutive 32-bit unsigned integers | `Uint32Array`
+`bin.i8Array` | consecutive 8-bit signed integers | `Int8Array`
+`bin.i16Array` | consecutive 16-bit signed integers | `Int16Array`
+`bin.i32Array` | consecutive 32-bit signed integers | `Int32Array`
+`bin.f32Array` | consecutive 32-bit floats | `Float32Array`
+`bin.f64Array` | consecutive 64-bit floats | `Float64Array`

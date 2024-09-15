@@ -17,17 +17,17 @@ There are a few primitives to choose from:
   - A string of characters followed by a `\0` terminal character.
 
 ```ts
-import { BufferWriter, BufferReader, byte, string } from 'typed-binary';
+import bin from 'typed-binary';
 
 const buffer = Buffer.alloc(16);
 
 // Writing four bytes into the buffer
-const writer = new BufferWriter(buffer);
-byte.write(writer, 'W'.charCodeAt(0));
-byte.write(writer, 'o'.charCodeAt(0));
-byte.write(writer, 'w'.charCodeAt(0));
-byte.write(writer, 0);
+const writer = new bin.BufferWriter(buffer);
+bin.byte.write(writer, 'W'.charCodeAt(0));
+bin.byte.write(writer, 'o'.charCodeAt(0));
+bin.byte.write(writer, 'w'.charCodeAt(0));
+bin.byte.write(writer, 0);
 
-const reader = new BufferReader(buffer);
-console.log(string.read(reader)); // > Wow
+const reader = new bin.BufferReader(buffer);
+console.log(bin.string.read(reader)); // > Wow
 ```

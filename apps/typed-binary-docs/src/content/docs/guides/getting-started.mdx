@@ -31,25 +31,25 @@ import { Tabs, TabItem } from '@astrojs/starlight/components';
 ## Use in the browser
 
 ```ts {7}
-import { tupleOf, f32, MaxValue, BufferWriter } from 'typed-binary';
+import bin from 'typed-binary';
 
 // Define a schema
-const Vec2f = tupleOf([f32, f32]);
-const Vec2fSize = Vec2f.measure(MaxValue).size;
+const Vec2f = bin.tupleOf([bin.f32, bin.f32]);
+const Vec2fSize = Vec2f.measure(bin.MaxValue).size;
 
 const buffer = new ArrayBuffer(Vec2fSize);
-Vec2f.write(new BufferWriter(buffer), [0.5, 3.14]);
+Vec2f.write(new bin.BufferWriter(buffer), [0.5, 3.14]);
 ```
 
 ## Use in Node.js
 
 ```ts {7}
-import { tupleOf, f32, MaxValue, BufferWriter } from 'typed-binary';
+import bin from 'typed-binary';
 
 // Define a schema
-const Vec2f = tupleOf([f32, f32]);
-const Vec2fSize = Vec2f.measure(MaxValue).size;
+const Vec2f = bin.tupleOf([bin.f32, bin.f32]);
+const Vec2fSize = Vec2f.measure(bin.MaxValue).size;
 
 const buffer = Buffer.alloc(Vec2fSize);
-Vec2f.write(new BufferWriter(buffer), [0.5, 3.14]);
+Vec2f.write(new bin.BufferWriter(buffer), [0.5, 3.14]);
 ```
