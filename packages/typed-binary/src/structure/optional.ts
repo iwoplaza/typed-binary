@@ -8,7 +8,7 @@ import type { ParseUnwrapped } from '../utilityTypes';
 import {
   type AnySchema,
   type IRefResolver,
-  type MaxValue,
+  MaxValue,
   Schema,
   type Unwrap,
 } from './types';
@@ -50,6 +50,18 @@ export class OptionalSchema<TInner extends AnySchema> extends Schema<
     }
 
     return undefined;
+  }
+
+  /**
+   * The maximum number of bytes this schema can take up.
+   *
+   * Is `NaN` if the schema is unbounded. If you would like to know
+   * how many bytes a particular value encoding will take up, use `.measure(value)`.
+   *
+   * Alias for `.measure(MaxValue).size`
+   */
+  get maxSize(): number {
+    return this.measure(MaxValue).size;
   }
 
   measure(
