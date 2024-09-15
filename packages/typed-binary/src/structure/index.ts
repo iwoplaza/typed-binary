@@ -28,4 +28,5 @@ export {
   SubTypeKey,
   OptionalSchema,
   TupleSchema,
+  TypedArraySchema,
 } from './_internal';

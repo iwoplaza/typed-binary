@@ -1,5 +1,6 @@
 import { BufferIOBase } from './bufferIOBase';
 import type { ISerialOutput } from './types';
+import { unwrapBuffer } from './unwrapBuffer';
 
 export class BufferWriter extends BufferIOBase implements ISerialOutput {
   private copyHelperToOutput(bytes: number) {
@@ -41,5 +42,13 @@ export class BufferWriter extends BufferIOBase implements ISerialOutput {
 
     // Extra null character
     this.uint8View[this.byteOffset++] = 0;
+  }
+
+  writeSlice(bufferView: ArrayLike<number> & ArrayBufferView): void {
+    const unwrapped = unwrapBuffer(bufferView);
+    const srcU8 = new Uint8Array(unwrapped.buffer, unwrapped.byteOffset);
+    for (const srcByte of srcU8) {
+      this.uint8View[this.byteOffset++] = srcByte;
+    }
   }
 }

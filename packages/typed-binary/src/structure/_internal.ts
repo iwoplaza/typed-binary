@@ -6,4 +6,5 @@ export * from './keyed';
 export * from './object';
 export * from './optional';
 export * from './tuple';
+export * from './typedArray';
 export * from './types';
