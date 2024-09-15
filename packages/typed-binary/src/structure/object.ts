@@ -5,7 +5,6 @@ import {
   Measurer,
 } from '../io';
 import type { ParseUnwrappedRecord, Parsed } from '../utilityTypes';
-import { byte, string } from './baseTypes';
 import {
   type AnySchema,
   type AnySchemaWithProperties,
@@ -229,9 +228,9 @@ export class GenericObjectSchema<
 
     // We're a generic object trying to encode a concrete value.
     if (this.keyedBy === SubTypeKey.ENUM) {
-      byte.measure(0, measurer);
+      measurer.add(1);
     } else if (value !== MaxValue) {
-      string.measure(value.type as string, measurer);
+      measurer.add((value.type as string).length + 1);
     } else {
       // 'type' can be a string of any length, so the schema is unbounded.
       return measurer.unbounded;

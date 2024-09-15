@@ -1,5 +1,5 @@
 import fs from 'node:fs/promises';
-import { BufferReader, BufferWriter } from 'typed-binary';
+import bin from 'typed-binary';
 import { Mesh } from './schemas';
 
 const DEFAULT_MESH: Mesh = {
@@ -17,7 +17,7 @@ const DEFAULT_MESH: Mesh = {
 async function loadMesh(): Promise<Mesh> {
   try {
     const buffer = await fs.readFile('./binaryMesh/mesh.bin');
-    const reader = new BufferReader(buffer);
+    const reader = new bin.BufferReader(buffer);
 
     return Mesh.read(reader);
   } catch (e) {
@@ -28,7 +28,7 @@ async function loadMesh(): Promise<Mesh> {
 async function saveMesh(mesh: Mesh): Promise<void> {
   try {
     const buffer = Buffer.alloc(Mesh.measure(mesh).size);
-    const writer = new BufferWriter(buffer);
+    const writer = new bin.BufferWriter(buffer);
 
     Mesh.write(writer, mesh);
 

@@ -7,7 +7,7 @@ If you want an object type to be able to contain one of itself (recursion), then
 
 ```ts
 /**
- * Wrapping a schema with a 'keyed' call allows the inner code to
+ * Wrapping a schema with a 'bin.keyed' call allows the inner code to
  * use a reference to the type we're currently creating, instead
  * of the type itself.
  *
@@ -21,10 +21,10 @@ If you want an object type to be able to contain one of itself (recursion), then
  * This is because references are resolved recursively once the method
  * passed as the 2nd argument to 'keyed' returns the schema.
  */
-const Recursive = keyed('recursive-key', (Recursive) =>
-  object({
-    value: i32,
-    next: optional(Recursive),
+const Recursive = bin.keyed('recursive-key', (Recursive) =>
+  bin.object({
+    value: bin.i32,
+    next: bin.optional(Recursive),
   })
 );
 ```
@@ -32,28 +32,29 @@ const Recursive = keyed('recursive-key', (Recursive) =>
 ### Recursive types alongside generics
 
 ```ts
-import { i32, string, object, keyed } from 'typed-binary';
+import bin from 'typed-binary';
 
-type Expression = Parsed<typeof Expression>;
-const Expression = keyed('expression', (Expression) =>
-  generic(
+const Expression = bin.keyed('expression', (Expression) =>
+  bin.generic(
     {},
     {
-      multiply: object({
+      multiply: bin.object({
         a: Expression,
         b: Expression,
       }),
-      negate: object({
+      negate: bin.object({
         inner: Expression,
       }),
-      int_literal: object({
-        value: i32,
+      int_literal: bin.object({
+        value: bin.i32,
       }),
     }
   )
 );
 
-const expr: Parsed<typeof Expression> = {
+type Expression = bin.Parsed<typeof Expression>;
+
+const expr: Expression = {
   type: 'multiply',
   a: {
     type: 'negate',

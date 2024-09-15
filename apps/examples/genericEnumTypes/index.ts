@@ -2,15 +2,7 @@
 // Run with `npm run example:genericEnumTypes`
 //
 
-import {
-  BufferReader,
-  BufferWriter,
-  bool,
-  genericEnum,
-  i32,
-  object,
-  string,
-} from 'typed-binary';
+import bin from 'typed-binary';
 
 enum AnimalType {
   DOG = 0,
@@ -18,27 +10,27 @@ enum AnimalType {
 }
 
 // Generic (enum) object schema
-const Animal = genericEnum(
+const Animal = bin.genericEnum(
   {
-    nickname: string,
-    age: i32,
+    nickname: bin.string,
+    age: bin.i32,
   },
   {
-    [AnimalType.DOG]: object({
+    [AnimalType.DOG]: bin.object({
       // Animal can be a dog
-      breed: string,
+      breed: bin.string,
     }),
-    [AnimalType.CAT]: object({
+    [AnimalType.CAT]: bin.object({
       // Animal can be a cat
-      striped: bool,
+      striped: bin.bool,
     }),
   },
 );
 
 // A buffer to serialize into/out of
 const buffer = Buffer.alloc(16);
-const writer = new BufferWriter(buffer);
-const reader = new BufferReader(buffer);
+const writer = new bin.BufferWriter(buffer);
+const reader = new bin.BufferReader(buffer);
 
 // Writing an Animal
 Animal.write(writer, {

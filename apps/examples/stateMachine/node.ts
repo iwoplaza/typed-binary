@@ -1,10 +1,10 @@
-import { bool, dynamicArrayOf, f32, i32, object, string } from 'typed-binary';
+import bin from 'typed-binary';
 import { ConnectionTemplate } from './connection';
 
-export const NodeTemplate = object({
-  animationKey: string,
-  startFrame: i32,
-  playbackSpeed: f32,
-  looping: bool,
-  connections: dynamicArrayOf(ConnectionTemplate),
+export const NodeTemplate = bin.object({
+  animationKey: bin.string,
+  startFrame: bin.i32,
+  playbackSpeed: bin.f32,
+  looping: bin.bool,
+  connections: bin.dynamicArrayOf(ConnectionTemplate),
 });

@@ -1,7 +1,7 @@
-import { dynamicArrayOf, i32, object } from 'typed-binary';
+import bin from 'typed-binary';
 import { NodeTemplate } from './node';
 
-export const Graph = object({
-  entryNode: i32,
-  nodes: dynamicArrayOf(NodeTemplate),
+export const Graph = bin.object({
+  entryNode: bin.i32,
+  nodes: bin.dynamicArrayOf(NodeTemplate),
 });

@@ -1,20 +1,21 @@
-import { byte, generic, keyed, object } from 'typed-binary';
-import type { Parsed } from 'typed-binary';
+import bin from 'typed-binary';
 
-type TriggerCondition = Parsed<typeof TriggerCondition>;
-export const TriggerCondition = keyed('trigger-condition', (TriggerCondition) =>
-  generic(
-    {},
-    {
-      'core:state': object({
-        state: byte,
-      }),
-      'core:animation_finished': object({}),
-      'core:not': object({
-        condition: TriggerCondition,
-      }),
-    },
-  ),
+type TriggerCondition = bin.Parsed<typeof TriggerCondition>;
+export const TriggerCondition = bin.keyed(
+  'trigger-condition',
+  (TriggerCondition) =>
+    bin.generic(
+      {},
+      {
+        'core:state': bin.object({
+          state: bin.byte,
+        }),
+        'core:animation_finished': bin.object({}),
+        'core:not': bin.object({
+          condition: TriggerCondition,
+        }),
+      },
+    ),
 );
 
 export enum MobState {

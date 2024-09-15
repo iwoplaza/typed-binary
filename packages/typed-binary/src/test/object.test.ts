@@ -1,14 +1,16 @@
 import { describe, expect, expectTypeOf, it } from 'vitest';
 
-import { concat, generic, genericEnum, object, optional } from '../describe';
 import {
-  type ISchema,
-  MaxValue,
-  type ObjectSchema,
   byte,
+  concat,
+  generic,
+  genericEnum,
   i32,
+  object,
+  optional,
   string,
-} from '../structure';
+} from '../describe';
+import { type ISchema, MaxValue, type ObjectSchema } from '../structure';
 import type { Parsed } from '../utilityTypes';
 import { encodeAndDecode, makeIO } from './helpers/mock';
 

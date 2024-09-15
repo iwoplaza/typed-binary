@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 
-import { dynamicArrayOf } from '../describe';
-import { DynamicArraySchema, MaxValue, i32 } from '../structure';
+import { dynamicArrayOf, i32 } from '../describe';
+import { DynamicArraySchema, MaxValue } from '../structure';
 import { makeIO } from './helpers/mock';
 import { randIntBetween } from './random';
 

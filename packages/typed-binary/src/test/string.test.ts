@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { string } from '../structure';
+import { string } from '../describe';
 import { encodeAndDecode } from './helpers/mock';
 import { randIntBetween } from './random';
 

@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 
-import { tupleOf } from '../describe';
-import { MaxValue, bool, i32 } from '../structure';
+import { bool, i32, tupleOf } from '../describe';
+import { MaxValue } from '../structure';
 import { encodeAndDecode } from './helpers/mock';
 
 describe('TupleSchema', () => {

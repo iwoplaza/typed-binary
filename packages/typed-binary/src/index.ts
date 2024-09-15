@@ -1,7 +1,8 @@
-export * from './structure';
-export * from './describe';
-export * from './io';
-export * from './error';
+import * as bin from './main-api';
+export * from './main-api';
+export { bin };
+export default bin;
 
+export * from './structure';
 export { getSystemEndianness } from './util';
-export type { Parsed, ParseUnwrapped } from './utilityTypes';
+export type { ParseUnwrapped } from './utilityTypes';

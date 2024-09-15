@@ -11,32 +11,25 @@ They are encoded as:
 - `1 encoded(value)` given `value !== undefined`.
 
 ```ts
-import {
-  BufferWriter,
-  BufferReader,
-  i32,
-  string,
-  object,
-  optional,
-} from 'typed-binary';
+import bin from 'typed-binary';
 
 const buffer = Buffer.alloc(16);
-const writer = new BufferWriter(buffer);
-const reader = new BufferReader(buffer);
+const writer = new bin.BufferWriter(buffer);
+const reader = new bin.BufferReader(buffer);
 
 // Simple object schema
-const Address = object({
-  city: string,
-  street: string,
-  postalCode: string,
+const Address = bin.object({
+  city: bin.string,
+  street: bin.string,
+  postalCode: bin.string,
 });
 
 // Simple object schema (with optional field)
-const Person = object({
-  firstName: string,
-  lastName: string,
-  age: i32,
-  address: optional(Address),
+const Person = bin.object({
+  firstName: bin.string,
+  lastName: bin.string,
+  age: bin.i32,
+  address: bin.optional(Address),
 });
 
 // Writing a Person (no address)

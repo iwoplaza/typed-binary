@@ -4,18 +4,18 @@ description: Objects store their properties in key-ascending-alphabetical order,
 ---
 
 Primitive values in JavaScript can be composed into *Plain-Old-JavaScript-Objects*. This can be
-easily represented using the `object()` schema constructor function.
+easily represented using the `bin.object()` schema constructor function.
 
 ## Simple objects
 
 ```ts
-import { i32, string, object } from 'typed-binary';
+import bin from 'typed-binary';
 
 // Simple object schema
-const Person = object({
-  firstName: string,
-  lastName: string,
-  age: i32,
+const Person = bin.object({
+  firstName: bin.string,
+  lastName: bin.string,
+  age: bin.i32,
 });
 
 // Writing a Person
@@ -29,7 +29,7 @@ console.log(JSON.stringify(Person.read(reader))); // { "firstName": "John", ... 
 ```
 
 :::note
-Objects store their properties in the order they are defined in the record passed into the `object()` constructor function.
+Objects store their properties in the order they are defined in the record passed into the `bin.object()` constructor function.
 :::
 
 ## Generic objects
@@ -39,28 +39,22 @@ This feature allows for the parsing of a type that contains different fields dep
 ### Keyed by strings
 
 ```ts
-import {
-  i32,
-  string,
-  bool,
-  generic,
-  object,
-} from 'typed-binary';
+import bin from 'typed-binary';
 
 // Generic object schema
-const Animal = generic(
+const Animal = bin.generic(
   {
-    nickname: string,
-    age: i32,
+    nickname: bin.string,
+    age: bin.i32,
   },
   {
-    dog: object({
+    dog: bin.object({
       // Animal can be a dog
-      breed: string,
+      breed: bin.string,
     }),
-    cat: object({
+    cat: bin.object({
       // Animal can be a cat
-      striped: bool,
+      striped: bin.bool,
     }),
   }
 );
@@ -102,7 +96,7 @@ if (animal.type === 'cat') {
 ### Keyed by an enum (byte)
 
 ```ts
-import { BufferWriter, BufferReader, i32, string, genericEnum, object } from 'typed-binary';
+import bin from 'typed-binary';
 
 enum AnimalType = {
   DOG = 0,
@@ -110,15 +104,15 @@ enum AnimalType = {
 };
 
 // Generic (enum) object schema
-const Animal = genericEnum({
-  nickname: string,
-  age: i32,
+const Animal = bin.genericEnum({
+  nickname: bin.string,
+  age: bin.i32,
 }, {
-  [AnimalType.DOG]: object({ // Animal can be a dog
-    breed: string,
+  [AnimalType.DOG]: bin.object({ // Animal can be a dog
+    breed: bin.string,
   }),
-  [AnimalType.CAT]: object({ // Animal can be a cat
-    striped: bool,
+  [AnimalType.CAT]: bin.object({ // Animal can be a cat
+    striped: bin.bool,
   }),
 });
 

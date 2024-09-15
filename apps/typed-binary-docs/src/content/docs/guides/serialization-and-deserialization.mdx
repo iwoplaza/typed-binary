@@ -25,20 +25,20 @@ measure(value: T | MaxValue, measurer: IMeasurer): IMeasurer;
 The `ISerialInput/Output` interfaces have a basic built-in implementation that reads/writes to a buffer:
 
 ```ts
-import { BufferReader, BufferWriter, byte, string } from 'typed-binary';
+import bin from 'typed-binary';
 
 // Creating a fixed-length buffer of arbitrary size (64 bytes).
 const buffer = Buffer.alloc(64); // Or new ArrayBuffer(64); on browsers.
 
 // Writing four bytes into the buffer
-const writer = new BufferWriter(buffer); // Implements ISerialOutput
-byte.write(writer, 'W'.charCodeAt(0));
-byte.write(writer, 'o'.charCodeAt(0));
-byte.write(writer, 'w'.charCodeAt(0));
-byte.write(writer, 0);
+const writer = new bin.BufferWriter(buffer); // Implements ISerialOutput
+bin.byte.write(writer, 'W'.charCodeAt(0));
+bin.byte.write(writer, 'o'.charCodeAt(0));
+bin.byte.write(writer, 'w'.charCodeAt(0));
+bin.byte.write(writer, 0);
 
-const reader = new BufferReader(buffer); // Implements ISerialInput
-console.log(string.read(reader)); // > Wow
+const reader = new bin.BufferReader(buffer); // Implements ISerialInput
+console.log(bin.string.read(reader)); // > Wow
 ```
 
 ### Creating a buffer with the most optimal size
@@ -47,12 +47,12 @@ Schemas can measure how many bytes a particular value will take up, which can be
 to create a buffer that will fit that value perfectly.
 
 ```ts
-import { object, u32, f32 } from 'typed-binary';
+import bin from 'typed-binary';
 
-export const PlayerUpdatePacket = object({
-  id: u32,
-  x: f32,
-  y: f32,
+export const PlayerUpdatePacket = bin.object({
+  id: bin.u32,
+  x: bin.f32,
+  y: bin.f32,
 });
 
 const packet = {
@@ -70,15 +70,15 @@ const buffer = Buffer.alloc(packetSize); // or new ArrayBuffer(packetSize) on th
 If a schema's size is bounded (there is a max size that no value encodings will surpass), we can create a shared buffer
 of the maximum size the schema can take.
 
-```ts "MaxValue"
-import { object, u32, f32, MaxValue } from 'typed-binary';
+```ts "bin.MaxValue"
+import bin from 'typed-binary';
 
-export const PlayerUpdatePacket = object({
-  id: u32,
-  x: f32,
-  y: f32,
+export const PlayerUpdatePacket = bin.object({
+  id: bin.u32,
+  x: bin.f32,
+  y: bin.f32,
 });
 
-const maxPacketSize = PlayerUpdatePacket.measure(MaxValue).size;
+const maxPacketSize = PlayerUpdatePacket.measure(bin.MaxValue).size;
 const sharedBuffer = Buffer.alloc(maxPacketSize); // or new ArrayBuffer(maxPacketSize) on the browser
 ```
