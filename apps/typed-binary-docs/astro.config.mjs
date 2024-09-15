@@ -9,7 +9,7 @@ export default defineConfig({
     starlight({
       title: 'Typed Binary',
       logo: {
-        light: '/public/logo-light-alt.svg',
+        light: '/public/logo-light.svg',
         dark: '/public/logo-dark.svg',
         replacesTitle: true,
       },
