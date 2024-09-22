@@ -3,6 +3,15 @@ import type { ISerialOutput } from './types';
 import { unwrapBuffer } from './unwrapBuffer';
 
 export class BufferWriter extends BufferIOBase implements ISerialOutput {
+  private _cachedTextEncoder: TextEncoder | undefined;
+
+  private get _textEncoder() {
+    if (!this._cachedTextEncoder) {
+      this._cachedTextEncoder = new TextEncoder();
+    }
+    return this._cachedTextEncoder;
+  }
+
   private copyHelperToOutput(bytes: number) {
     for (let i = 0; i < bytes; ++i)
       this.uint8View[this.byteOffset++] =
@@ -36,9 +45,11 @@ export class BufferWriter extends BufferIOBase implements ISerialOutput {
   }
 
   writeString(value: string) {
-    for (let i = 0; i < value.length; ++i) {
-      this.uint8View[this.byteOffset++] = value.charCodeAt(i);
-    }
+    const result = this._textEncoder.encodeInto(
+      value,
+      this.uint8View.subarray(this.byteOffset),
+    );
+    this.byteOffset += result.written;
 
     // Extra null character
     this.uint8View[this.byteOffset++] = 0;
