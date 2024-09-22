@@ -51,6 +51,18 @@ export class DynamicArraySchema<TElement extends AnySchema> extends Schema<
     return array;
   }
 
+  /**
+   * The maximum number of bytes this schema can take up.
+   *
+   * Is `NaN` if the schema is unbounded. If you would like to know
+   * how many bytes a particular value encoding will take up, use `.measure(value)`.
+   *
+   * Alias for `.measure(MaxValue).size`
+   */
+  get maxSize(): number {
+    return this.measure(MaxValue).size;
+  }
+
   measure(
     values: ParseUnwrapped<TElement>[] | typeof MaxValue,
     measurer: IMeasurer = new Measurer(),
