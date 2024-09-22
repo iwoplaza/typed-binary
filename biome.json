@@ -9,7 +9,7 @@
       "dist",
       "tsconfig.test.json",
       "tsconfig.base.json",
-      ".astro"
+      "*.astro"
     ]
   },
   "linter": {
