@@ -9,6 +9,7 @@ import {
   object,
   optional,
   string,
+  u32,
 } from '../describe';
 import { type ISchema, MaxValue, type ObjectSchema } from '../structure';
 import type { Parsed } from '../utilityTypes';
@@ -28,11 +29,13 @@ describe('ObjectSchema', () => {
     const description = object({
       value: i32,
       label: string,
+      extra: u32,
     });
 
     const value = {
       value: 70,
       label: 'Banana',
+      extra: 43,
     };
 
     const { output, input } = makeIO(64);

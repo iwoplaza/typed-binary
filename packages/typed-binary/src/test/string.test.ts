@@ -28,4 +28,16 @@ describe('StringSchema', () => {
     const decoded = encodeAndDecode(string, value);
     expect(decoded).to.equal(value);
   });
+
+  it('should encode an emoji', () => {
+    const value = '⛓️‍💥';
+    const decoded = encodeAndDecode(string, value);
+    expect(decoded).to.equal(value);
+  });
+
+  it('should encode a unicode string', () => {
+    const value = 'A wonderful 🌞 sunny day! 🌲🌲🌲 Forest trip.';
+    const decoded = encodeAndDecode(string, value);
+    expect(decoded).to.equal(value);
+  });
 });

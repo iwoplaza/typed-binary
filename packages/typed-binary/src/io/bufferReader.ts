@@ -3,6 +3,15 @@ import type { ISerialInput } from './types';
 import { unwrapBuffer } from './unwrapBuffer';
 
 export class BufferReader extends BufferIOBase implements ISerialInput {
+  private _cachedTextDecoder: TextDecoder | undefined;
+
+  private get _textDecoder() {
+    if (!this._cachedTextDecoder) {
+      this._cachedTextDecoder = new TextDecoder(undefined, { fatal: true });
+    }
+    return this._cachedTextDecoder;
+  }
+
   private copyInputToHelper(bytes: number) {
     for (let i = 0; i < bytes; ++i) {
       this.helperByteView[this.switchEndianness ? bytes - 1 - i : i] =
@@ -37,15 +46,21 @@ export class BufferReader extends BufferIOBase implements ISerialInput {
   }
 
   readString() {
-    let contents = '';
-
-    let char = String.fromCharCode(this.uint8View[this.byteOffset++]);
-    while (char !== '\0') {
-      contents += char;
-      char = String.fromCharCode(this.uint8View[this.byteOffset++]);
+    // Looking for the 'NULL' byte.
+    let end = this.byteOffset;
+    while (end < this.uint8View.byteLength) {
+      if (this.uint8View[end++] === 0) {
+        break;
+      }
     }
 
-    return contents;
+    const result = this._textDecoder.decode(
+      this.uint8View.subarray(this.byteOffset, end - 1),
+    );
+
+    this.byteOffset = end;
+
+    return result;
   }
 
   readSlice(

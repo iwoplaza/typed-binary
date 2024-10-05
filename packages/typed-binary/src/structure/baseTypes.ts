@@ -39,6 +39,15 @@ export class BoolSchema extends Schema<boolean> {
 ////
 
 export class StringSchema extends Schema<string> {
+  private static _cachedEncoder: TextEncoder | undefined;
+
+  private static get _encoder() {
+    if (!StringSchema._cachedEncoder) {
+      StringSchema._cachedEncoder = new TextEncoder();
+    }
+    return StringSchema._cachedEncoder;
+  }
+
   read(input: ISerialInput): string {
     return input.readString();
   }
@@ -55,7 +64,8 @@ export class StringSchema extends Schema<string> {
       // A string cannot be bound
       return measurer.unbounded;
     }
-    return measurer.add(value.length + 1);
+    const encoded = StringSchema._encoder.encode(value);
+    return measurer.add(encoded.byteLength + 1);
   }
 }
 
