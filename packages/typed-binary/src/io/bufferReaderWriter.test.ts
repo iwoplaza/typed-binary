@@ -76,6 +76,21 @@ describe('BufferWriter', () => {
     expect(reader.readUint32()).to.eq(8);
     expect(reader.readUint32()).to.eq(4_294_967_295);
   });
+
+  it('respects view length when writing slice (#35)', () => {
+    // Create a 512 byte ArrayBuffer.
+    const srcBuffer = new ArrayBuffer(512);
+
+    // Create a 100 byte Uint8Array view into the ArrayBuffer at offset 10.
+    const srcView = new Uint8Array(srcBuffer, 10, 100);
+
+    // Write the Uint8Array into a BufferWriter.
+    const dstBuffer = new ArrayBuffer(512);
+    const output = new BufferWriter(dstBuffer);
+    expect(output.currentByteOffset).toEqual(0);
+    output.writeSlice(srcView);
+    expect(output.currentByteOffset).toEqual(100);
+  });
 });
 
 describe('BufferReader', () => {

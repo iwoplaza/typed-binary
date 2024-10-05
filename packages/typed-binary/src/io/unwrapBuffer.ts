@@ -1,7 +1,15 @@
+interface UnwrapBufferResult {
+  buffer: ArrayBufferLike;
+  byteOffset: number;
+  byteLength: number;
+}
+
 /**
  * Removes up to one layer of view over a buffer.
  */
-export function unwrapBuffer(buffer: ArrayBufferLike | ArrayBufferView) {
+export function unwrapBuffer(
+  buffer: ArrayBufferLike | ArrayBufferView,
+): UnwrapBufferResult {
   let byteOffset = 0;
   let innerBuffer = buffer;
 
@@ -11,5 +19,5 @@ export function unwrapBuffer(buffer: ArrayBufferLike | ArrayBufferView) {
     innerBuffer = innerBuffer.buffer;
   }
 
-  return { buffer: innerBuffer, byteOffset };
+  return { buffer: innerBuffer, byteOffset, byteLength: buffer.byteLength };
 }
