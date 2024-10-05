@@ -40,6 +40,7 @@ export class BoolSchema extends Schema<boolean> {
 
 export class StringSchema extends Schema<string> {
   private static _cachedEncoder: TextEncoder | undefined;
+
   private static get _encoder() {
     if (!StringSchema._cachedEncoder) {
       StringSchema._cachedEncoder = new TextEncoder();
