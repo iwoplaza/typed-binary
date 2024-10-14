@@ -157,6 +157,30 @@ export class Uint32Schema extends Schema<number> {
 // FLOAT
 ////
 
+export class Float16Schema extends Schema<number> {
+  /**
+   * The maximum number of bytes this schema can take up.
+   *
+   * Alias for `.measure(MaxValue).size`
+   */
+  readonly maxSize = 2;
+
+  read(input: ISerialInput): number {
+    return input.readFloat16();
+  }
+
+  write(output: ISerialOutput, value: number): void {
+    output.writeFloat16(value);
+  }
+
+  measure(
+    _: number | MaxValue,
+    measurer: IMeasurer = new Measurer(),
+  ): IMeasurer {
+    return measurer.add(2);
+  }
+}
+
 export class Float32Schema extends Schema<number> {
   /**
    * The maximum number of bytes this schema can take up.

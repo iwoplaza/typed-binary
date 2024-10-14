@@ -5,6 +5,7 @@ import {
   ByteSchema,
   CharsSchema,
   DynamicArraySchema,
+  Float16Schema,
   Float32Schema,
   GenericObjectSchema,
   Int32Schema,
@@ -35,6 +36,8 @@ export const byte = new ByteSchema();
 export const i32 = new Int32Schema();
 
 export const u32 = new Uint32Schema();
+
+export const f16 = new Float16Schema();
 
 export const f32 = new Float32Schema();
 

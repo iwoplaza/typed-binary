@@ -17,7 +17,8 @@ export class BufferIOBase {
   protected readonly uint8View: Uint8Array;
   protected readonly helperInt32View: Int32Array;
   protected readonly helperUint32View: Uint32Array;
-  protected readonly helperFloatView: Float32Array;
+  protected readonly helperFloat16View: Uint16Array;
+  protected readonly helperFloat32View: Float32Array;
   protected readonly helperByteView: Uint8Array;
   protected readonly switchEndianness: boolean;
 
@@ -43,8 +44,9 @@ export class BufferIOBase {
     const helperBuffer = new ArrayBuffer(4);
     this.helperInt32View = new Int32Array(helperBuffer);
     this.helperUint32View = new Uint32Array(helperBuffer);
-    this.helperFloatView = new Float32Array(helperBuffer);
+    this.helperFloat32View = new Float32Array(helperBuffer);
     this.helperByteView = new Uint8Array(helperBuffer);
+    this.helperFloat16View = new Uint16Array(helperBuffer);
   }
 
   get currentByteOffset() {
