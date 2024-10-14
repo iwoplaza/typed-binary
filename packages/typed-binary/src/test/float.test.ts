@@ -67,4 +67,18 @@ describe('Float16Schema', () => {
     expect(decoded3).to.closeTo(value3, 0.000976);
     expect(decoded4).to.closeTo(value4, 16);
   });
+
+  it('should handle NaN and Infinity', () => {
+    const value1 = Number.POSITIVE_INFINITY;
+    const value2 = Number.NEGATIVE_INFINITY;
+    const value3 = Number.NaN;
+
+    const decoded1 = encodeAndDecode(f16, value1);
+    const decoded2 = encodeAndDecode(f16, value2);
+    const decoded3 = encodeAndDecode(f16, value3);
+
+    expect(decoded1).to.equal(value1);
+    expect(decoded2).to.equal(value2);
+    expect(decoded3).to.be.NaN;
+  });
 });
