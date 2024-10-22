@@ -28,7 +28,7 @@ export class BufferWriter extends BufferIOBase implements ISerialOutput {
   }
 
   writeFloat16(value: number): void {
-    this.helperFloat16View[0] = numberToFloat16(value)[0];
+    this.helperUint16View[0] = numberToFloat16(value)[0];
 
     this.copyHelperToOutput(2);
   }

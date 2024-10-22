@@ -31,7 +31,7 @@ export class BufferReader extends BufferIOBase implements ISerialInput {
   readFloat16() {
     this.copyInputToHelper(2);
 
-    return float16ToNumber(this.helperFloat16View);
+    return float16ToNumber(this.helperUint16View);
   }
 
   readFloat32() {
