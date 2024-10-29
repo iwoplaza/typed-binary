@@ -1,4 +1,5 @@
 import { BufferIOBase } from './bufferIOBase';
+import { float16ToNumber } from './float16converter';
 import type { ISerialInput } from './types';
 import { unwrapBuffer } from './unwrapBuffer';
 
@@ -27,10 +28,16 @@ export class BufferReader extends BufferIOBase implements ISerialInput {
     return this.uint8View[this.byteOffset++];
   }
 
+  readFloat16() {
+    this.copyInputToHelper(2);
+
+    return float16ToNumber(this.helperUint16View);
+  }
+
   readFloat32() {
     this.copyInputToHelper(4);
 
-    return this.helperFloatView[0];
+    return this.helperFloat32View[0];
   }
 
   readInt32() {

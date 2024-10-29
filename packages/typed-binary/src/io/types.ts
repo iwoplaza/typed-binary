@@ -8,6 +8,7 @@ export interface ISerialInput {
   readInt32(): number;
   readUint32(): number;
   readFloat32(): number;
+  readFloat16(): number;
   readString(): string;
   readSlice(bufferView: BufferView, offset: number, byteLength: number): void;
   seekTo(offset: number): void;
@@ -22,6 +23,7 @@ export interface ISerialOutput {
   writeInt32(value: number): void;
   writeUint32(value: number): void;
   writeFloat32(value: number): void;
+  writeFloat16(value: number): void;
   writeString(value: string): void;
   writeSlice(bufferView: BufferView): void;
   seekTo(offset: number): void;

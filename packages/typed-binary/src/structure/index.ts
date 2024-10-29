@@ -17,6 +17,7 @@ export {
   ByteSchema,
   Int32Schema,
   Uint32Schema,
+  Float16Schema,
   Float32Schema,
   ArraySchema,
   CharsSchema,

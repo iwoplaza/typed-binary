@@ -1,4 +1,5 @@
 import { BufferIOBase } from './bufferIOBase';
+import { numberToFloat16 } from './float16converter';
 import type { ISerialOutput } from './types';
 import { unwrapBuffer } from './unwrapBuffer';
 
@@ -26,6 +27,12 @@ export class BufferWriter extends BufferIOBase implements ISerialOutput {
     this.uint8View[this.byteOffset++] = Math.floor(value) % 256;
   }
 
+  writeFloat16(value: number): void {
+    this.helperUint16View[0] = numberToFloat16(value)[0];
+
+    this.copyHelperToOutput(2);
+  }
+
   writeInt32(value: number) {
     this.helperInt32View[0] = Math.floor(value);
 
@@ -39,7 +46,7 @@ export class BufferWriter extends BufferIOBase implements ISerialOutput {
   }
 
   writeFloat32(value: number) {
-    this.helperFloatView[0] = value;
+    this.helperFloat32View[0] = value;
 
     this.copyHelperToOutput(4);
   }
