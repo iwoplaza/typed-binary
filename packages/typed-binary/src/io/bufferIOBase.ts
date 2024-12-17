@@ -15,15 +15,7 @@ export type BufferIOOptions = {
 
 export class BufferIOBase {
   protected readonly dataView: DataView;
-  protected readonly uint8View: Uint8Array;
-  protected readonly helperInt32View: Int32Array;
-  protected readonly helperUint32View: Uint32Array;
-  protected readonly helperUint16View: Uint16Array;
-  protected readonly helperFloat32View: Float32Array;
-  protected readonly helperByteView: Uint8Array;
-  protected readonly switchEndianness: boolean;
   protected readonly littleEndian: boolean;
-
   protected byteOffset = 0;
 
   public readonly endianness: Endianness;
@@ -35,7 +27,6 @@ export class BufferIOBase {
 
     const systemEndianness = getSystemEndianness();
     this.endianness = endianness === 'system' ? systemEndianness : endianness;
-    this.switchEndianness = this.endianness !== systemEndianness;
     this.littleEndian = this.endianness === 'little';
 
     // Getting rid of the outer shell, which causes the Uint8Array line to create a copy, instead of a view.
@@ -43,14 +34,6 @@ export class BufferIOBase {
     this.byteOffset += unwrapped.byteOffset;
 
     this.dataView = new DataView(unwrapped.buffer);
-    this.uint8View = new Uint8Array(unwrapped.buffer, 0);
-
-    const helperBuffer = new ArrayBuffer(4);
-    this.helperInt32View = new Int32Array(helperBuffer);
-    this.helperUint32View = new Uint32Array(helperBuffer);
-    this.helperFloat32View = new Float32Array(helperBuffer);
-    this.helperByteView = new Uint8Array(helperBuffer);
-    this.helperUint16View = new Uint16Array(helperBuffer);
   }
 
   get currentByteOffset() {
