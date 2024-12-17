@@ -70,10 +70,10 @@ export class StringSchema extends Schema<string> {
 }
 
 ////
-// BYTE
+// i8
 ////
 
-export class ByteSchema extends Schema<number> {
+export class Int8Schema extends Schema<number> {
   /**
    * The maximum number of bytes this schema can take up.
    *
@@ -82,11 +82,11 @@ export class ByteSchema extends Schema<number> {
   readonly maxSize = 1;
 
   read(input: ISerialInput): number {
-    return input.readByte();
+    return input.readInt8();
   }
 
   write(output: ISerialOutput, value: number): void {
-    output.writeByte(value);
+    output.writeInt8(value);
   }
 
   measure(
@@ -94,6 +94,90 @@ export class ByteSchema extends Schema<number> {
     measurer: IMeasurer = new Measurer(),
   ): IMeasurer {
     return measurer.add(1);
+  }
+}
+
+////
+// u8
+////
+
+export class Uint8Schema extends Schema<number> {
+  /**
+   * The maximum number of bytes this schema can take up.
+   *
+   * Alias for `.measure(MaxValue).size`
+   */
+  readonly maxSize = 1;
+
+  read(input: ISerialInput): number {
+    return input.readUint8();
+  }
+
+  write(output: ISerialOutput, value: number): void {
+    output.writeUint8(value);
+  }
+
+  measure(
+    _: number | MaxValue,
+    measurer: IMeasurer = new Measurer(),
+  ): IMeasurer {
+    return measurer.add(1);
+  }
+}
+
+////
+// i16
+////
+
+export class Int16Schema extends Schema<number> {
+  /**
+   * The maximum number of bytes this schema can take up.
+   *
+   * Alias for `.measure(MaxValue).size`
+   */
+  readonly maxSize = 2;
+
+  read(input: ISerialInput): number {
+    return input.readInt16();
+  }
+
+  write(output: ISerialOutput, value: number): void {
+    output.writeInt16(value);
+  }
+
+  measure(
+    _: number | MaxValue,
+    measurer: IMeasurer = new Measurer(),
+  ): IMeasurer {
+    return measurer.add(2);
+  }
+}
+
+////
+// u16
+////
+
+export class Uint16Schema extends Schema<number> {
+  /**
+   * The maximum number of bytes this schema can take up.
+   *
+   * Alias for `.measure(MaxValue).size`
+   */
+  readonly maxSize = 2;
+
+  read(input: ISerialInput): number {
+    return input.readUint16();
+  }
+
+  write(output: ISerialOutput, value: number): void {
+    output.writeUint16(value);
+  }
+
+  measure(
+    _: number | MaxValue,
+    measurer: IMeasurer = new Measurer(),
+  ): IMeasurer {
+    return measurer.add(2);
   }
 }
 

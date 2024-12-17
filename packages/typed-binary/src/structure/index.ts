@@ -14,7 +14,10 @@ export {
   // Specific schemas
   BoolSchema,
   StringSchema,
-  ByteSchema,
+  Int8Schema,
+  Uint8Schema,
+  Int16Schema,
+  Uint16Schema,
   Int32Schema,
   Uint32Schema,
   Float16Schema,
