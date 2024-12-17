@@ -2,7 +2,6 @@ import {
   type AnyObjectSchema,
   ArraySchema,
   BoolSchema,
-  ByteSchema,
   CharsSchema,
   DynamicArraySchema,
   Float16Schema,
@@ -18,6 +17,12 @@ import {
   TypedArraySchema,
   Uint32Schema,
 } from '../structure';
+import {
+  Int16Schema,
+  Int8Schema,
+  Uint16Schema,
+  Uint8Schema,
+} from '../structure/baseTypes';
 import type {
   AnySchema,
   AnySchemaWithProperties,
@@ -31,15 +36,22 @@ export const bool = new BoolSchema();
 
 export const string = new StringSchema();
 
-export const byte = new ByteSchema();
+export const i8 = new Int8Schema();
+export const u8 = new Uint8Schema();
+
+export const i16 = new Int16Schema();
+export const u16 = new Uint16Schema();
 
 export const i32 = new Int32Schema();
-
 export const u32 = new Uint32Schema();
 
 export const f16 = new Float16Schema();
-
 export const f32 = new Float32Schema();
+
+/**
+ * Alias for `bin.u8`
+ */
+export const byte = u8;
 
 export const chars = <T extends number>(length: T) => new CharsSchema(length);
 

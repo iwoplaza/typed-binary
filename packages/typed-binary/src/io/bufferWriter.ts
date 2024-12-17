@@ -21,12 +21,21 @@ export class BufferWriter extends BufferIOBase implements ISerialOutput {
     this.dataView.setUint8(this.byteOffset++, value);
   }
 
-  writeFloat16(value: number): void {
-    this.dataView.setUint16(
-      this.byteOffset,
-      numberToFloat16(value),
-      this.littleEndian,
-    );
+  writeInt8(value: number) {
+    this.dataView.setInt8(this.byteOffset++, value);
+  }
+
+  writeUint8(value: number) {
+    this.dataView.setUint8(this.byteOffset++, value);
+  }
+
+  writeInt16(value: number) {
+    this.dataView.setInt16(this.byteOffset, value, this.littleEndian);
+    this.byteOffset += 2;
+  }
+
+  writeUint16(value: number) {
+    this.dataView.setUint16(this.byteOffset, value, this.littleEndian);
     this.byteOffset += 2;
   }
 
@@ -38,6 +47,15 @@ export class BufferWriter extends BufferIOBase implements ISerialOutput {
   writeUint32(value: number) {
     this.dataView.setUint32(this.byteOffset, value, this.littleEndian);
     this.byteOffset += 4;
+  }
+
+  writeFloat16(value: number): void {
+    this.dataView.setUint16(
+      this.byteOffset,
+      numberToFloat16(value),
+      this.littleEndian,
+    );
+    this.byteOffset += 2;
   }
 
   writeFloat32(value: number) {
