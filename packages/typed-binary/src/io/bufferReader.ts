@@ -13,59 +13,52 @@ export class BufferReader extends BufferIOBase implements ISerialInput {
     return this._cachedTextDecoder;
   }
 
-  private copyInputToHelper(bytes: number) {
-    for (let i = 0; i < bytes; ++i) {
-      this.helperByteView[this.switchEndianness ? bytes - 1 - i : i] =
-        this.uint8View[this.byteOffset++];
-    }
-  }
-
   readBool() {
-    return this.uint8View[this.byteOffset++] !== 0;
+    return this.dataView.getUint8(this.byteOffset++) !== 0;
   }
 
   readByte() {
-    return this.uint8View[this.byteOffset++];
+    return this.dataView.getUint8(this.byteOffset++);
   }
 
   readFloat16() {
-    this.copyInputToHelper(2);
-
-    return float16ToNumber(this.helperUint16View);
+    const value = this.dataView.getUint16(this.byteOffset, this.littleEndian);
+    this.byteOffset += 2;
+    return float16ToNumber(value);
   }
 
   readFloat32() {
-    this.copyInputToHelper(4);
-
-    return this.helperFloat32View[0];
+    const value = this.dataView.getFloat32(this.byteOffset, this.littleEndian);
+    this.byteOffset += 4;
+    return value;
   }
 
   readInt32() {
-    this.copyInputToHelper(4);
-
-    return this.helperInt32View[0];
+    const value = this.dataView.getInt32(this.byteOffset, this.littleEndian);
+    this.byteOffset += 4;
+    return value;
   }
 
   readUint32() {
-    this.copyInputToHelper(4);
-
-    return this.helperUint32View[0];
+    const value = this.dataView.getUint32(this.byteOffset, this.littleEndian);
+    this.byteOffset += 4;
+    return value;
   }
 
   readString() {
     // Looking for the 'NULL' byte.
-    let end = this.byteOffset;
-    while (end < this.uint8View.byteLength) {
-      if (this.uint8View[end++] === 0) {
+    let strLength = 0;
+    while (this.byteOffset + strLength < this.dataView.byteLength) {
+      if (this.dataView.getUint8(this.byteOffset + strLength++) === 0) {
         break;
       }
     }
 
     const result = this._textDecoder.decode(
-      this.uint8View.subarray(this.byteOffset, end - 1),
+      new Uint8Array(this.dataView.buffer, this.byteOffset, strLength - 1),
     );
 
-    this.byteOffset = end;
+    this.byteOffset += strLength;
 
     return result;
   }
@@ -82,7 +75,7 @@ export class BufferReader extends BufferIOBase implements ISerialInput {
     );
 
     for (let i = 0; i < byteLength; ++i) {
-      destU8[i] = this.uint8View[this.byteOffset++];
+      destU8[i] = this.dataView.getUint8(this.byteOffset++);
     }
   }
 }

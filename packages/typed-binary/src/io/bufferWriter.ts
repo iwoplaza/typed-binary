@@ -13,53 +13,47 @@ export class BufferWriter extends BufferIOBase implements ISerialOutput {
     return this._cachedTextEncoder;
   }
 
-  private copyHelperToOutput(bytes: number) {
-    for (let i = 0; i < bytes; ++i)
-      this.uint8View[this.byteOffset++] =
-        this.helperByteView[this.switchEndianness ? bytes - 1 - i : i];
-  }
-
   writeBool(value: boolean) {
-    this.uint8View[this.byteOffset++] = value ? 1 : 0;
+    this.dataView.setUint8(this.byteOffset++, value ? 1 : 0);
   }
 
   writeByte(value: number) {
-    this.uint8View[this.byteOffset++] = Math.floor(value) % 256;
+    this.dataView.setUint8(this.byteOffset++, value);
   }
 
   writeFloat16(value: number): void {
-    this.helperUint16View[0] = numberToFloat16(value)[0];
-
-    this.copyHelperToOutput(2);
+    this.dataView.setUint16(
+      this.byteOffset,
+      numberToFloat16(value),
+      this.littleEndian,
+    );
+    this.byteOffset += 2;
   }
 
   writeInt32(value: number) {
-    this.helperInt32View[0] = Math.floor(value);
-
-    this.copyHelperToOutput(4);
+    this.dataView.setInt32(this.byteOffset, value, this.littleEndian);
+    this.byteOffset += 4;
   }
 
   writeUint32(value: number) {
-    this.helperUint32View[0] = Math.floor(value);
-
-    this.copyHelperToOutput(4);
+    this.dataView.setUint32(this.byteOffset, value, this.littleEndian);
+    this.byteOffset += 4;
   }
 
   writeFloat32(value: number) {
-    this.helperFloat32View[0] = value;
-
-    this.copyHelperToOutput(4);
+    this.dataView.setFloat32(this.byteOffset, value, this.littleEndian);
+    this.byteOffset += 4;
   }
 
   writeString(value: string) {
     const result = this._textEncoder.encodeInto(
       value,
-      this.uint8View.subarray(this.byteOffset),
+      new Uint8Array(this.dataView.buffer, this.byteOffset),
     );
     this.byteOffset += result.written;
 
     // Extra null character
-    this.uint8View[this.byteOffset++] = 0;
+    this.dataView.setUint8(this.byteOffset++, 0);
   }
 
   writeSlice(bufferView: ArrayLike<number> & ArrayBufferView): void {
@@ -72,7 +66,7 @@ export class BufferWriter extends BufferIOBase implements ISerialOutput {
     );
 
     for (const srcByte of srcU8) {
-      this.uint8View[this.byteOffset++] = srcByte;
+      this.dataView.setUint8(this.byteOffset++, srcByte);
     }
   }
 }
