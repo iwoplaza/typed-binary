@@ -18,10 +18,10 @@ import {
   Uint32Schema,
 } from '../structure';
 import {
-  Int16Schema,
   Int8Schema,
-  Uint16Schema,
+  Int16Schema,
   Uint8Schema,
+  Uint16Schema,
 } from '../structure/baseTypes';
 import type {
   AnySchema,
