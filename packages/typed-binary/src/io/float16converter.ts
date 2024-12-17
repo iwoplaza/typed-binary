@@ -17,11 +17,10 @@ export function numberToFloat16(value: number): Uint16Array {
   return uint16Array;
 }
 
-export function float16ToNumber(uint16Array: Uint16Array): number {
-  const float16 = uint16Array[0];
-  const sign = (float16 & 0x8000) >> 15;
-  const exponent = (float16 & 0x7c00) >> 10;
-  const mantissa = float16 & 0x3ff;
+export function float16ToNumber(uint16Encoding: number): number {
+  const sign = (uint16Encoding & 0x8000) >> 15;
+  const exponent = (uint16Encoding & 0x7c00) >> 10;
+  const mantissa = uint16Encoding & 0x3ff;
   if (exponent === 0) {
     return sign === 0 ? mantissa / 1024 : -mantissa / 1024;
   }
