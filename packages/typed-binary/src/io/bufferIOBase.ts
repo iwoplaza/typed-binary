@@ -36,7 +36,7 @@ export class BufferIOBase {
     this.dataView = new DataView(unwrapped.buffer);
   }
 
-  get currentByteOffset() {
+  get currentByteOffset(): number {
     return this.byteOffset;
   }
 

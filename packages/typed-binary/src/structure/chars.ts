@@ -3,8 +3,10 @@ import { Measurer } from '../io/measurer.ts';
 import type { IMeasurer, ISerialInput, ISerialOutput } from '../io/types.ts';
 import { Schema } from './types.ts';
 
-export class CharsSchema extends Schema<string> {
-  constructor(public readonly length: number) {
+export class CharsSchema<
+  TLength extends number = number,
+> extends Schema<string> {
+  constructor(public readonly length: TLength) {
     super();
   }
 
@@ -35,6 +37,6 @@ export class CharsSchema extends Schema<string> {
   }
 }
 
-export function chars<T extends number>(length: T) {
+export function chars<T extends number>(length: T): CharsSchema<T> {
   return new CharsSchema(length);
 }

@@ -134,8 +134,11 @@ export class ObjectSchema<TProps extends Record<string, AnySchema>>
   }
 }
 
-export const object = <P extends Record<string, AnySchema>>(properties: P) =>
-  new ObjectSchema(properties);
+export function object<P extends Record<string, AnySchema>>(
+  properties: P,
+): ObjectSchema<P> {
+  return new ObjectSchema(properties);
+}
 
 type UnwrapGeneric<Base extends Record<string, AnySchema>, Ext> = {
   [TKey in keyof Ext]: ISchema<
@@ -308,7 +311,7 @@ export function generic<
   S extends {
     [Key in keyof S]: AnySchemaWithProperties;
   },
->(properties: P, subTypeMap: S) {
+>(properties: P, subTypeMap: S): GenericObjectSchema<P, S> {
   return new GenericObjectSchema(SubTypeKey.STRING, properties, subTypeMap);
 }
 
@@ -317,6 +320,6 @@ export function genericEnum<
   S extends {
     [Key in keyof S]: AnySchemaWithProperties;
   },
->(properties: P, subTypeMap: S) {
+>(properties: P, subTypeMap: S): GenericObjectSchema<P, S> {
   return new GenericObjectSchema(SubTypeKey.ENUM, properties, subTypeMap);
 }
