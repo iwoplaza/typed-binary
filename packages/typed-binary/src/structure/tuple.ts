@@ -1,6 +1,6 @@
 import { ValidationError } from '../error.ts';
-import type { IMeasurer, ISerialInput, ISerialOutput } from '../io/types.ts';
 import { Measurer } from '../io/measurer.ts';
+import type { IMeasurer, ISerialInput, ISerialOutput } from '../io/types.ts';
 import type { Parsed } from '../utilityTypes.ts';
 import {
   type AnySchema,
@@ -88,6 +88,8 @@ export class TupleSchema<
   }
 }
 
-export const tupleOf = <TSchema extends [AnySchema, ...AnySchema[]]>(
+export function tupleOf<TSchema extends [AnySchema, ...AnySchema[]]>(
   schemas: TSchema,
-) => new TupleSchema(schemas);
+) {
+  return new TupleSchema(schemas);
+}

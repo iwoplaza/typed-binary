@@ -1,6 +1,6 @@
 import { ValidationError } from '../error.ts';
-import type { IMeasurer, ISerialInput, ISerialOutput } from '../io/types.ts';
 import { Measurer } from '../io/measurer.ts';
+import type { IMeasurer, ISerialInput, ISerialOutput } from '../io/types.ts';
 import { Schema } from './types.ts';
 
 export class CharsSchema extends Schema<string> {
@@ -35,4 +35,6 @@ export class CharsSchema extends Schema<string> {
   }
 }
 
-export const chars = <T extends number>(length: T) => new CharsSchema(length);
+export function chars<T extends number>(length: T) {
+  return new CharsSchema(length);
+}

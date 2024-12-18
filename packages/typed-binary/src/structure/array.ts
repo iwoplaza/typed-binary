@@ -1,6 +1,6 @@
 import { ValidationError } from '../error.ts';
-import type { IMeasurer, ISerialInput, ISerialOutput } from '../io/types.ts';
 import { Measurer } from '../io/measurer.ts';
+import type { IMeasurer, ISerialInput, ISerialOutput } from '../io/types.ts';
 import type { ParseUnwrapped } from '../utilityTypes.ts';
 import {
   type AnySchema,
@@ -82,7 +82,9 @@ export class ArraySchema<TElement extends AnySchema> extends Schema<
   }
 }
 
-export const arrayOf = <TSchema extends AnySchema>(
+export function arrayOf<TSchema extends AnySchema>(
   elementSchema: TSchema,
   length: number,
-) => new ArraySchema(elementSchema, length);
+) {
+  return new ArraySchema(elementSchema, length);
+}

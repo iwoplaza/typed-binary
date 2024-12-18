@@ -1,5 +1,5 @@
-import type { IMeasurer, ISerialInput, ISerialOutput } from '../io/types.ts';
 import { Measurer } from '../io/measurer.ts';
+import type { IMeasurer, ISerialInput, ISerialOutput } from '../io/types.ts';
 import { MaxValue, Schema } from './types.ts';
 
 ////

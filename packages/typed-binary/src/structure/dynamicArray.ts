@@ -1,5 +1,5 @@
-import type { IMeasurer, ISerialInput, ISerialOutput } from '../io/types.ts';
 import { Measurer } from '../io/measurer.ts';
+import type { IMeasurer, ISerialInput, ISerialOutput } from '../io/types.ts';
 import type { ParseUnwrapped } from '../utilityTypes.ts';
 import {
   type AnySchema,

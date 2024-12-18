@@ -1,6 +1,6 @@
+import type { MergeRecordUnion } from '../utilityTypes.ts';
 import { type AnyObjectSchema, ObjectSchema } from './object.ts';
 import type { PropertiesOf } from './types.ts';
-import type { MergeRecordUnion } from '../utilityTypes.ts';
 
 type Concat<Objs extends AnyObjectSchema[]> = ObjectSchema<
   MergeRecordUnion<PropertiesOf<Objs[number]>>
