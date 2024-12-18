@@ -1,6 +1,6 @@
-import { getSystemEndianness } from '../util';
-import type { Endianness } from './types';
-import { unwrapBuffer } from './unwrapBuffer';
+import { getSystemEndianness } from '../util.ts';
+import type { Endianness } from './types.ts';
+import { unwrapBuffer } from './unwrapBuffer.ts';
 
 export type BufferIOOptions = {
   /**

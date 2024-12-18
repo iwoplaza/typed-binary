@@ -3,7 +3,7 @@ import type {
   DistributedKeyOf,
   MergeRecordUnion,
   MergeRecords,
-} from './utilityTypes';
+} from './utilityTypes.ts';
 
 describe('DistributedKeyOf', () => {
   it('should apply keyof to each union entry separately, then union the results together', () => {

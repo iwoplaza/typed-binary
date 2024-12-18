@@ -1,10 +1,6 @@
-import {
-  type IMeasurer,
-  type ISerialInput,
-  type ISerialOutput,
-  Measurer,
-} from '../io';
-import { MaxValue, Schema } from './types';
+import type { IMeasurer, ISerialInput, ISerialOutput } from '../io/types.ts';
+import { Measurer } from '../io/measurer.ts';
+import { MaxValue, Schema } from './types.ts';
 
 ////
 // BOOL
@@ -33,6 +29,8 @@ export class BoolSchema extends Schema<boolean> {
     return measurer.add(1);
   }
 }
+
+export const bool = new BoolSchema();
 
 ////
 // STRING
@@ -69,6 +67,8 @@ export class StringSchema extends Schema<string> {
   }
 }
 
+export const string = new StringSchema();
+
 ////
 // i8
 ////
@@ -96,6 +96,8 @@ export class Int8Schema extends Schema<number> {
     return measurer.add(1);
   }
 }
+
+export const i8 = new Int8Schema();
 
 ////
 // u8
@@ -125,6 +127,13 @@ export class Uint8Schema extends Schema<number> {
   }
 }
 
+export const u8 = new Uint8Schema();
+
+/**
+ * Alias for `bin.u8`
+ */
+export const byte = u8;
+
 ////
 // i16
 ////
@@ -152,6 +161,8 @@ export class Int16Schema extends Schema<number> {
     return measurer.add(2);
   }
 }
+
+export const i16 = new Int16Schema();
 
 ////
 // u16
@@ -181,6 +192,8 @@ export class Uint16Schema extends Schema<number> {
   }
 }
 
+export const u16 = new Uint16Schema();
+
 ////
 // i32
 ////
@@ -208,6 +221,8 @@ export class Int32Schema extends Schema<number> {
     return measurer.add(4);
   }
 }
+
+export const i32 = new Int32Schema();
 
 ////
 // u32
@@ -237,8 +252,10 @@ export class Uint32Schema extends Schema<number> {
   }
 }
 
+export const u32 = new Uint32Schema();
+
 ////
-// FLOAT
+// f16
 ////
 
 export class Float16Schema extends Schema<number> {
@@ -265,6 +282,12 @@ export class Float16Schema extends Schema<number> {
   }
 }
 
+export const f16 = new Float16Schema();
+
+////
+// f32
+////
+
 export class Float32Schema extends Schema<number> {
   /**
    * The maximum number of bytes this schema can take up.
@@ -288,3 +311,5 @@ export class Float32Schema extends Schema<number> {
     return measurer.add(4);
   }
 }
+
+export const f32 = new Float32Schema();

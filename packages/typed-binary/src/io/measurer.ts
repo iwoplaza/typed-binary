@@ -1,4 +1,4 @@
-import type { IMeasurer } from './types';
+import type { IMeasurer } from './types.ts';
 
 class UnboundedMeasurer implements IMeasurer {
   size = Number.NaN;

@@ -1,8 +1,10 @@
+import { Buffer } from 'node:buffer';
+
 import { describe, expect, it } from 'vitest';
-import { randBetween, randIntBetween } from '../test/random';
-import { getSystemEndianness } from '../util';
-import { BufferReader } from './bufferReader';
-import { BufferWriter } from './bufferWriter';
+import { randBetween, randIntBetween } from '../test/random.ts';
+import { getSystemEndianness } from '../util.ts';
+import { BufferReader } from './bufferReader.ts';
+import { BufferWriter } from './bufferWriter.ts';
 
 describe('BufferWriter', () => {
   it('should encode a Uint8Array', () => {
@@ -97,10 +99,10 @@ describe('BufferReader', () => {
   it('should decode a Uint8Array', () => {
     const buffer = Buffer.alloc(4);
     const writer = new BufferWriter(buffer);
-    writer.writeByte(0);
-    writer.writeByte(15);
-    writer.writeByte(64);
-    writer.writeByte(255);
+    writer.writeUint8(0);
+    writer.writeUint8(15);
+    writer.writeUint8(64);
+    writer.writeUint8(255);
 
     const destBuffer = new ArrayBuffer(4);
     const destU8 = new Uint8Array(destBuffer);

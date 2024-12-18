@@ -1,8 +1,10 @@
 import { describe, expect, it } from 'vitest';
 
-import { i8, i16, i32, u8, u16, u32 } from '../describe';
-import { encodeAndDecode } from './helpers/mock';
-import { randIntBetween } from './random';
+// Importing from the public API
+import { i8, i16, i32, u8, u16, u32 } from '../index.ts';
+// Helpers
+import { encodeAndDecode } from './helpers/mock.ts';
+import { randIntBetween } from './random.ts';
 
 describe('Int8Schema', () => {
   it('should encode and decode a signed int8 value', () => {

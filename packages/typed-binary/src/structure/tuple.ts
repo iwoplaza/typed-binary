@@ -1,18 +1,14 @@
-import { ValidationError } from '../error';
-import {
-  type IMeasurer,
-  type ISerialInput,
-  type ISerialOutput,
-  Measurer,
-} from '../io';
-import type { Parsed } from '../utilityTypes';
+import { ValidationError } from '../error.ts';
+import type { IMeasurer, ISerialInput, ISerialOutput } from '../io/types.ts';
+import { Measurer } from '../io/measurer.ts';
+import type { Parsed } from '../utilityTypes.ts';
 import {
   type AnySchema,
   type IRefResolver,
   MaxValue,
   Schema,
   type UnwrapArray,
-} from './types';
+} from './types.ts';
 
 export function resolveArray<T extends AnySchema[]>(
   ctx: IRefResolver,
@@ -34,11 +30,14 @@ export class TupleSchema<
     this.schemas = _unstableSchemas;
   }
 
-  resolveReferences(ctx: IRefResolver): void {
+  override resolveReferences(ctx: IRefResolver): void {
     this.schemas = resolveArray(ctx, this._unstableSchemas);
   }
 
-  write(output: ISerialOutput, values: Parsed<UnwrapArray<TSequence>>): void {
+  override write(
+    output: ISerialOutput,
+    values: Parsed<UnwrapArray<TSequence>>,
+  ): void {
     if (values.length !== this.schemas.length) {
       throw new ValidationError(
         `Expected tuple of length ${this.schemas.length}, got ${values.length}`,
@@ -50,7 +49,7 @@ export class TupleSchema<
     }
   }
 
-  read(input: ISerialInput): Parsed<UnwrapArray<TSequence>> {
+  override read(input: ISerialInput): Parsed<UnwrapArray<TSequence>> {
     const array = [] as Parsed<UnwrapArray<TSequence>>;
 
     for (let i = 0; i < this.schemas.length; ++i) {
@@ -88,3 +87,7 @@ export class TupleSchema<
     return measurer;
   }
 }
+
+export const tupleOf = <TSchema extends [AnySchema, ...AnySchema[]]>(
+  schemas: TSchema,
+) => new TupleSchema(schemas);

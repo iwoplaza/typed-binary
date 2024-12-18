@@ -1,50 +1,38 @@
 import { expectTypeOf, it } from 'vitest';
 
-import {
-  type Parsed,
-  bool,
-  dynamicArrayOf,
-  f32,
-  generic,
-  genericEnum,
-  i32,
-  keyed,
-  object,
-  optional,
-  string,
-  tupleOf,
-} from '..';
+// Importing from the public API
+import bin from '../index.ts';
 
 it('parses `i32` properly', () => {
-  expectTypeOf<Parsed<typeof i32>>().toEqualTypeOf<number>();
+  expectTypeOf<bin.Parsed<typeof bin.i32>>().toEqualTypeOf<number>();
 });
 
 it('parses `string` properly', () => {
-  expectTypeOf<Parsed<typeof string>>().toEqualTypeOf<string>();
+  expectTypeOf<bin.Parsed<typeof bin.string>>().toEqualTypeOf<string>();
 });
 
 it('parses `optional(string)` properly', () => {
-  const Schema = optional(string);
-  expectTypeOf<Parsed<typeof Schema>>().toEqualTypeOf<string | undefined>();
+  const Schema = bin.optional(bin.string);
+  expectTypeOf<bin.Parsed<typeof Schema>>().toEqualTypeOf<string | undefined>();
 });
 
 it('parses `dynamicArrayOf(i32)` properly', () => {
-  const Schema = dynamicArrayOf(i32);
-  expectTypeOf<Parsed<typeof Schema>>().toEqualTypeOf<number[]>();
+  const Schema = bin.dynamicArrayOf(bin.i32);
+  expectTypeOf<bin.Parsed<typeof Schema>>().toEqualTypeOf<number[]>();
 });
 
 it('parses `dynamicArrayOf(string)` properly', () => {
-  const Schema = dynamicArrayOf(string);
-  expectTypeOf<Parsed<typeof Schema>>().toEqualTypeOf<string[]>();
+  const Schema = bin.dynamicArrayOf(bin.string);
+  expectTypeOf<bin.Parsed<typeof Schema>>().toEqualTypeOf<string[]>();
 });
 
 it('parses `object({ a: i32, b: string, c: bool })` properly', () => {
-  const Schema = object({
-    a: i32,
-    b: string,
-    c: bool,
+  const Schema = bin.object({
+    a: bin.i32,
+    b: bin.string,
+    c: bin.bool,
   });
-  expectTypeOf<Parsed<typeof Schema>>().toEqualTypeOf<{
+  expectTypeOf<bin.Parsed<typeof Schema>>().toEqualTypeOf<{
     a: number;
     b: string;
     c: boolean;
@@ -57,20 +45,20 @@ it('parses `genericEnum` properly', () => {
     NEGATE = 1,
   }
 
-  const Expression = genericEnum(
+  const Expression = bin.genericEnum(
     {},
     {
-      [ExpressionType.ADD]: object({
-        leftHandSizeId: i32,
-        rightHandSizeId: i32,
+      [ExpressionType.ADD]: bin.object({
+        leftHandSizeId: bin.i32,
+        rightHandSizeId: bin.i32,
       }),
-      [ExpressionType.NEGATE]: object({
-        innerExpressionId: i32,
+      [ExpressionType.NEGATE]: bin.object({
+        innerExpressionId: bin.i32,
       }),
     },
   );
 
-  type Result = Parsed<typeof Expression>;
+  type Result = bin.Parsed<typeof Expression>;
 
   expectTypeOf<Result>().toEqualTypeOf<
     | {
@@ -86,26 +74,26 @@ it('parses `genericEnum` properly', () => {
 });
 
 it('parses `generic` with base properties properly', () => {
-  const KeyframeNodeTemplate = generic(
+  const KeyframeNodeTemplate = bin.generic(
     {
-      connections: dynamicArrayOf(i32),
+      connections: bin.dynamicArrayOf(bin.i32),
     },
     {
-      'core:standard': object({
-        animationKey: string,
-        startFrame: i32,
-        playbackSpeed: i32,
-        looping: bool,
+      'core:standard': bin.object({
+        animationKey: bin.string,
+        startFrame: bin.i32,
+        playbackSpeed: bin.i32,
+        looping: bin.bool,
       }),
-      'core:movement': object({
-        animationKey: string,
-        startFrame: i32,
-        playbackSpeed: i32,
+      'core:movement': bin.object({
+        animationKey: bin.string,
+        startFrame: bin.i32,
+        playbackSpeed: bin.i32,
       }),
     },
   );
 
-  type KeyframeNodeTemplate = Parsed<typeof KeyframeNodeTemplate>;
+  type KeyframeNodeTemplate = bin.Parsed<typeof KeyframeNodeTemplate>;
   expectTypeOf<KeyframeNodeTemplate>().toEqualTypeOf<
     | {
         type: 'core:standard';
@@ -126,26 +114,26 @@ it('parses `generic` with base properties properly', () => {
 });
 
 it('parses simple recursive record properly', () => {
-  const InfiniteLink = keyed('infinite-link', (InfiniteLink) =>
-    object({
-      value: i32,
+  const InfiniteLink = bin.keyed('infinite-link', (InfiniteLink) =>
+    bin.object({
+      value: bin.i32,
       next: InfiniteLink,
     }),
   );
 
-  expectTypeOf<Parsed<typeof InfiniteLink>['next']>().toEqualTypeOf<
-    Parsed<typeof InfiniteLink>
+  expectTypeOf<bin.Parsed<typeof InfiniteLink>['next']>().toEqualTypeOf<
+    bin.Parsed<typeof InfiniteLink>
   >();
 });
 
 it('parses tuple schema properly', () => {
-  const Schema = tupleOf([i32, bool]);
+  const Schema = bin.tupleOf([bin.i32, bin.bool]);
 
-  expectTypeOf<Parsed<typeof Schema>>().toEqualTypeOf<[number, boolean]>();
+  expectTypeOf<bin.Parsed<typeof Schema>>().toEqualTypeOf<[number, boolean]>();
 });
 
 it('parses complex schema properly', () => {
-  const vec3f = tupleOf([f32, f32, f32]);
+  const vec3f = bin.tupleOf([bin.f32, bin.f32, bin.f32]);
 
   enum NodeType {
     // primitives
@@ -157,29 +145,29 @@ it('parses complex schema properly', () => {
     UNION = 3,
   }
 
-  const Sphere = object({
+  const Sphere = bin.object({
     pos: vec3f,
-    radius: f32,
+    radius: bin.f32,
   });
 
-  const Box3 = object({
+  const Box3 = bin.object({
     pos: vec3f,
     halfSize: vec3f,
   });
 
-  const Plane = object({
+  const Plane = bin.object({
     pos: vec3f,
     normal: vec3f,
   });
 
-  const Union = object({
-    smoothRadius: f32,
+  const Union = bin.object({
+    smoothRadius: bin.f32,
   });
 
-  const SceneGraphNode = keyed('node', (SceneGraphNode) =>
-    genericEnum(
+  const SceneGraphNode = bin.keyed('node', (SceneGraphNode) =>
+    bin.genericEnum(
       {
-        children: dynamicArrayOf(SceneGraphNode),
+        children: bin.dynamicArrayOf(SceneGraphNode),
       },
       {
         [NodeType.SPHERE]: Sphere,
@@ -191,7 +179,7 @@ it('parses complex schema properly', () => {
     ),
   );
 
-  type Actual = Parsed<typeof SceneGraphNode>;
+  type Actual = bin.Parsed<typeof SceneGraphNode>;
 
   type Expected = {
     children: Expected[];

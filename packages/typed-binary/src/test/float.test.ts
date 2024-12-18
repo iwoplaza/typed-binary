@@ -1,8 +1,10 @@
 import { describe, expect, it } from 'vitest';
 
-import { f16, f32 } from '../describe';
-import { encodeAndDecode } from './helpers/mock';
-import { randBetween } from './random';
+// Importing from the public API
+import { f16, f32 } from '../index.ts';
+// Helpers
+import { encodeAndDecode } from './helpers/mock.ts';
+import { randBetween } from './random.ts';
 
 describe('Float32Schema', () => {
   it('should encode and decode a f32 value', () => {

@@ -1,11 +1,7 @@
-import {
-  type IMeasurer,
-  type ISerialInput,
-  type ISerialOutput,
-  Measurer,
-} from '../io';
-import type { Parsed } from '../utilityTypes';
-import { type MaxValue, Schema } from './types';
+import type { IMeasurer, ISerialInput, ISerialOutput } from '../io/types.ts';
+import { Measurer } from '../io/measurer.ts';
+import type { Parsed } from '../utilityTypes.ts';
+import { type MaxValue, Schema } from './types.ts';
 
 type TypedArrayConstructor<T> = {
   readonly BYTES_PER_ELEMENT: number;
@@ -44,3 +40,30 @@ export class TypedArraySchema<
     return measurer.add(this.byteLength);
   }
 }
+
+export const u8Array = (length: number) =>
+  new TypedArraySchema(length, Uint8Array);
+
+export const u8ClampedArray = (length: number) =>
+  new TypedArraySchema(length, Uint8ClampedArray);
+
+export const u16Array = (length: number) =>
+  new TypedArraySchema(length, Uint16Array);
+
+export const u32Array = (length: number) =>
+  new TypedArraySchema(length, Uint32Array);
+
+export const i8Array = (length: number) =>
+  new TypedArraySchema(length, Int8Array);
+
+export const i16Array = (length: number) =>
+  new TypedArraySchema(length, Int16Array);
+
+export const i32Array = (length: number) =>
+  new TypedArraySchema(length, Int32Array);
+
+export const f32Array = (length: number) =>
+  new TypedArraySchema(length, Float32Array);
+
+export const f64Array = (length: number) =>
+  new TypedArraySchema(length, Float64Array);

@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { unwrapBuffer } from './unwrapBuffer';
+import { unwrapBuffer } from './unwrapBuffer.ts';
 
 describe('unwrapBuffer', () => {
   it('returns the input if given an array buffer', () => {

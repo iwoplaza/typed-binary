@@ -1,11 +1,7 @@
-import { UnresolvedReferenceError } from '../error';
-import {
-  type IMeasurer,
-  type ISerialInput,
-  type ISerialOutput,
-  Measurer,
-} from '../io';
-import type { ParseUnwrapped, Parsed } from '../utilityTypes';
+import { UnresolvedReferenceError } from '../error.ts';
+import type { IMeasurer, ISerialInput, ISerialOutput } from '../io/types.ts';
+import { Measurer } from '../io/measurer.ts';
+import type { ParseUnwrapped, Parsed } from '../utilityTypes.ts';
 import {
   type AnySchema,
   type IKeyedSchema,
@@ -15,7 +11,7 @@ import {
   type PropertyDescription,
   Ref,
   type Unwrap,
-} from './types';
+} from './types.ts';
 
 class RefSchema<TKeyDef extends string> implements ISchema<Ref<TKeyDef>> {
   public readonly __unwrapped!: Ref<TKeyDef>;
@@ -148,3 +144,8 @@ export class KeyedSchema<
     return this.innerType.seekProperty(reference, prop as never);
   }
 }
+
+export const keyed = <K extends string, P extends ISchema<unknown>>(
+  key: K,
+  inner: (ref: ISchema<Ref<K>>) => P,
+) => new KeyedSchema(key, inner);

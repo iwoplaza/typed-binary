@@ -28,8 +28,8 @@ class RadiansSchema extends Schema<number> {
     const low = discrete & 0xff;
     const high = (discrete >> 8) & 0xff;
 
-    output.writeByte(low);
-    output.writeByte(high);
+    output.writeUint8(low);
+    output.writeUint8(high);
   }
 
   measure(

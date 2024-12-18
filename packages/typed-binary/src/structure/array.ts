@@ -1,18 +1,14 @@
-import { ValidationError } from '../error';
-import {
-  type IMeasurer,
-  type ISerialInput,
-  type ISerialOutput,
-  Measurer,
-} from '../io';
-import type { ParseUnwrapped } from '../utilityTypes';
+import { ValidationError } from '../error.ts';
+import type { IMeasurer, ISerialInput, ISerialOutput } from '../io/types.ts';
+import { Measurer } from '../io/measurer.ts';
+import type { ParseUnwrapped } from '../utilityTypes.ts';
 import {
   type AnySchema,
   type IRefResolver,
   MaxValue,
   Schema,
   type Unwrap,
-} from './types';
+} from './types.ts';
 
 export class ArraySchema<TElement extends AnySchema> extends Schema<
   Unwrap<TElement>[]
@@ -30,11 +26,14 @@ export class ArraySchema<TElement extends AnySchema> extends Schema<
     this.elementSchema = _unstableElementSchema;
   }
 
-  resolveReferences(ctx: IRefResolver): void {
+  override resolveReferences(ctx: IRefResolver): void {
     this.elementSchema = ctx.resolve(this._unstableElementSchema);
   }
 
-  write(output: ISerialOutput, values: ParseUnwrapped<TElement>[]): void {
+  override write(
+    output: ISerialOutput,
+    values: ParseUnwrapped<TElement>[],
+  ): void {
     if (values.length !== this.length) {
       throw new ValidationError(
         `Expected array of length ${this.length}, got ${values.length}`,
@@ -46,7 +45,7 @@ export class ArraySchema<TElement extends AnySchema> extends Schema<
     }
   }
 
-  read(input: ISerialInput): ParseUnwrapped<TElement>[] {
+  override read(input: ISerialInput): ParseUnwrapped<TElement>[] {
     const array: ParseUnwrapped<TElement>[] = [];
 
     for (let i = 0; i < this.length; ++i) {
@@ -68,7 +67,7 @@ export class ArraySchema<TElement extends AnySchema> extends Schema<
     return this.elementSchema.measure(MaxValue).size * this.length;
   }
 
-  measure(
+  override measure(
     values: ParseUnwrapped<TElement>[] | MaxValue,
     measurer: IMeasurer = new Measurer(),
   ): IMeasurer {
@@ -82,3 +81,8 @@ export class ArraySchema<TElement extends AnySchema> extends Schema<
     return measurer;
   }
 }
+
+export const arrayOf = <TSchema extends AnySchema>(
+  elementSchema: TSchema,
+  length: number,
+) => new ArraySchema(elementSchema, length);

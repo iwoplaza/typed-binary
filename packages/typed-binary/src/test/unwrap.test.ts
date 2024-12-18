@@ -1,11 +1,13 @@
 import { describe, expectTypeOf, it } from 'vitest';
 
-import type { ISchema, Unwrap } from '..';
+// Importing from the public API
 import type {
+  Unwrap,
+  ISchema,
   IKeyedSchema,
-  UnwrapArray,
   UnwrapRecord,
-} from '../structure/types';
+  UnwrapArray,
+} from '../index.ts';
 
 describe('Unwrap<T>', () => {
   it('unwraps one level of wrapping properly', () => {

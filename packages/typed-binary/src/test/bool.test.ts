@@ -1,7 +1,9 @@
 import { describe, expect, it } from 'vitest';
 
-import { bool } from '../describe';
-import { encodeAndDecode } from './helpers/mock';
+// Importing from the public API
+import { bool } from '../index.ts';
+// Helpers
+import { encodeAndDecode } from './helpers/mock.ts';
 
 describe('BoolSchema', () => {
   it('should encode and decode a bool value', () => {

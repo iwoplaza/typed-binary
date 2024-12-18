@@ -1,17 +1,13 @@
-import {
-  type IMeasurer,
-  type ISerialInput,
-  type ISerialOutput,
-  Measurer,
-} from '../io';
-import type { ParseUnwrapped } from '../utilityTypes';
+import type { IMeasurer, ISerialInput, ISerialOutput } from '../io/types.ts';
+import { Measurer } from '../io/measurer.ts';
+import type { ParseUnwrapped } from '../utilityTypes.ts';
 import {
   type AnySchema,
   type IRefResolver,
   MaxValue,
   Schema,
   type Unwrap,
-} from './types';
+} from './types.ts';
 
 export class OptionalSchema<TInner extends AnySchema> extends Schema<
   Unwrap<TInner> | undefined
@@ -26,11 +22,11 @@ export class OptionalSchema<TInner extends AnySchema> extends Schema<
     this.innerSchema = _innerUnstableSchema;
   }
 
-  resolveReferences(ctx: IRefResolver): void {
+  override resolveReferences(ctx: IRefResolver): void {
     this.innerSchema = ctx.resolve(this._innerUnstableSchema);
   }
 
-  write(
+  override write(
     output: ISerialOutput,
     value: ParseUnwrapped<TInner> | undefined,
   ): void {
@@ -42,7 +38,7 @@ export class OptionalSchema<TInner extends AnySchema> extends Schema<
     }
   }
 
-  read(input: ISerialInput): ParseUnwrapped<TInner> | undefined {
+  override read(input: ISerialInput): ParseUnwrapped<TInner> | undefined {
     const valueExists = input.readBool();
 
     if (valueExists) {
@@ -64,7 +60,7 @@ export class OptionalSchema<TInner extends AnySchema> extends Schema<
     return this.measure(MaxValue).size;
   }
 
-  measure(
+  override measure(
     value: ParseUnwrapped<TInner> | MaxValue | undefined,
     measurer: IMeasurer = new Measurer(),
   ): IMeasurer {
@@ -75,3 +71,6 @@ export class OptionalSchema<TInner extends AnySchema> extends Schema<
     return measurer.add(1);
   }
 }
+
+export const optional = <TSchema extends AnySchema>(innerType: TSchema) =>
+  new OptionalSchema(innerType);
