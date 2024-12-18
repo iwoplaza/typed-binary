@@ -26,7 +26,7 @@ jobs:
       - name: Install dependencies
         run: pnpm install --recursive --frozen-lockfile
 
-      - run: pnpm publish-package -- --dry-run
+      - run: pnpm publish-package
         working-directory: ./packages/typed-binary
         env:
-          NODE_AUTH_TOKEN: ${{secrets.npm_token}}
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
