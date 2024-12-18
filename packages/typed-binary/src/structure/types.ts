@@ -149,10 +149,11 @@ export class Ref<K extends string> {
 // Generic types
 ////
 
-export enum SubTypeKey {
-  STRING = 'STRING',
-  ENUM = 'ENUM',
-}
+export type SubTypeKey = 'string' | 'enum';
+export const SubTypeKey = {
+  STRING: 'string',
+  ENUM: 'enum',
+} as const;
 
 export interface IRefResolver {
   hasKey(key: string): boolean;
