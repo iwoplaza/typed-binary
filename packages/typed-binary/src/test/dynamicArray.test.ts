@@ -1,13 +1,14 @@
 import { describe, expect, it } from 'vitest';
 
-import { dynamicArrayOf, i32 } from '../describe';
-import { DynamicArraySchema, MaxValue } from '../structure';
-import { makeIO } from './helpers/mock';
-import { randIntBetween } from './random';
+// Importing from the public API
+import bin, { DynamicArraySchema, MaxValue } from '../index.ts';
+// Helpers
+import { makeIO } from './helpers/mock.ts';
+import { randIntBetween } from './random.ts';
 
 describe('DynamicArraySchema', () => {
   it('should estimate an int-array encoding size', () => {
-    const IntArray = dynamicArrayOf(i32);
+    const IntArray = bin.dynamicArrayOf(bin.i32);
 
     const length = randIntBetween(0, 200);
     const values = [];
@@ -16,12 +17,12 @@ describe('DynamicArraySchema', () => {
     }
 
     expect(IntArray.measure(values).size).to.equal(
-      i32.measure(MaxValue).size + length * i32.measure(MaxValue).size,
+      bin.i32.measure(MaxValue).size + length * bin.i32.measure(MaxValue).size,
     );
   });
 
   it('should fail to estimate size of max value', () => {
-    const IntArray = dynamicArrayOf(i32);
+    const IntArray = bin.dynamicArrayOf(bin.i32);
 
     expect(IntArray.measure(MaxValue).isUnbounded).to.be.true;
   });
@@ -33,7 +34,7 @@ describe('DynamicArraySchema', () => {
       value.push(randIntBetween(-10000, 10000));
     }
 
-    const description = new DynamicArraySchema(i32);
+    const description = new DynamicArraySchema(bin.i32);
 
     const { output, input } = makeIO(length * 4 + 4); // Extra 4 bytes for the length of the array
     description.write(output, value);

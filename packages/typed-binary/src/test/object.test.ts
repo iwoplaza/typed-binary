@@ -1,35 +1,26 @@
 import { describe, expect, expectTypeOf, it } from 'vitest';
 
-import {
-  byte,
-  concat,
-  generic,
-  genericEnum,
-  i32,
-  object,
-  optional,
-  string,
-  u32,
-} from '../describe';
-import { type ISchema, MaxValue, type ObjectSchema } from '../structure';
-import type { Parsed } from '../utilityTypes';
-import { encodeAndDecode, makeIO } from './helpers/mock';
+// Importing from the public API
+import bin, { type ISchema, MaxValue, type ObjectSchema } from '../index.ts';
+// Helpers
+import type { Parsed } from '../utilityTypes.ts';
+import { encodeAndDecode, makeIO } from './helpers/mock.ts';
 
 describe('ObjectSchema', () => {
   it('should properly estimate size of max value', () => {
-    const description = object({
-      value: i32,
-      label: byte,
+    const description = bin.object({
+      value: bin.i32,
+      label: bin.byte,
     });
 
     expect(description.measure(MaxValue).size).to.equal(5);
   });
 
   it('should encode and decode a simple object', () => {
-    const description = object({
-      value: i32,
-      label: string,
-      extra: u32,
+    const description = bin.object({
+      value: bin.i32,
+      label: bin.string,
+      extra: bin.u32,
     });
 
     const value = {
@@ -44,9 +35,9 @@ describe('ObjectSchema', () => {
   });
 
   it('should treat optional properties as undefined', () => {
-    const OptionalString = optional(string);
-    const schema = object({
-      required: string,
+    const OptionalString = bin.optional(bin.string);
+    const schema = bin.object({
+      required: bin.string,
       optional: OptionalString,
     });
 
@@ -62,16 +53,16 @@ describe('ObjectSchema', () => {
 
   it('should encode and decode a generic object', () => {
     type GenericType = Parsed<typeof GenericType>;
-    const GenericType = generic(
+    const GenericType = bin.generic(
       {
-        sharedValue: i32,
+        sharedValue: bin.i32,
       },
       {
-        concrete: object({
-          extraValue: i32,
+        concrete: bin.object({
+          extraValue: bin.i32,
         }),
-        other: object({
-          notImportant: i32,
+        other: bin.object({
+          notImportant: bin.i32,
         }),
       },
     );
@@ -91,16 +82,16 @@ describe('ObjectSchema', () => {
 
   it('should encode and decode an enum generic object', () => {
     type GenericType = Parsed<typeof GenericType>;
-    const GenericType = genericEnum(
+    const GenericType = bin.genericEnum(
       {
-        sharedValue: i32,
+        sharedValue: bin.i32,
       },
       {
-        0: object({
-          extraValue: i32,
+        0: bin.object({
+          extraValue: bin.i32,
         }),
-        1: object({
-          notImportant: i32,
+        1: bin.object({
+          notImportant: bin.i32,
         }),
       },
     );
@@ -119,10 +110,10 @@ describe('ObjectSchema', () => {
   });
 
   it('preserves insertion-order of properties', () => {
-    const schema = object({
-      a: i32,
-      c: i32,
-      b: i32,
+    const schema = bin.object({
+      a: bin.i32,
+      c: bin.i32,
+      b: bin.i32,
     });
 
     // Purposefully out-of-order.
@@ -141,16 +132,16 @@ describe('ObjectSchema', () => {
   });
 
   it('allows to extend it with more properties', () => {
-    const schema = object({
-      a: i32,
-      b: i32,
+    const schema = bin.object({
+      a: bin.i32,
+      b: bin.i32,
     });
 
-    const extended = concat([
+    const extended = bin.concat([
       schema,
-      object({
-        c: i32,
-        d: i32,
+      bin.object({
+        c: bin.i32,
+        d: bin.i32,
       }),
     ]);
 
@@ -171,15 +162,15 @@ describe('ObjectSchema', () => {
   });
 
   it('allows to prepend it with more properties', () => {
-    const schema = object({
-      a: i32,
-      b: i32,
+    const schema = bin.object({
+      a: bin.i32,
+      b: bin.i32,
     });
 
-    const prepended = concat([
-      object({
-        c: i32,
-        d: i32,
+    const prepended = bin.concat([
+      bin.object({
+        c: bin.i32,
+        d: bin.i32,
       }),
       schema,
     ]);

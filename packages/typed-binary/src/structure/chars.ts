@@ -1,11 +1,7 @@
-import { ValidationError } from '../error';
-import {
-  type IMeasurer,
-  type ISerialInput,
-  type ISerialOutput,
-  Measurer,
-} from '../io';
-import { Schema } from './types';
+import { ValidationError } from '../error.ts';
+import { Measurer } from '../io/measurer.ts';
+import type { IMeasurer, ISerialInput, ISerialOutput } from '../io/types.ts';
+import { Schema } from './types.ts';
 
 export class CharsSchema extends Schema<string> {
   constructor(public readonly length: number) {
@@ -20,7 +16,7 @@ export class CharsSchema extends Schema<string> {
     }
 
     for (let i = 0; i < value.length; ++i) {
-      output.writeByte(value.charCodeAt(i));
+      output.writeUint8(value.charCodeAt(i));
     }
   }
 
@@ -37,4 +33,8 @@ export class CharsSchema extends Schema<string> {
   measure(_: string, measurer: IMeasurer = new Measurer()): IMeasurer {
     return measurer.add(this.length);
   }
+}
+
+export function chars<T extends number>(length: T) {
+  return new CharsSchema(length);
 }

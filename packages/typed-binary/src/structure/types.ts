@@ -1,5 +1,5 @@
-import type { IMeasurer, ISerialInput, ISerialOutput } from '../io';
-import type { Parsed } from '../utilityTypes';
+import type { IMeasurer, ISerialInput, ISerialOutput } from '../io/types.ts';
+import type { Parsed } from '../utilityTypes.ts';
 
 export type MaxValue = typeof MaxValue;
 export const MaxValue = Symbol(

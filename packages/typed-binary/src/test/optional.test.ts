@@ -1,15 +1,16 @@
 import { describe, expect, it } from 'vitest';
 
-import { i32 } from '../describe';
-import { OptionalSchema } from '../structure';
-import { makeIO } from './helpers/mock';
-import { randIntBetween } from './random';
+// Importing from the public API
+import bin from '../index.ts';
+// Helpers
+import { makeIO } from './helpers/mock.ts';
+import { randIntBetween } from './random.ts';
 
-describe('OptionalSchema', () => {
+describe('bin.optional', () => {
   it('should encode and decode an optional int, with a value', () => {
     const innerValue = randIntBetween(-10000, 10000);
 
-    const description = new OptionalSchema(i32);
+    const description = bin.optional(bin.i32);
 
     const { output, input } = makeIO(1 + 4); // Extra 1 byte to hold the boolean value.
     description.write(output, innerValue);
@@ -17,7 +18,7 @@ describe('OptionalSchema', () => {
   });
 
   it('should encode and decode a nullable int, with UNDEFINED value', () => {
-    const description = new OptionalSchema(i32);
+    const description = bin.optional(bin.i32);
 
     const { output, input } = makeIO(1 + 4); // Extra 1 byte to hold the boolean value.
     description.write(output, undefined);

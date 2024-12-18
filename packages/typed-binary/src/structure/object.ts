@@ -1,10 +1,6 @@
-import {
-  type IMeasurer,
-  type ISerialInput,
-  type ISerialOutput,
-  Measurer,
-} from '../io';
-import type { ParseUnwrappedRecord, Parsed } from '../utilityTypes';
+import { Measurer } from '../io/measurer.ts';
+import type { IMeasurer, ISerialInput, ISerialOutput } from '../io/types.ts';
+import type { ParseUnwrappedRecord, Parsed } from '../utilityTypes.ts';
 import {
   type AnySchema,
   type AnySchemaWithProperties,
@@ -17,7 +13,7 @@ import {
   SubTypeKey,
   type Unwrap,
   type UnwrapRecord,
-} from './types';
+} from './types.ts';
 
 export function exactEntries<T extends Record<keyof T, T[keyof T]>>(
   record: T,
@@ -54,11 +50,14 @@ export class ObjectSchema<TProps extends Record<string, AnySchema>>
     this.properties = _properties;
   }
 
-  resolveReferences(ctx: IRefResolver): void {
+  override resolveReferences(ctx: IRefResolver): void {
     this.properties = resolveMap(ctx, this._properties);
   }
 
-  write(output: ISerialOutput, value: ParseUnwrappedRecord<TProps>): void {
+  override write(
+    output: ISerialOutput,
+    value: ParseUnwrappedRecord<TProps>,
+  ): void {
     type Property = keyof ParseUnwrappedRecord<TProps>;
 
     for (const [key, property] of exactEntries(this.properties)) {
@@ -66,7 +65,7 @@ export class ObjectSchema<TProps extends Record<string, AnySchema>>
     }
   }
 
-  read(input: ISerialInput): ParseUnwrappedRecord<TProps> {
+  override read(input: ISerialInput): ParseUnwrappedRecord<TProps> {
     type Property = keyof ParseUnwrappedRecord<TProps>;
 
     const result = {} as ParseUnwrappedRecord<TProps>;
@@ -98,7 +97,7 @@ export class ObjectSchema<TProps extends Record<string, AnySchema>>
     return measurer.size;
   }
 
-  measure(
+  override measure(
     value: ParseUnwrappedRecord<TProps> | typeof MaxValue,
     measurer: IMeasurer = new Measurer(),
   ): IMeasurer {
@@ -114,7 +113,7 @@ export class ObjectSchema<TProps extends Record<string, AnySchema>>
     return measurer;
   }
 
-  seekProperty(
+  override seekProperty(
     reference: ParseUnwrappedRecord<TProps> | MaxValue,
     prop: keyof UnwrapRecord<TProps>,
   ): PropertyDescription | null {
@@ -134,6 +133,9 @@ export class ObjectSchema<TProps extends Record<string, AnySchema>>
     return null;
   }
 }
+
+export const object = <P extends Record<string, AnySchema>>(properties: P) =>
+  new ObjectSchema(properties);
 
 type UnwrapGeneric<Base extends Record<string, AnySchema>, Ext> = {
   [TKey in keyof Ext]: ISchema<
@@ -162,12 +164,12 @@ export class GenericObjectSchema<
     this.subTypeMap = _subTypeMap;
   }
 
-  resolveReferences(ctx: IRefResolver): void {
+  override resolveReferences(ctx: IRefResolver): void {
     this._baseObject.resolveReferences(ctx);
     this.subTypeMap = resolveMap(ctx, this._subTypeMap);
   }
 
-  write(
+  override write(
     output: ISerialOutput,
     value: Parsed<UnwrapGeneric<TUnwrapBase, TUnwrapExt>>,
   ): void {
@@ -185,7 +187,7 @@ export class GenericObjectSchema<
 
     // Writing the sub-type out.
     if (this.keyedBy === SubTypeKey.ENUM) {
-      output.writeByte(value.type as number);
+      output.writeUint8(value.type as number);
     } else {
       output.writeString(value.type as string);
     }
@@ -201,7 +203,9 @@ export class GenericObjectSchema<
     }
   }
 
-  read(input: ISerialInput): Parsed<UnwrapGeneric<TUnwrapBase, TUnwrapExt>> {
+  override read(
+    input: ISerialInput,
+  ): Parsed<UnwrapGeneric<TUnwrapBase, TUnwrapExt>> {
     const subTypeKey =
       this.keyedBy === SubTypeKey.ENUM ? input.readByte() : input.readString();
 
@@ -297,4 +301,22 @@ export class GenericObjectSchema<
 
     return measurer;
   }
+}
+
+export function generic<
+  P extends Record<string, AnySchema>,
+  S extends {
+    [Key in keyof S]: AnySchemaWithProperties;
+  },
+>(properties: P, subTypeMap: S) {
+  return new GenericObjectSchema(SubTypeKey.STRING, properties, subTypeMap);
+}
+
+export function genericEnum<
+  P extends Record<string, AnySchema>,
+  S extends {
+    [Key in keyof S]: AnySchemaWithProperties;
+  },
+>(properties: P, subTypeMap: S) {
+  return new GenericObjectSchema(SubTypeKey.ENUM, properties, subTypeMap);
 }

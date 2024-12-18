@@ -1,11 +1,14 @@
 import { describe, expect, it } from 'vitest';
-import { string } from '../describe';
-import { encodeAndDecode } from './helpers/mock';
-import { randIntBetween } from './random';
+
+// Importing from the public API
+import bin from '../index.ts';
+// Helpers
+import { encodeAndDecode } from './helpers/mock.ts';
+import { randIntBetween } from './random.ts';
 
 describe('StringSchema', () => {
   it('should encode and decode an empty string value', () => {
-    const decoded = encodeAndDecode(string, '');
+    const decoded = encodeAndDecode(bin.string, '');
 
     expect(decoded).to.equal('');
   });
@@ -25,19 +28,19 @@ describe('StringSchema', () => {
       );
     }
 
-    const decoded = encodeAndDecode(string, value);
+    const decoded = encodeAndDecode(bin.string, value);
     expect(decoded).to.equal(value);
   });
 
   it('should encode an emoji', () => {
     const value = '⛓️‍💥';
-    const decoded = encodeAndDecode(string, value);
+    const decoded = encodeAndDecode(bin.string, value);
     expect(decoded).to.equal(value);
   });
 
   it('should encode a unicode string', () => {
     const value = 'A wonderful 🌞 sunny day! 🌲🌲🌲 Forest trip.';
-    const decoded = encodeAndDecode(string, value);
+    const decoded = encodeAndDecode(bin.string, value);
     expect(decoded).to.equal(value);
   });
 });

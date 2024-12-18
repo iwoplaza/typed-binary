@@ -4,7 +4,7 @@ import type {
   Ref,
   Unwrap,
   UnwrapRecord,
-} from './structure/types';
+} from './structure/types.ts';
 
 /**
  * @example ```

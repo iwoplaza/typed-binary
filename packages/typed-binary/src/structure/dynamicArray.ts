@@ -1,10 +1,6 @@
-import {
-  type IMeasurer,
-  type ISerialInput,
-  type ISerialOutput,
-  Measurer,
-} from '../io';
-import type { ParseUnwrapped } from '../utilityTypes';
+import { Measurer } from '../io/measurer.ts';
+import type { IMeasurer, ISerialInput, ISerialOutput } from '../io/types.ts';
+import type { ParseUnwrapped } from '../utilityTypes.ts';
 import {
   type AnySchema,
   type IRefResolver,
@@ -12,7 +8,7 @@ import {
   type PropertyDescription,
   Schema,
   type Unwrap,
-} from './types';
+} from './types.ts';
 
 export class DynamicArraySchema<TElement extends AnySchema> extends Schema<
   Unwrap<TElement>[]
@@ -27,11 +23,14 @@ export class DynamicArraySchema<TElement extends AnySchema> extends Schema<
     this.elementType = _unstableElementType;
   }
 
-  resolveReferences(ctx: IRefResolver): void {
+  override resolveReferences(ctx: IRefResolver): void {
     this.elementType = ctx.resolve(this._unstableElementType);
   }
 
-  write(output: ISerialOutput, values: ParseUnwrapped<TElement>[]): void {
+  override write(
+    output: ISerialOutput,
+    values: ParseUnwrapped<TElement>[],
+  ): void {
     output.writeUint32(values.length);
 
     for (const value of values) {
@@ -39,7 +38,7 @@ export class DynamicArraySchema<TElement extends AnySchema> extends Schema<
     }
   }
 
-  read(input: ISerialInput): ParseUnwrapped<TElement>[] {
+  override read(input: ISerialInput): ParseUnwrapped<TElement>[] {
     const array: ParseUnwrapped<TElement>[] = [];
 
     const len = input.readUint32();
@@ -63,7 +62,7 @@ export class DynamicArraySchema<TElement extends AnySchema> extends Schema<
     return this.measure(MaxValue).size;
   }
 
-  measure(
+  override measure(
     values: ParseUnwrapped<TElement>[] | typeof MaxValue,
     measurer: IMeasurer = new Measurer(),
   ): IMeasurer {
@@ -83,7 +82,7 @@ export class DynamicArraySchema<TElement extends AnySchema> extends Schema<
     return measurer;
   }
 
-  seekProperty(
+  override seekProperty(
     reference: ParseUnwrapped<TElement>[] | MaxValue,
     prop: number,
   ): PropertyDescription | null {
@@ -118,4 +117,10 @@ export class DynamicArraySchema<TElement extends AnySchema> extends Schema<
       schema: this.elementType,
     };
   }
+}
+
+export function dynamicArrayOf<TSchema extends AnySchema>(
+  elementSchema: TSchema,
+) {
+  return new DynamicArraySchema(elementSchema);
 }

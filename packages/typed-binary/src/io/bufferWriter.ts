@@ -1,7 +1,7 @@
-import { BufferIOBase } from './bufferIOBase';
-import { numberToFloat16 } from './float16converter';
-import type { ISerialOutput } from './types';
-import { unwrapBuffer } from './unwrapBuffer';
+import { BufferIOBase } from './bufferIOBase.ts';
+import { numberToFloat16 } from './float16converter.ts';
+import type { ISerialOutput } from './types.ts';
+import { unwrapBuffer } from './unwrapBuffer.ts';
 
 export class BufferWriter extends BufferIOBase implements ISerialOutput {
   private _cachedTextEncoder: TextEncoder | undefined;

@@ -1,8 +1,10 @@
 import { describe, expect, it } from 'vitest';
 
-import { CharsSchema } from '../structure';
-import { encodeAndDecode } from './helpers/mock';
-import { randIntBetween } from './random';
+// Importing from the public API
+import { CharsSchema } from '../index.ts';
+// Helpers
+import { encodeAndDecode } from './helpers/mock.ts';
+import { randIntBetween } from './random.ts';
 
 describe('CharsSchema', () => {
   it('should encode and decode fixed-size char array', () => {
