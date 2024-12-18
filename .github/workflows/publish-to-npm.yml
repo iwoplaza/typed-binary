@@ -8,6 +8,9 @@ on:
 jobs:
   publish:
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write
     steps:
       - uses: actions/checkout@v4
 
@@ -26,7 +29,7 @@ jobs:
       - name: Install dependencies
         run: pnpm install --recursive --frozen-lockfile
 
-      - run: pnpm publish-package
+      - run: pnpm publish-package -- --provenance --access public
         working-directory: ./packages/typed-binary
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}

@@ -70,7 +70,6 @@ Release channel: ${colors.Cyan}${channel ?? '<LATEST>'}${colors.Reset}
   try {
     await promiseSpawn('pnpm', [
       'publish',
-      '--provenance',
       ...(channel ? ['--tag', channel] : []),
       ...args._,
     ]);
