@@ -1,0 +1,34 @@
+name: Publish to JSR
+
+on:
+  release:
+    types: [published]
+  workflow_dispatch:
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    environment: production
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          run_install: false
+
+      - name: Use Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20.x
+          registry-url: https://registry.npmjs.org/
+          cache: 'pnpm'
+
+      - name: Install dependencies
+        run: pnpm install --recursive --frozen-lockfile
+
+      - name: Check
+        run: pnpm check
+
+      - run: npx jsr publish
+        working-directory: ./packages/typed-binary
