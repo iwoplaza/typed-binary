@@ -90,6 +90,6 @@ export class TupleSchema<
 
 export function tupleOf<TSchema extends [AnySchema, ...AnySchema[]]>(
   schemas: TSchema,
-) {
+): TupleSchema<TSchema> {
   return new TupleSchema(schemas);
 }

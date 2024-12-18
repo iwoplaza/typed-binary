@@ -72,6 +72,8 @@ export class OptionalSchema<TInner extends AnySchema> extends Schema<
   }
 }
 
-export function optional<TSchema extends AnySchema>(innerType: TSchema) {
+export function optional<TSchema extends AnySchema>(
+  innerType: TSchema,
+): OptionalSchema<TSchema> {
   return new OptionalSchema(innerType);
 }

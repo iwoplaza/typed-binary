@@ -148,6 +148,6 @@ export class KeyedSchema<
 export function keyed<K extends string, P extends ISchema<unknown>>(
   key: K,
   inner: (ref: ISchema<Ref<K>>) => P,
-) {
+): KeyedSchema<P, K> {
   return new KeyedSchema(key, inner);
 }

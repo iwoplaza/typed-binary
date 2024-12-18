@@ -26,7 +26,7 @@ export class Measurer implements IMeasurer {
     return this;
   }
 
-  fork() {
+  fork(): IMeasurer {
     const forked = new Measurer();
     forked.size = this.size;
     return forked;

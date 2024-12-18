@@ -10,6 +10,6 @@ function isSystemBigEndian(): boolean {
   return array[0] === 0; // if zero is the left-most byte, one was encoded as big endian
 }
 
-export function getSystemEndianness() {
+export function getSystemEndianness(): 'big' | 'little' {
   return isSystemBigEndian() ? 'big' : 'little';
 }

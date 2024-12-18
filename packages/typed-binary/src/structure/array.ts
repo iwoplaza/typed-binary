@@ -85,6 +85,6 @@ export class ArraySchema<TElement extends AnySchema> extends Schema<
 export function arrayOf<TSchema extends AnySchema>(
   elementSchema: TSchema,
   length: number,
-) {
+): ArraySchema<TSchema> {
   return new ArraySchema(elementSchema, length);
 }

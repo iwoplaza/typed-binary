@@ -13,59 +13,59 @@ export class BufferReader extends BufferIOBase implements ISerialInput {
     return this._cachedTextDecoder;
   }
 
-  readBool() {
+  readBool(): boolean {
     return this.dataView.getUint8(this.byteOffset++) !== 0;
   }
 
-  readByte() {
+  readByte(): number {
     return this.dataView.getUint8(this.byteOffset++);
   }
 
-  readInt8() {
+  readInt8(): number {
     return this.dataView.getInt8(this.byteOffset++);
   }
 
-  readUint8() {
+  readUint8(): number {
     return this.dataView.getUint8(this.byteOffset++);
   }
 
-  readInt16() {
+  readInt16(): number {
     const value = this.dataView.getInt16(this.byteOffset, this.littleEndian);
     this.byteOffset += 2;
     return value;
   }
 
-  readUint16() {
+  readUint16(): number {
     const value = this.dataView.getUint16(this.byteOffset, this.littleEndian);
     this.byteOffset += 2;
     return value;
   }
 
-  readInt32() {
+  readInt32(): number {
     const value = this.dataView.getInt32(this.byteOffset, this.littleEndian);
     this.byteOffset += 4;
     return value;
   }
 
-  readUint32() {
+  readUint32(): number {
     const value = this.dataView.getUint32(this.byteOffset, this.littleEndian);
     this.byteOffset += 4;
     return value;
   }
 
-  readFloat16() {
+  readFloat16(): number {
     const value = this.dataView.getUint16(this.byteOffset, this.littleEndian);
     this.byteOffset += 2;
     return float16ToNumber(value);
   }
 
-  readFloat32() {
+  readFloat32(): number {
     const value = this.dataView.getFloat32(this.byteOffset, this.littleEndian);
     this.byteOffset += 4;
     return value;
   }
 
-  readString() {
+  readString(): string {
     // Looking for the 'NULL' byte.
     let strLength = 0;
     while (this.byteOffset + strLength < this.dataView.byteLength) {
