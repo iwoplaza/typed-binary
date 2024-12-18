@@ -27,6 +27,7 @@
     "build": "tsup",
     "prepublishOnly": "pnpm -w run check && pnpm -w run build",
     "dryPublish": "pnpm publish --dry-run",
+    "publish-package": "node ../../scripts/publish-to-npm.mjs",
     "check": "tsup"
   },
   "keywords": [
