@@ -1,6 +1,6 @@
 {
   "name": "@iwoplaza/typed-binary",
-  "version": "4.3.0-alpha.1",
+  "version": "4.3.0",
   "license": "MIT",
   "exports": "./src/index.ts",
   "publish": {

@@ -1,6 +1,6 @@
 {
   "name": "typed-binary",
-  "version": "4.3.0-alpha.1",
+  "version": "4.3.0",
   "description": "Describe binary structures with full TypeScript support. Encode and decode into pure JavaScript objects.",
   "packageManager": "pnpm@8.15.8+sha256.691fe176eea9a8a80df20e4976f3dfb44a04841ceb885638fe2a26174f81e65e",
   "type": "module",
