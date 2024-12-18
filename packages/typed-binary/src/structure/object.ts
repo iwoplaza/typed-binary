@@ -303,22 +303,20 @@ export class GenericObjectSchema<
   }
 }
 
-export const generic = <
+export function generic<
   P extends Record<string, AnySchema>,
   S extends {
     [Key in keyof S]: AnySchemaWithProperties;
   },
->(
-  properties: P,
-  subTypeMap: S,
-) => new GenericObjectSchema(SubTypeKey.STRING, properties, subTypeMap);
+>(properties: P, subTypeMap: S) {
+  return new GenericObjectSchema(SubTypeKey.STRING, properties, subTypeMap);
+}
 
-export const genericEnum = <
+export function genericEnum<
   P extends Record<string, AnySchema>,
   S extends {
     [Key in keyof S]: AnySchemaWithProperties;
   },
->(
-  properties: P,
-  subTypeMap: S,
-) => new GenericObjectSchema(SubTypeKey.ENUM, properties, subTypeMap);
+>(properties: P, subTypeMap: S) {
+  return new GenericObjectSchema(SubTypeKey.ENUM, properties, subTypeMap);
+}

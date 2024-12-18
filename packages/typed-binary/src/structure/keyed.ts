@@ -145,7 +145,9 @@ export class KeyedSchema<
   }
 }
 
-export const keyed = <K extends string, P extends ISchema<unknown>>(
+export function keyed<K extends string, P extends ISchema<unknown>>(
   key: K,
   inner: (ref: ISchema<Ref<K>>) => P,
-) => new KeyedSchema(key, inner);
+) {
+  return new KeyedSchema(key, inner);
+}

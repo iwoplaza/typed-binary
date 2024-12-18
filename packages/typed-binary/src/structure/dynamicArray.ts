@@ -119,6 +119,8 @@ export class DynamicArraySchema<TElement extends AnySchema> extends Schema<
   }
 }
 
-export const dynamicArrayOf = <TSchema extends AnySchema>(
+export function dynamicArrayOf<TSchema extends AnySchema>(
   elementSchema: TSchema,
-) => new DynamicArraySchema(elementSchema);
+) {
+  return new DynamicArraySchema(elementSchema);
+}
