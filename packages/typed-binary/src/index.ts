@@ -4,7 +4,7 @@ export { bin };
 export default bin;
 
 export { getSystemEndianness } from './util.ts';
-export { MaxValue, SubTypeKey } from './structure/types.ts';
+export { MaxValue, SubTypeKey, Schema } from './structure/types.ts';
 export {
   BoolSchema,
   Float16Schema,
@@ -36,7 +36,6 @@ export type {
   IKeyedSchema,
   Ref,
   IRefResolver,
-  Schema,
   ISchema,
   AnyKeyedSchema,
   AnySchema,
