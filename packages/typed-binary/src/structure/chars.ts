@@ -37,6 +37,7 @@ export class CharsSchema<
   }
 }
 
+// @__NO_SIDE_EFFECTS__
 export function chars<T extends number>(length: T): CharsSchema<T> {
   return new CharsSchema(length);
 }

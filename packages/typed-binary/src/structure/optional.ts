@@ -72,6 +72,7 @@ export class OptionalSchema<TInner extends AnySchema> extends Schema<
   }
 }
 
+// @__NO_SIDE_EFFECTS__
 export function optional<TSchema extends AnySchema>(
   innerType: TSchema,
 ): OptionalSchema<TSchema> {

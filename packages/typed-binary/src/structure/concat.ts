@@ -6,6 +6,7 @@ type Concat<Objs extends AnyObjectSchema[]> = ObjectSchema<
   MergeRecordUnion<PropertiesOf<Objs[number]>>
 >;
 
+// @__NO_SIDE_EFFECTS__
 export function concat<Objs extends AnyObjectSchema[]>(
   objs: Objs,
 ): Concat<Objs> {

@@ -145,6 +145,7 @@ export class KeyedSchema<
   }
 }
 
+// @__NO_SIDE_EFFECTS__
 export function keyed<K extends string, P extends ISchema<unknown>>(
   key: K,
   inner: (ref: ISchema<Ref<K>>) => P,
