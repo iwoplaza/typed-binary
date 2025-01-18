@@ -41,31 +41,40 @@ export class TypedArraySchema<
   }
 }
 
+// @__NO_SIDE_EFFECTS__
 export const u8Array = (length: number): TypedArraySchema<Uint8Array> =>
   new TypedArraySchema(length, Uint8Array);
 
+// @__NO_SIDE_EFFECTS__
 export const u8ClampedArray = (
   length: number,
 ): TypedArraySchema<Uint8ClampedArray> =>
   new TypedArraySchema(length, Uint8ClampedArray);
 
+// @__NO_SIDE_EFFECTS__
 export const u16Array = (length: number): TypedArraySchema<Uint16Array> =>
   new TypedArraySchema(length, Uint16Array);
 
+// @__NO_SIDE_EFFECTS__
 export const u32Array = (length: number): TypedArraySchema<Uint32Array> =>
   new TypedArraySchema(length, Uint32Array);
 
+// @__NO_SIDE_EFFECTS__
 export const i8Array = (length: number): TypedArraySchema<Int8Array> =>
   new TypedArraySchema(length, Int8Array);
 
+// @__NO_SIDE_EFFECTS__
 export const i16Array = (length: number): TypedArraySchema<Int16Array> =>
   new TypedArraySchema(length, Int16Array);
 
+// @__NO_SIDE_EFFECTS__
 export const i32Array = (length: number): TypedArraySchema<Int32Array> =>
   new TypedArraySchema(length, Int32Array);
 
+// @__NO_SIDE_EFFECTS__
 export const f32Array = (length: number): TypedArraySchema<Float32Array> =>
   new TypedArraySchema(length, Float32Array);
 
+// @__NO_SIDE_EFFECTS__
 export const f64Array = (length: number): TypedArraySchema<Float64Array> =>
   new TypedArraySchema(length, Float64Array);

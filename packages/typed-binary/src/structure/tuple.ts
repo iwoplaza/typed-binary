@@ -10,6 +10,7 @@ import {
   type UnwrapArray,
 } from './types.ts';
 
+// @__NO_SIDE_EFFECTS__
 export function resolveArray<T extends AnySchema[]>(
   ctx: IRefResolver,
   refs: T,
@@ -88,6 +89,7 @@ export class TupleSchema<
   }
 }
 
+// @__NO_SIDE_EFFECTS__
 export function tupleOf<TSchema extends [AnySchema, ...AnySchema[]]>(
   schemas: TSchema,
 ): TupleSchema<TSchema> {

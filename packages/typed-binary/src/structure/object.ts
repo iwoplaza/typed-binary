@@ -15,12 +15,14 @@ import {
   type UnwrapRecord,
 } from './types.ts';
 
+// @__NO_SIDE_EFFECTS__
 export function exactEntries<T extends Record<keyof T, T[keyof T]>>(
   record: T,
 ): [keyof T, T[keyof T]][] {
   return Object.entries(record) as [keyof T, T[keyof T]][];
 }
 
+// @__NO_SIDE_EFFECTS__
 export function resolveMap<T extends Record<string, AnySchema>>(
   ctx: IRefResolver,
   refs: T,
@@ -134,6 +136,7 @@ export class ObjectSchema<TProps extends Record<string, AnySchema>>
   }
 }
 
+// @__NO_SIDE_EFFECTS__
 export function object<P extends Record<string, AnySchema>>(
   properties: P,
 ): ObjectSchema<P> {
@@ -306,6 +309,7 @@ export class GenericObjectSchema<
   }
 }
 
+// @__NO_SIDE_EFFECTS__
 export function generic<
   P extends Record<string, AnySchema>,
   S extends {
@@ -315,6 +319,7 @@ export function generic<
   return new GenericObjectSchema(SubTypeKey.STRING, properties, subTypeMap);
 }
 
+// @__NO_SIDE_EFFECTS__
 export function genericEnum<
   P extends Record<string, AnySchema>,
   S extends {

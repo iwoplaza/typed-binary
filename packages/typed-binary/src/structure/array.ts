@@ -82,6 +82,7 @@ export class ArraySchema<TElement extends AnySchema> extends Schema<
   }
 }
 
+// @__NO_SIDE_EFFECTS__
 export function arrayOf<TSchema extends AnySchema>(
   elementSchema: TSchema,
   length: number,

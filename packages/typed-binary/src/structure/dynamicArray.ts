@@ -119,6 +119,7 @@ export class DynamicArraySchema<TElement extends AnySchema> extends Schema<
   }
 }
 
+// @__NO_SIDE_EFFECTS__
 export function dynamicArrayOf<TSchema extends AnySchema>(
   elementSchema: TSchema,
 ): DynamicArraySchema<TSchema> {
