@@ -54,7 +54,7 @@ describe('Float16Schema', () => {
   });
 
   it('should encode and decode a f16 value', () => {
-    const value1 = 5472.5; // precision should be 4
+    const value1 = 5474; // precision should be 4
     const value2 = 145; // precision should be 2^-2
     const value3 = 0.34; // precision should be 2^-12
     const value4 = 21877.5; // precision should be 16
@@ -64,6 +64,8 @@ describe('Float16Schema', () => {
     const decoded3 = encodeAndDecode(f16, value3);
     const decoded4 = encodeAndDecode(f16, value4);
 
+    // Nearest two representible numbers to 5474 are 5472 and 5476
+    expect(Math.abs(decoded1 - value1)).toEqual(2);
     expect(decoded1).to.closeTo(value1, 4);
     expect(decoded2).to.closeTo(value2, 0.25);
     expect(decoded3).to.closeTo(value3, 0.000976);
