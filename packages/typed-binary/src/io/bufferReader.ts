@@ -1,5 +1,4 @@
 import { BufferIOBase } from './bufferIOBase.ts';
-import { float16ToNumber } from './float16converter.ts';
 import type { ISerialInput } from './types.ts';
 import { unwrapBuffer } from './unwrapBuffer.ts';
 
@@ -54,9 +53,9 @@ export class BufferReader extends BufferIOBase implements ISerialInput {
   }
 
   readFloat16(): number {
-    const value = this.dataView.getUint16(this.byteOffset, this.littleEndian);
+    const value = this.dataView.getFloat16(this.byteOffset, this.littleEndian);
     this.byteOffset += 2;
-    return float16ToNumber(value);
+    return value;
   }
 
   readFloat32(): number {
