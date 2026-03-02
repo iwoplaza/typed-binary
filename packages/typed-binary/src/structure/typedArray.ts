@@ -46,9 +46,7 @@ export const u8Array = (length: number): TypedArraySchema<Uint8Array> =>
   new TypedArraySchema(length, Uint8Array);
 
 // @__NO_SIDE_EFFECTS__
-export const u8ClampedArray = (
-  length: number,
-): TypedArraySchema<Uint8ClampedArray> =>
+export const u8ClampedArray = (length: number): TypedArraySchema<Uint8ClampedArray> =>
   new TypedArraySchema(length, Uint8ClampedArray);
 
 // @__NO_SIDE_EFFECTS__

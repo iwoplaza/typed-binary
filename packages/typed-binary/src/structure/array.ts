@@ -2,17 +2,9 @@ import { ValidationError } from '../error.ts';
 import { Measurer } from '../io/measurer.ts';
 import type { IMeasurer, ISerialInput, ISerialOutput } from '../io/types.ts';
 import type { ParseUnwrapped } from '../utilityTypes.ts';
-import {
-  type AnySchema,
-  type IRefResolver,
-  MaxValue,
-  Schema,
-  type Unwrap,
-} from './types.ts';
+import { type AnySchema, type IRefResolver, MaxValue, Schema, type Unwrap } from './types.ts';
 
-export class ArraySchema<TElement extends AnySchema> extends Schema<
-  Unwrap<TElement>[]
-> {
+export class ArraySchema<TElement extends AnySchema> extends Schema<Unwrap<TElement>[]> {
   private elementSchema: TElement;
 
   constructor(
@@ -30,14 +22,9 @@ export class ArraySchema<TElement extends AnySchema> extends Schema<
     this.elementSchema = ctx.resolve(this._unstableElementSchema);
   }
 
-  override write(
-    output: ISerialOutput,
-    values: ParseUnwrapped<TElement>[],
-  ): void {
+  override write(output: ISerialOutput, values: ParseUnwrapped<TElement>[]): void {
     if (values.length !== this.length) {
-      throw new ValidationError(
-        `Expected array of length ${this.length}, got ${values.length}`,
-      );
+      throw new ValidationError(`Expected array of length ${this.length}, got ${values.length}`);
     }
 
     for (const value of values) {
@@ -72,10 +59,7 @@ export class ArraySchema<TElement extends AnySchema> extends Schema<
     measurer: IMeasurer = new Measurer(),
   ): IMeasurer {
     for (let i = 0; i < this.length; ++i) {
-      this.elementSchema.measure(
-        values === MaxValue ? MaxValue : values[i],
-        measurer,
-      );
+      this.elementSchema.measure(values === MaxValue ? MaxValue : values[i], measurer);
     }
 
     return measurer;

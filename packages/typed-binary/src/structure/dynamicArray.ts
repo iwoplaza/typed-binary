@@ -10,9 +10,7 @@ import {
   type Unwrap,
 } from './types.ts';
 
-export class DynamicArraySchema<TElement extends AnySchema> extends Schema<
-  Unwrap<TElement>[]
-> {
+export class DynamicArraySchema<TElement extends AnySchema> extends Schema<Unwrap<TElement>[]> {
   public elementType: TElement;
 
   constructor(private readonly _unstableElementType: TElement) {
@@ -27,10 +25,7 @@ export class DynamicArraySchema<TElement extends AnySchema> extends Schema<
     this.elementType = ctx.resolve(this._unstableElementType);
   }
 
-  override write(
-    output: ISerialOutput,
-    values: ParseUnwrapped<TElement>[],
-  ): void {
+  override write(output: ISerialOutput, values: ParseUnwrapped<TElement>[]): void {
     output.writeUint32(values.length);
 
     for (const value of values) {

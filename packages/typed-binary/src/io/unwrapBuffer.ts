@@ -8,9 +8,7 @@ interface UnwrapBufferResult {
  * Removes up to one layer of view over a buffer.
  */
 // @__NO_SIDE_EFFECTS__
-export function unwrapBuffer(
-  buffer: ArrayBufferLike | ArrayBufferView,
-): UnwrapBufferResult {
+export function unwrapBuffer(buffer: ArrayBufferLike | ArrayBufferView): UnwrapBufferResult {
   let byteOffset = 0;
   let innerBuffer = buffer;
 

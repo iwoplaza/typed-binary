@@ -23,10 +23,7 @@ export function exactEntries<T extends Record<keyof T, T[keyof T]>>(
 }
 
 // @__NO_SIDE_EFFECTS__
-export function resolveMap<T extends Record<string, AnySchema>>(
-  ctx: IRefResolver,
-  refs: T,
-): T {
+export function resolveMap<T extends Record<string, AnySchema>>(ctx: IRefResolver, refs: T): T {
   const props = {} as T;
 
   for (const [key, ref] of exactEntries(refs)) {
@@ -56,10 +53,7 @@ export class ObjectSchema<TProps extends Record<string, AnySchema>>
     this.properties = resolveMap(ctx, this._properties);
   }
 
-  override write(
-    output: ISerialOutput,
-    value: ParseUnwrappedRecord<TProps>,
-  ): void {
+  override write(output: ISerialOutput, value: ParseUnwrappedRecord<TProps>): void {
     type Property = keyof ParseUnwrappedRecord<TProps>;
 
     for (const [key, property] of exactEntries(this.properties)) {
@@ -73,9 +67,7 @@ export class ObjectSchema<TProps extends Record<string, AnySchema>>
     const result = {} as ParseUnwrappedRecord<TProps>;
 
     for (const [key, property] of exactEntries(this.properties)) {
-      result[key as Property] = property.read(input) as Parsed<
-        UnwrapRecord<TProps>
-      >[Property];
+      result[key as Property] = property.read(input) as Parsed<UnwrapRecord<TProps>>[Property];
     }
 
     return result;
@@ -106,10 +98,7 @@ export class ObjectSchema<TProps extends Record<string, AnySchema>>
     type Property = keyof ParseUnwrappedRecord<TProps>;
 
     for (const [key, property] of exactEntries(this.properties)) {
-      property.measure(
-        value === MaxValue ? MaxValue : value[key as Property],
-        measurer,
-      );
+      property.measure(value === MaxValue ? MaxValue : value[key as Property], measurer);
     }
 
     return measurer;
@@ -137,9 +126,7 @@ export class ObjectSchema<TProps extends Record<string, AnySchema>>
 }
 
 // @__NO_SIDE_EFFECTS__
-export function object<P extends Record<string, AnySchema>>(
-  properties: P,
-): ObjectSchema<P> {
+export function object<P extends Record<string, AnySchema>>(properties: P): ObjectSchema<P> {
   return new ObjectSchema(properties);
 }
 
@@ -202,21 +189,15 @@ export class GenericObjectSchema<
     this._baseObject.write(output, value as ParseUnwrappedRecord<TUnwrapBase>);
 
     // Extra sub-type fields
-    for (const [key, extraProp] of exactEntries(
-      subTypeDescription.properties,
-    )) {
+    for (const [key, extraProp] of exactEntries(subTypeDescription.properties)) {
       extraProp.write(output, value[key]);
     }
   }
 
-  override read(
-    input: ISerialInput,
-  ): Parsed<UnwrapGeneric<TUnwrapBase, TUnwrapExt>> {
-    const subTypeKey =
-      this.keyedBy === SubTypeKey.ENUM ? input.readByte() : input.readString();
+  override read(input: ISerialInput): Parsed<UnwrapGeneric<TUnwrapBase, TUnwrapExt>> {
+    const subTypeKey = this.keyedBy === SubTypeKey.ENUM ? input.readByte() : input.readString();
 
-    const subTypeDescription =
-      this.subTypeMap[subTypeKey as keyof TUnwrapExt] || null;
+    const subTypeDescription = this.subTypeMap[subTypeKey as keyof TUnwrapExt] || null;
     if (subTypeDescription === null) {
       throw new Error(
         `Unknown sub-type '${subTypeKey}' in among '${JSON.stringify(
@@ -225,19 +206,13 @@ export class GenericObjectSchema<
       );
     }
 
-    const result = this._baseObject.read(input) as Parsed<
-      UnwrapGeneric<TUnwrapBase, TUnwrapExt>
-    >;
+    const result = this._baseObject.read(input) as Parsed<UnwrapGeneric<TUnwrapBase, TUnwrapExt>>;
 
     // Making the sub type key available to the result object.
-    (result as { type: keyof TUnwrapExt }).type =
-      subTypeKey as keyof TUnwrapExt;
+    (result as { type: keyof TUnwrapExt }).type = subTypeKey as keyof TUnwrapExt;
 
     if (subTypeDescription !== null) {
-      for (const [key, extraProp] of exactEntries(
-        subTypeDescription.properties,
-      )) {
-        // biome-ignore lint/suspicious/noExplicitAny: <covered by tests>
+      for (const [key, extraProp] of exactEntries(subTypeDescription.properties)) {
         (result as any)[key] = extraProp.read(input);
       }
     }
@@ -249,10 +224,7 @@ export class GenericObjectSchema<
     value: Parsed<UnwrapGeneric<TUnwrapBase, TUnwrapExt>> | MaxValue,
     measurer: IMeasurer = new Measurer(),
   ): IMeasurer {
-    this._baseObject.measure(
-      value as Parsed<UnwrapRecord<TUnwrapBase>> | MaxValue,
-      measurer,
-    );
+    this._baseObject.measure(value as Parsed<UnwrapRecord<TUnwrapBase>> | MaxValue, measurer);
 
     // We're a generic object trying to encode a concrete value.
     if (this.keyedBy === SubTypeKey.ENUM) {
@@ -266,9 +238,7 @@ export class GenericObjectSchema<
 
     // Extra sub-type fields
     if (value === MaxValue) {
-      const biggestSubType = (
-        Object.values(this.subTypeMap) as TUnwrapExt[keyof TUnwrapExt][]
-      )
+      const biggestSubType = (Object.values(this.subTypeMap) as TUnwrapExt[keyof TUnwrapExt][])
         .map((subType) => {
           const forkedMeasurer = measurer.fork();
 

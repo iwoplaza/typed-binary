@@ -32,10 +32,7 @@ class RadiansSchema extends Schema<number> {
     output.writeUint8(high);
   }
 
-  measure(
-    _: number | MaxValue,
-    measurer: IMeasurer = new Measurer(),
-  ): IMeasurer {
+  measure(_: number | MaxValue, measurer: IMeasurer = new Measurer()): IMeasurer {
     // The size of the data serialized by this schema
     // doesn't depend on the actual value. It's always 2 bytes.
     return measurer.add(2);

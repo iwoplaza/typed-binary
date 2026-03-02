@@ -3,9 +3,7 @@ import { Measurer } from '../io/measurer.ts';
 import type { IMeasurer, ISerialInput, ISerialOutput } from '../io/types.ts';
 import { Schema } from './types.ts';
 
-export class CharsSchema<
-  TLength extends number = number,
-> extends Schema<string> {
+export class CharsSchema<TLength extends number = number> extends Schema<string> {
   constructor(public readonly length: TLength) {
     super();
   }

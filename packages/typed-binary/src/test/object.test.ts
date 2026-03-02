@@ -46,9 +46,7 @@ describe('ObjectSchema', () => {
       optional: undefined,
     };
 
-    expect(encodeAndDecode(schema, valueWithUndefined)).to.deep.equal(
-      valueWithUndefined,
-    );
+    expect(encodeAndDecode(schema, valueWithUndefined)).to.deep.equal(valueWithUndefined);
   });
 
   it('should encode and decode a generic object', () => {

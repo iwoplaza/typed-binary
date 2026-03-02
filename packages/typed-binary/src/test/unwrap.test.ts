@@ -1,13 +1,7 @@
 import { describe, expectTypeOf, it } from 'vitest';
 
 // Importing from the public API
-import type {
-  IKeyedSchema,
-  ISchema,
-  Unwrap,
-  UnwrapArray,
-  UnwrapRecord,
-} from '../index.ts';
+import type { IKeyedSchema, ISchema, Unwrap, UnwrapArray, UnwrapRecord } from '../index.ts';
 
 describe('Unwrap<T>', () => {
   it('unwraps one level of wrapping properly', () => {
@@ -128,9 +122,7 @@ describe('UnwrapArray<T>', () => {
   });
 
   it('bypasses keyed schema at the top level (tuple)', () => {
-    type Actual = UnwrapArray<
-      IKeyedSchema<'xyz', [ISchema<ISchema<number>>, ISchema<string>]>
-    >;
+    type Actual = UnwrapArray<IKeyedSchema<'xyz', [ISchema<ISchema<number>>, ISchema<string>]>>;
     type Expected = IKeyedSchema<'xyz', [ISchema<number>, string]>;
 
     expectTypeOf<Actual>().toMatchTypeOf<Expected>();

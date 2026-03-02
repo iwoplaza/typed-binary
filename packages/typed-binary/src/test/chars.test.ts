@@ -17,9 +17,7 @@ describe('CharsSchema', () => {
     ];
     for (let i = 0; i < length; ++i) {
       const range = ranges[randIntBetween(0, ranges.length) % ranges.length];
-      value += String.fromCharCode(
-        randIntBetween(range[0].charCodeAt(0), range[1].charCodeAt(0)),
-      );
+      value += String.fromCharCode(randIntBetween(range[0].charCodeAt(0), range[1].charCodeAt(0)));
     }
 
     const description = new CharsSchema(value.length);

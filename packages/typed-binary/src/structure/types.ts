@@ -6,8 +6,7 @@ export const MaxValue = Symbol(
   'The biggest (in amount of bytes needed) value a schema can represent',
 );
 
-export interface IKeyedSchema<TKeyDef extends string, TUnwrapped>
-  extends ISchema<TUnwrapped> {
+export interface IKeyedSchema<TKeyDef extends string, TUnwrapped> extends ISchema<TUnwrapped> {
   readonly __keyDefinition: TKeyDef;
 }
 
@@ -27,12 +26,13 @@ export type AnyKeyedSchema = IKeyedSchema<string, unknown>;
  * Unwrap<IKeyedSchema<'abc', ISchema<number>>> -> IKeyedSchema<'abc', number>
  * ```
  */
-export type Unwrap<T> = T extends IKeyedSchema<infer TKeyDef, infer TInner>
-  ? // bypassing keyed schemas, as that information has to be preserved for parsing
-    IKeyedSchema<TKeyDef, Unwrap<TInner>>
-  : T extends ISchema<infer TInner>
-    ? TInner
-    : T;
+export type Unwrap<T> =
+  T extends IKeyedSchema<infer TKeyDef, infer TInner>
+    ? // bypassing keyed schemas, as that information has to be preserved for parsing
+      IKeyedSchema<TKeyDef, Unwrap<TInner>>
+    : T extends ISchema<infer TInner>
+      ? TInner
+      : T;
 
 /**
  * Removes one layer of schema wrapping of record properties.
@@ -49,14 +49,12 @@ export type Unwrap<T> = T extends IKeyedSchema<infer TKeyDef, infer TInner>
  * }
  * ```
  */
-export type UnwrapRecord<T> = T extends IKeyedSchema<
-  infer TKeyDef,
-  Record<infer K, unknown>
->
-  ? IKeyedSchema<TKeyDef, { [key in K]: Unwrap<T['__unwrapped'][key]> }>
-  : T extends Record<infer K, unknown>
-    ? { [key in K]: Unwrap<T[key]> }
-    : T;
+export type UnwrapRecord<T> =
+  T extends IKeyedSchema<infer TKeyDef, Record<infer K, unknown>>
+    ? IKeyedSchema<TKeyDef, { [key in K]: Unwrap<T['__unwrapped'][key]> }>
+    : T extends Record<infer K, unknown>
+      ? { [key in K]: Unwrap<T[key]> }
+      : T;
 
 /* helper type for UnwrapArray */
 type __UnwrapArray<T> = T extends unknown[]
@@ -74,20 +72,20 @@ type __UnwrapArray<T> = T extends unknown[]
  * [a: number, b: ISchema<string>]
  * ```
  */
-export type UnwrapArray<T> = T extends IKeyedSchema<infer TKeyDef, unknown[]>
-  ? IKeyedSchema<TKeyDef, __UnwrapArray<T['__unwrapped']>>
-  : T extends unknown[]
-    ? __UnwrapArray<T>
-    : T;
+export type UnwrapArray<T> =
+  T extends IKeyedSchema<infer TKeyDef, unknown[]>
+    ? IKeyedSchema<TKeyDef, __UnwrapArray<T['__unwrapped']>>
+    : T extends unknown[]
+      ? __UnwrapArray<T>
+      : T;
 
-export interface ISchemaWithProperties<TProps extends Record<string, AnySchema>>
-  extends ISchema<UnwrapRecord<TProps>> {
+export interface ISchemaWithProperties<TProps extends Record<string, AnySchema>> extends ISchema<
+  UnwrapRecord<TProps>
+> {
   readonly properties: TProps;
 }
 
-export type AnySchemaWithProperties = ISchemaWithProperties<
-  Record<string, AnySchema>
->;
+export type AnySchemaWithProperties = ISchemaWithProperties<Record<string, AnySchema>>;
 
 export type PropertiesOf<T extends AnySchemaWithProperties> = T['properties'];
 
@@ -105,10 +103,7 @@ export interface ISchema<TUnwrapped> {
   resolveReferences(ctx: IRefResolver): void;
   write(output: ISerialOutput, value: Parsed<TUnwrapped>): void;
   read(input: ISerialInput): Parsed<TUnwrapped>;
-  measure(
-    value: Parsed<TUnwrapped> | MaxValue,
-    measurer?: IMeasurer,
-  ): IMeasurer;
+  measure(value: Parsed<TUnwrapped> | MaxValue, measurer?: IMeasurer): IMeasurer;
   seekProperty(
     reference: Parsed<TUnwrapped> | MaxValue,
     prop: keyof TUnwrapped,
@@ -126,10 +121,7 @@ export abstract class Schema<TUnwrapped> implements ISchema<TUnwrapped> {
   }
   abstract write(output: ISerialOutput, value: Parsed<TUnwrapped>): void;
   abstract read(input: ISerialInput): Parsed<TUnwrapped>;
-  abstract measure(
-    value: Parsed<TUnwrapped> | MaxValue,
-    measurer?: IMeasurer,
-  ): IMeasurer;
+  abstract measure(value: Parsed<TUnwrapped> | MaxValue, measurer?: IMeasurer): IMeasurer;
   seekProperty(
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     _reference: Parsed<TUnwrapped> | MaxValue,

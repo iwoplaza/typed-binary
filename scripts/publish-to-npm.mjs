@@ -22,9 +22,7 @@ const pkg = JSON.parse(await fs.readFile(packageJsonUrl, 'utf-8'));
  */
 function extractChannel(version) {
   if (/[a-zA-Z]/.test(version)) {
-    const channel = Object.values(ReleaseChannel.Values).find((c) =>
-      version.includes(c),
-    );
+    const channel = Object.values(ReleaseChannel.Values).find((c) => version.includes(c));
 
     if (!channel) {
       throw new Error(`Unrecognized channel: ${channel}`);
@@ -68,11 +66,7 @@ Release channel: ${colors.Cyan}${channel ?? '<LATEST>'}${colors.Reset}
   );
 
   try {
-    await promiseSpawn('pnpm', [
-      'publish',
-      ...(channel ? ['--tag', channel] : []),
-      ...args._,
-    ]);
+    await promiseSpawn('pnpm', ['publish', ...(channel ? ['--tag', channel] : []), ...args._]);
   } catch (e) {
     console.error('pnpm publish error code:', e);
     process.exit(1);

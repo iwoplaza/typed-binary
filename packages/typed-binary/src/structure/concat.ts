@@ -7,9 +7,7 @@ type Concat<Objs extends AnyObjectSchema[]> = ObjectSchema<
 >;
 
 // @__NO_SIDE_EFFECTS__
-export function concat<Objs extends AnyObjectSchema[]>(
-  objs: Objs,
-): Concat<Objs> {
+export function concat<Objs extends AnyObjectSchema[]>(objs: Objs): Concat<Objs> {
   return new ObjectSchema(
     Object.fromEntries(
       objs.flatMap(({ properties }) => Object.entries(properties)),

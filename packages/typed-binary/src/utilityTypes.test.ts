@@ -1,15 +1,9 @@
 import { describe, expectTypeOf, it } from 'vitest';
-import type {
-  DistributedKeyOf,
-  MergeRecordUnion,
-  MergeRecords,
-} from './utilityTypes.ts';
+import type { DistributedKeyOf, MergeRecordUnion, MergeRecords } from './utilityTypes.ts';
 
 describe('DistributedKeyOf', () => {
   it('should apply keyof to each union entry separately, then union the results together', () => {
-    type Actual = DistributedKeyOf<
-      { a: number; b: number } | { a: number; c: number }
-    >;
+    type Actual = DistributedKeyOf<{ a: number; b: number } | { a: number; c: number }>;
 
     type Expected = 'a' | 'b' | 'c';
 
@@ -19,9 +13,7 @@ describe('DistributedKeyOf', () => {
 
 describe('MergeRecords', () => {
   it('should merge a tuple of records', () => {
-    type Actual = MergeRecords<
-      [{ a: number; b: number }, { a: number; c: number }]
-    >;
+    type Actual = MergeRecords<[{ a: number; b: number }, { a: number; c: number }]>;
 
     type Expected = { a: number; b: number; c: number };
 
@@ -31,9 +23,7 @@ describe('MergeRecords', () => {
 
 describe('MergeRecordUnion', () => {
   it('should merge a union of two records', () => {
-    type Actual = MergeRecordUnion<
-      { a: number; b: number } | { a: number; c: number }
-    >;
+    type Actual = MergeRecordUnion<{ a: number; b: number } | { a: number; c: number }>;
 
     type Expected = { a: number; b: number; c: number };
 

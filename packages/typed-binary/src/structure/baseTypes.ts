@@ -22,10 +22,7 @@ export class BoolSchema extends Schema<boolean> {
     output.writeBool(value);
   }
 
-  measure(
-    _: boolean | MaxValue,
-    measurer: IMeasurer = new Measurer(),
-  ): IMeasurer {
+  measure(_: boolean | MaxValue, measurer: IMeasurer = new Measurer()): IMeasurer {
     return measurer.add(1);
   }
 }
@@ -54,10 +51,7 @@ export class StringSchema extends Schema<string> {
     output.writeString(value);
   }
 
-  measure(
-    value: string | typeof MaxValue,
-    measurer: IMeasurer = new Measurer(),
-  ): IMeasurer {
+  measure(value: string | typeof MaxValue, measurer: IMeasurer = new Measurer()): IMeasurer {
     if (value === MaxValue) {
       // A string cannot be bound
       return measurer.unbounded;
@@ -89,10 +83,7 @@ export class Int8Schema extends Schema<number> {
     output.writeInt8(value);
   }
 
-  measure(
-    _: number | MaxValue,
-    measurer: IMeasurer = new Measurer(),
-  ): IMeasurer {
+  measure(_: number | MaxValue, measurer: IMeasurer = new Measurer()): IMeasurer {
     return measurer.add(1);
   }
 }
@@ -119,10 +110,7 @@ export class Uint8Schema extends Schema<number> {
     output.writeUint8(value);
   }
 
-  measure(
-    _: number | MaxValue,
-    measurer: IMeasurer = new Measurer(),
-  ): IMeasurer {
+  measure(_: number | MaxValue, measurer: IMeasurer = new Measurer()): IMeasurer {
     return measurer.add(1);
   }
 }
@@ -154,10 +142,7 @@ export class Int16Schema extends Schema<number> {
     output.writeInt16(value);
   }
 
-  measure(
-    _: number | MaxValue,
-    measurer: IMeasurer = new Measurer(),
-  ): IMeasurer {
+  measure(_: number | MaxValue, measurer: IMeasurer = new Measurer()): IMeasurer {
     return measurer.add(2);
   }
 }
@@ -184,10 +169,7 @@ export class Uint16Schema extends Schema<number> {
     output.writeUint16(value);
   }
 
-  measure(
-    _: number | MaxValue,
-    measurer: IMeasurer = new Measurer(),
-  ): IMeasurer {
+  measure(_: number | MaxValue, measurer: IMeasurer = new Measurer()): IMeasurer {
     return measurer.add(2);
   }
 }
@@ -214,10 +196,7 @@ export class Int32Schema extends Schema<number> {
     output.writeInt32(value);
   }
 
-  measure(
-    _: number | MaxValue,
-    measurer: IMeasurer = new Measurer(),
-  ): IMeasurer {
+  measure(_: number | MaxValue, measurer: IMeasurer = new Measurer()): IMeasurer {
     return measurer.add(4);
   }
 }
@@ -244,10 +223,7 @@ export class Uint32Schema extends Schema<number> {
     output.writeUint32(value);
   }
 
-  measure(
-    _: number | MaxValue,
-    measurer: IMeasurer = new Measurer(),
-  ): IMeasurer {
+  measure(_: number | MaxValue, measurer: IMeasurer = new Measurer()): IMeasurer {
     return measurer.add(4);
   }
 }
@@ -274,10 +250,7 @@ export class Float16Schema extends Schema<number> {
     output.writeFloat16(value);
   }
 
-  measure(
-    _: number | MaxValue,
-    measurer: IMeasurer = new Measurer(),
-  ): IMeasurer {
+  measure(_: number | MaxValue, measurer: IMeasurer = new Measurer()): IMeasurer {
     return measurer.add(2);
   }
 }
@@ -304,10 +277,7 @@ export class Float32Schema extends Schema<number> {
     output.writeFloat32(value);
   }
 
-  measure(
-    _: number | MaxValue,
-    measurer: IMeasurer = new Measurer(),
-  ): IMeasurer {
+  measure(_: number | MaxValue, measurer: IMeasurer = new Measurer()): IMeasurer {
     return measurer.add(4);
   }
 }

@@ -12,10 +12,7 @@ export function makeIO(bufferSize: number) {
   };
 }
 
-export function encodeAndDecode<T extends AnySchema>(
-  schema: T,
-  value: Parsed<T>,
-): Parsed<T> {
+export function encodeAndDecode<T extends AnySchema>(schema: T, value: Parsed<T>): Parsed<T> {
   const buffer = new ArrayBuffer(schema.measure(value).size);
 
   schema.write(new BufferWriter(buffer), value);

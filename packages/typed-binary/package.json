@@ -35,7 +35,11 @@
     "type": "git",
     "url": "https://github.com/iwoplaza/typed-binary.git"
   },
-  "files": ["README.md", "LICENSE", "dist"],
+  "files": [
+    "README.md",
+    "LICENSE",
+    "dist"
+  ],
   "type": "module",
   "sideEffects": false,
   "main": "./src/index.ts",

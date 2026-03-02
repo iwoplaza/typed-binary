@@ -19,9 +19,7 @@ describe('u8ClampedArray', () => {
     const value = new Uint8ClampedArray([0, 1, 15, 255, 256]);
 
     expect(value[4]).toEqual(255); // clamping
-    expect([...encodeAndDecode(bin.u8ClampedArray(5), value)]).toEqual([
-      ...value,
-    ]);
+    expect([...encodeAndDecode(bin.u8ClampedArray(5), value)]).toEqual([...value]);
   });
 });
 
@@ -67,9 +65,7 @@ describe('i16Array', () => {
 
 describe('i32Array', () => {
   it('encodes and decodes a int32 array', () => {
-    const value = new Int32Array([
-      16, -2_147_483_648, 2_147_483_647, 2_147_483_648,
-    ]);
+    const value = new Int32Array([16, -2_147_483_648, 2_147_483_647, 2_147_483_648]);
     expect([...encodeAndDecode(bin.i32Array(4), value)]).toEqual([...value]);
   });
 });

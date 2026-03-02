@@ -28,15 +28,11 @@ class RefSchema<TKeyDef extends string> implements ISchema<Ref<TKeyDef>> {
   }
 
   read(): Parsed<Ref<TKeyDef>> {
-    throw new UnresolvedReferenceError(
-      'Tried to read a reference directly. Resolve it instead.',
-    );
+    throw new UnresolvedReferenceError('Tried to read a reference directly. Resolve it instead.');
   }
 
   write(): void {
-    throw new UnresolvedReferenceError(
-      'Tried to write a reference directly. Resolve it instead.',
-    );
+    throw new UnresolvedReferenceError('Tried to write a reference directly. Resolve it instead.');
   }
 
   measure(): IMeasurer {
@@ -71,9 +67,7 @@ class RefResolve implements IRefResolver {
         return this.registry[key] as TSchema;
       }
 
-      throw new UnresolvedReferenceError(
-        `Couldn't resolve reference to ${key}. Unknown key.`,
-      );
+      throw new UnresolvedReferenceError(`Couldn't resolve reference to ${key}. Unknown key.`);
     }
 
     // Since it's not a RefSchema, we assume it can be resolved.
@@ -86,8 +80,7 @@ class RefResolve implements IRefResolver {
 export class KeyedSchema<
   TInner extends ISchema<unknown>,
   TKeyDef extends string,
-> implements IKeyedSchema<TKeyDef, Unwrap<TInner>>
-{
+> implements IKeyedSchema<TKeyDef, Unwrap<TInner>> {
   public readonly __unwrapped!: Unwrap<TInner>;
   public readonly __keyDefinition!: TKeyDef;
   public innerType: TInner;

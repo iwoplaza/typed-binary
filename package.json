@@ -30,8 +30,8 @@
   "author": "Iwo Plaza <iwoplaza@gmail.com>",
   "scripts": {
     "check": "pnpm lint && pnpm test && pnpm -r check",
-    "lint": "biome check .",
-    "fix": "biome check --write .",
+    "lint": "oxlint && oxfmt --check",
+    "fix": "oxlint --fix && oxfmt",
     "test": "vitest run",
     "build": "pnpm -r build",
     "dev": "pnpm -r dev",
@@ -39,10 +39,11 @@
     "ts-version": "tsc -v"
   },
   "devDependencies": {
-    "@biomejs/biome": "^1.8.3",
     "@types/node": "^20.14.11",
     "arg": "^5.0.2",
     "cypress": "^15.11.0",
+    "oxfmt": "^0.36.0",
+    "oxlint": "^1.51.0",
     "socket.io": "^4.7.5",
     "socket.io-client": "^4.7.5",
     "tsup": "8.1.0",

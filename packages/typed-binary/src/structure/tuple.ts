@@ -2,25 +2,16 @@ import { ValidationError } from '../error.ts';
 import { Measurer } from '../io/measurer.ts';
 import type { IMeasurer, ISerialInput, ISerialOutput } from '../io/types.ts';
 import type { Parsed } from '../utilityTypes.ts';
-import {
-  type AnySchema,
-  type IRefResolver,
-  MaxValue,
-  Schema,
-  type UnwrapArray,
-} from './types.ts';
+import { type AnySchema, type IRefResolver, MaxValue, Schema, type UnwrapArray } from './types.ts';
 
 // @__NO_SIDE_EFFECTS__
-export function resolveArray<T extends AnySchema[]>(
-  ctx: IRefResolver,
-  refs: T,
-): T {
+export function resolveArray<T extends AnySchema[]>(ctx: IRefResolver, refs: T): T {
   return refs.map((ref) => ctx.resolve(ref)) as T;
 }
 
-export class TupleSchema<
-  TSequence extends [AnySchema, ...AnySchema[]],
-> extends Schema<UnwrapArray<TSequence>> {
+export class TupleSchema<TSequence extends [AnySchema, ...AnySchema[]]> extends Schema<
+  UnwrapArray<TSequence>
+> {
   private schemas: TSequence;
 
   constructor(private readonly _unstableSchemas: TSequence) {
@@ -35,10 +26,7 @@ export class TupleSchema<
     this.schemas = resolveArray(ctx, this._unstableSchemas);
   }
 
-  override write(
-    output: ISerialOutput,
-    values: Parsed<UnwrapArray<TSequence>>,
-  ): void {
+  override write(output: ISerialOutput, values: Parsed<UnwrapArray<TSequence>>): void {
     if (values.length !== this.schemas.length) {
       throw new ValidationError(
         `Expected tuple of length ${this.schemas.length}, got ${values.length}`,
@@ -54,9 +42,7 @@ export class TupleSchema<
     const array = [] as Parsed<UnwrapArray<TSequence>>;
 
     for (let i = 0; i < this.schemas.length; ++i) {
-      array.push(
-        this.schemas[i].read(input) as Parsed<UnwrapArray<TSequence>>[number],
-      );
+      array.push(this.schemas[i].read(input) as Parsed<UnwrapArray<TSequence>>[number]);
     }
 
     return array;
@@ -79,10 +65,7 @@ export class TupleSchema<
     measurer: IMeasurer = new Measurer(),
   ): IMeasurer {
     for (let i = 0; i < this.schemas.length; ++i) {
-      this.schemas[i].measure(
-        values === MaxValue ? MaxValue : values[i],
-        measurer,
-      );
+      this.schemas[i].measure(values === MaxValue ? MaxValue : values[i], measurer);
     }
 
     return measurer;
