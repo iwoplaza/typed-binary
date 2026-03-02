@@ -13,9 +13,13 @@ export default defineConfig({
         dark: '/public/logo-dark.svg',
         replacesTitle: true,
       },
-      social: {
-        github: 'https://github.com/iwoplaza/typed-binary',
-      },
+      social: [
+        {
+          icon: 'github',
+          label: 'GitHub',
+          href: 'https://github.com/iwoplaza/typed-binary',
+        },
+      ],
       sidebar: [
         { label: 'Why Typed Binary?', slug: 'guides/why-typed-binary' },
         {
