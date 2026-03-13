@@ -1,5 +1,5 @@
 import { BufferIOBase } from './bufferIOBase.ts';
-import type { ISerialInput } from './types.ts';
+import type { BufferView, ISerialInput } from './types.ts';
 import { unwrapBuffer } from './unwrapBuffer.ts';
 
 export class BufferReader extends BufferIOBase implements ISerialInput {
@@ -82,16 +82,11 @@ export class BufferReader extends BufferIOBase implements ISerialInput {
     return result;
   }
 
-  readSlice(
-    bufferView: ArrayLike<number> & ArrayBufferView,
-    offset: number,
-    byteLength: number,
-  ): void {
+  readSlice(bufferView: BufferView, offset: number, byteLength: number): void {
     const unwrapped = unwrapBuffer(bufferView);
     const destU8 = new Uint8Array(unwrapped.buffer, unwrapped.byteOffset + offset);
 
-    const bytesPerElement =
-      (bufferView as { BYTES_PER_ELEMENT?: number }).BYTES_PER_ELEMENT ?? 1;
+    const bytesPerElement = bufferView.BYTES_PER_ELEMENT;
 
     if (this.needsByteSwap && bytesPerElement > 1) {
       for (let i = 0; i < byteLength; i += bytesPerElement) {
@@ -100,9 +95,7 @@ export class BufferReader extends BufferIOBase implements ISerialInput {
         }
       }
     } else {
-      destU8.set(
-        new Uint8Array(this.dataView.buffer, this.byteOffset, byteLength),
-      );
+      destU8.set(new Uint8Array(this.dataView.buffer, this.byteOffset, byteLength));
       this.byteOffset += byteLength;
     }
   }

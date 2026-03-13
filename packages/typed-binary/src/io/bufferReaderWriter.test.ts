@@ -178,9 +178,7 @@ describe('BufferWriter slice endianness', () => {
 describe('BufferReader slice endianness', () => {
   it('reads Int32Array from big-endian buffer', () => {
     const buffer = new ArrayBuffer(8);
-    new Uint8Array(buffer).set([
-      0x00, 0x00, 0x00, 0x01, 0x00, 0x00, 0x00, 0x02,
-    ]);
+    new Uint8Array(buffer).set([0x00, 0x00, 0x00, 0x01, 0x00, 0x00, 0x00, 0x02]);
 
     const dest = new Int32Array(2);
     new BufferReader(buffer, { endianness: 'big' }).readSlice(dest, 0, 8);
@@ -190,9 +188,7 @@ describe('BufferReader slice endianness', () => {
 
   it('reads Int32Array from little-endian buffer', () => {
     const buffer = new ArrayBuffer(8);
-    new Uint8Array(buffer).set([
-      0x01, 0x00, 0x00, 0x00, 0x02, 0x00, 0x00, 0x00,
-    ]);
+    new Uint8Array(buffer).set([0x01, 0x00, 0x00, 0x00, 0x02, 0x00, 0x00, 0x00]);
 
     const dest = new Int32Array(2);
     new BufferReader(buffer, { endianness: 'little' }).readSlice(dest, 0, 8);
@@ -206,11 +202,7 @@ describe('BufferReader slice endianness', () => {
     new BufferWriter(buffer, { endianness: 'big' }).writeSlice(src);
 
     const dest = new Int32Array(src.length);
-    new BufferReader(buffer, { endianness: 'big' }).readSlice(
-      dest,
-      0,
-      buffer.byteLength,
-    );
+    new BufferReader(buffer, { endianness: 'big' }).readSlice(dest, 0, buffer.byteLength);
 
     expect([...dest]).toEqual([...src]);
   });
@@ -221,11 +213,7 @@ describe('BufferReader slice endianness', () => {
     new BufferWriter(buffer, { endianness: 'big' }).writeSlice(src);
 
     const dest = new Float64Array(src.length);
-    new BufferReader(buffer, { endianness: 'big' }).readSlice(
-      dest,
-      0,
-      buffer.byteLength,
-    );
+    new BufferReader(buffer, { endianness: 'big' }).readSlice(dest, 0, buffer.byteLength);
 
     expect([...dest]).toEqual([...src]);
   });

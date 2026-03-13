@@ -1,5 +1,5 @@
 import { Measurer } from '../io/measurer.ts';
-import type { IMeasurer, ISerialInput, ISerialOutput } from '../io/types.ts';
+import type { BufferView, IMeasurer, ISerialInput, ISerialOutput } from '../io/types.ts';
 import type { Parsed } from '../utilityTypes.ts';
 import { type MaxValue, Schema } from './types.ts';
 
@@ -8,9 +8,7 @@ type TypedArrayConstructor<T> = {
   new (buffer: ArrayBufferLike, offset?: number, length?: number): T;
 };
 
-export class TypedArraySchema<
-  TTypedArray extends ArrayLike<number> & ArrayBufferView,
-> extends Schema<TTypedArray> {
+export class TypedArraySchema<TTypedArray extends BufferView> extends Schema<TTypedArray> {
   public readonly byteLength: number;
 
   constructor(
