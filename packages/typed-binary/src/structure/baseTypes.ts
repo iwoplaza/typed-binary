@@ -6,7 +6,9 @@ import { MaxValue, Schema } from './types.ts';
 // BOOL
 ////
 
-export class BoolSchema extends Schema<boolean> {
+export interface Bool extends Schema<boolean> {}
+
+class BoolSchema implements Bool {
   /**
    * The maximum number of bytes this schema can take up.
    *
@@ -27,13 +29,18 @@ export class BoolSchema extends Schema<boolean> {
   }
 }
 
-export const bool: BoolSchema = new BoolSchema();
+export const bool: Bool = new BoolSchema();
 
 ////
 // STRING
 ////
 
-export class StringSchema extends Schema<string> {
+export interface String extends Schema<string, string> {}
+
+class StringSchema implements String {
+  declare readonly $in: string;
+  declare readonly $out: string;
+
   private static _cachedEncoder: TextEncoder | undefined;
 
   private static get _encoder() {
@@ -61,13 +68,15 @@ export class StringSchema extends Schema<string> {
   }
 }
 
-export const string: StringSchema = new StringSchema();
+export const string: String = new StringSchema();
 
 ////
 // i8
 ////
 
-export class Int8Schema extends Schema<number> {
+export interface Int8 extends Schema<number> {}
+
+class Int8Schema implements Int8 {
   /**
    * The maximum number of bytes this schema can take up.
    *
@@ -88,13 +97,15 @@ export class Int8Schema extends Schema<number> {
   }
 }
 
-export const i8: Int8Schema = new Int8Schema();
+export const i8: Int8 = new Int8Schema();
 
 ////
 // u8
 ////
 
-export class Uint8Schema extends Schema<number> {
+export interface Uint8 extends Schema<number> {}
+
+class Uint8Schema implements Uint8 {
   /**
    * The maximum number of bytes this schema can take up.
    *
@@ -115,18 +126,15 @@ export class Uint8Schema extends Schema<number> {
   }
 }
 
-export const u8: Uint8Schema = new Uint8Schema();
-
-/**
- * Alias for `bin.u8`
- */
-export const byte: Uint8Schema = u8;
+export const u8: Uint8 = new Uint8Schema();
 
 ////
 // i16
 ////
 
-export class Int16Schema extends Schema<number> {
+export interface Int16 extends Schema<number> {}
+
+class Int16Schema implements Int16 {
   /**
    * The maximum number of bytes this schema can take up.
    *
@@ -147,13 +155,15 @@ export class Int16Schema extends Schema<number> {
   }
 }
 
-export const i16: Int16Schema = new Int16Schema();
+export const i16: Int16 = new Int16Schema();
 
 ////
 // u16
 ////
 
-export class Uint16Schema extends Schema<number> {
+export interface Uint16 extends Schema<number> {}
+
+class Uint16Schema implements Uint16 {
   /**
    * The maximum number of bytes this schema can take up.
    *
@@ -174,13 +184,18 @@ export class Uint16Schema extends Schema<number> {
   }
 }
 
-export const u16: Uint16Schema = new Uint16Schema();
+export const u16: Uint16 = new Uint16Schema();
 
 ////
 // i32
 ////
 
-export class Int32Schema extends Schema<number> {
+export interface Int32 extends Schema<number, number> {}
+
+class Int32Schema implements Int32 {
+  declare readonly $in: number;
+  declare readonly $out: number;
+
   /**
    * The maximum number of bytes this schema can take up.
    *
@@ -201,13 +216,15 @@ export class Int32Schema extends Schema<number> {
   }
 }
 
-export const i32: Int32Schema = new Int32Schema();
+export const i32: Int32 = new Int32Schema();
 
 ////
 // u32
 ////
 
-export class Uint32Schema extends Schema<number> {
+export interface Uint32 extends Schema<number> {}
+
+class Uint32Schema implements Uint32 {
   /**
    * The maximum number of bytes this schema can take up.
    *
@@ -228,13 +245,15 @@ export class Uint32Schema extends Schema<number> {
   }
 }
 
-export const u32: Uint32Schema = new Uint32Schema();
+export const u32: Uint32 = new Uint32Schema();
 
 ////
 // f16
 ////
 
-export class Float16Schema extends Schema<number> {
+export interface Float16 extends Schema<number> {}
+
+class Float16Schema implements Float16 {
   /**
    * The maximum number of bytes this schema can take up.
    *
@@ -255,13 +274,15 @@ export class Float16Schema extends Schema<number> {
   }
 }
 
-export const f16: Float16Schema = new Float16Schema();
+export const f16: Float16 = new Float16Schema();
 
 ////
 // f32
 ////
 
-export class Float32Schema extends Schema<number> {
+export interface Float32 extends Schema<number> {}
+
+class Float32Schema implements Float32 {
   /**
    * The maximum number of bytes this schema can take up.
    *
@@ -282,4 +303,4 @@ export class Float32Schema extends Schema<number> {
   }
 }
 
-export const f32: Float32Schema = new Float32Schema();
+export const f32: Float32 = new Float32Schema();

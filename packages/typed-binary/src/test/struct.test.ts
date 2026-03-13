@@ -1,23 +1,20 @@
 import { describe, expect, expectTypeOf, it } from 'vitest';
 
-// Importing from the public API
-import bin, { type ISchema, MaxValue, type ObjectSchema } from '../index.ts';
-// Helpers
-import type { Parsed } from '../utilityTypes.ts';
+import bin from 'typed-binary';
 import { encodeAndDecode, makeIO } from './helpers/mock.ts';
 
-describe('ObjectSchema', () => {
+describe('bin.struct', () => {
   it('should properly estimate size of max value', () => {
-    const description = bin.object({
+    const description = bin.struct({
       value: bin.i32,
-      label: bin.byte,
+      label: bin.u8,
     });
 
-    expect(description.measure(MaxValue).size).to.equal(5);
+    expect(description.measure(bin.MaxValue).size).toEqual(5);
   });
 
   it('should encode and decode a simple object', () => {
-    const description = bin.object({
+    const description = bin.struct({
       value: bin.i32,
       label: bin.string,
       extra: bin.u32,
@@ -36,7 +33,7 @@ describe('ObjectSchema', () => {
 
   it('should treat optional properties as undefined', () => {
     const OptionalString = bin.optional(bin.string);
-    const schema = bin.object({
+    const schema = bin.struct({
       required: bin.string,
       optional: OptionalString,
     });
@@ -50,18 +47,18 @@ describe('ObjectSchema', () => {
   });
 
   it('should encode and decode a generic object', () => {
-    type GenericType = Parsed<typeof GenericType>;
+    type GenericType = bin.ExtractOut<typeof GenericType>;
     const GenericType = bin.generic(
       {
         sharedValue: bin.i32,
       },
       {
-        concrete: bin.object({
+        concrete: {
           extraValue: bin.i32,
-        }),
-        other: bin.object({
+        },
+        other: {
           notImportant: bin.i32,
-        }),
+        },
       },
     );
 
@@ -79,18 +76,18 @@ describe('ObjectSchema', () => {
   });
 
   it('should encode and decode an enum generic object', () => {
-    type GenericType = Parsed<typeof GenericType>;
+    type GenericType = bin.ExtractOut<typeof GenericType>;
     const GenericType = bin.genericEnum(
       {
         sharedValue: bin.i32,
       },
       {
-        0: bin.object({
+        0: {
           extraValue: bin.i32,
-        }),
-        1: bin.object({
+        },
+        1: {
           notImportant: bin.i32,
-        }),
+        },
       },
     );
 
@@ -108,14 +105,14 @@ describe('ObjectSchema', () => {
   });
 
   it('preserves insertion-order of properties', () => {
-    const schema = bin.object({
+    const schema = bin.struct({
       a: bin.i32,
       c: bin.i32,
       b: bin.i32,
     });
 
     // Purposefully out-of-order.
-    const value: Parsed<typeof schema> = {
+    const value: bin.ExtractOut<typeof schema> = {
       a: 1,
       b: 2,
       c: 3,
@@ -130,20 +127,20 @@ describe('ObjectSchema', () => {
   });
 
   it('allows to extend it with more properties', () => {
-    const schema = bin.object({
+    const schema = bin.struct({
       a: bin.i32,
       b: bin.i32,
     });
 
     const extended = bin.concat([
       schema,
-      bin.object({
+      bin.struct({
         c: bin.i32,
         d: bin.i32,
       }),
     ]);
 
-    const value: Parsed<typeof extended> = {
+    const value: bin.ExtractOut<typeof extended> = {
       a: 1,
       b: 2,
       c: 3,
@@ -160,20 +157,20 @@ describe('ObjectSchema', () => {
   });
 
   it('allows to prepend it with more properties', () => {
-    const schema = bin.object({
+    const schema = bin.struct({
       a: bin.i32,
       b: bin.i32,
     });
 
     const prepended = bin.concat([
-      bin.object({
+      bin.struct({
         c: bin.i32,
         d: bin.i32,
       }),
       schema,
     ]);
 
-    const value: Parsed<typeof prepended> = {
+    const value: bin.ExtractOut<typeof prepended> = {
       a: 1,
       b: 2,
       c: 3,
@@ -189,17 +186,50 @@ describe('ObjectSchema', () => {
     expect(input.readInt32()).to.equal(2); // b
   });
 
-  it('has a type of ISchema with its properties all unwrapped', () => {
-    type FlatActual = ObjectSchema<{ a: ISchema<number> }>;
-    type FlatExpected = ISchema<{ a: number }>;
+  it('is assignable to AnySchema', () => {
+    const schema = bin.struct({ a: bin.i32 });
 
-    type NestedActual = ObjectSchema<{
-      a: ISchema<number>;
-      b: ObjectSchema<{ c: ISchema<number> }>;
-    }>;
-    type NestedExpected = ISchema<{ a: number; b: { c: number } }>;
+    function acceptsAny(_s: bin.Schema) {}
 
-    expectTypeOf<FlatActual>().toMatchTypeOf<FlatExpected>();
-    expectTypeOf<NestedActual>().toMatchTypeOf<NestedExpected>();
+    acceptsAny(schema);
+
+    expectTypeOf(schema).toEqualTypeOf<bin.Struct<{ a: bin.Int32 }>>();
+    expectTypeOf(schema).toExtend<bin.Schema>();
+  });
+
+  it('is not assignable to a wider or narrower schema', () => {
+    const schema = bin.struct({ a: bin.i32, b: bin.i32 });
+
+    function wider(_s: bin.Struct<{ a: bin.Int32 }>) {}
+    function narrower(_s: bin.Struct<{ a: bin.Int32; b: bin.Int32; c: bin.Int32 }>) {}
+
+    // @ts-expect-error
+    wider(schema);
+
+    // @ts-expect-error
+    narrower(schema);
+  });
+
+  it('can be recursive', () => {
+    const Example = bin.struct({
+      value: bin.i32,
+      label: bin.string,
+      get next() {
+        return bin.optional(Example);
+      },
+    });
+
+    const value: bin.ExtractOut<typeof Example> = {
+      value: 70,
+      label: 'Banana',
+      next: {
+        value: 20,
+        label: 'Inner Banana',
+        next: undefined,
+      },
+    };
+
+    const decoded = encodeAndDecode(Example, value);
+    expect(decoded).to.deep.equal(value);
   });
 });

@@ -1,6 +1,5 @@
 import { Measurer } from '../io/measurer.ts';
 import type { IMeasurer, ISerialInput, ISerialOutput } from '../io/types.ts';
-import type { Parsed } from '../utilityTypes.ts';
 import { type MaxValue, Schema } from './types.ts';
 
 type TypedArrayConstructor<T> = {
@@ -10,69 +9,69 @@ type TypedArrayConstructor<T> = {
 
 export class TypedArraySchema<
   TTypedArray extends ArrayLike<number> & ArrayBufferView,
-> extends Schema<TTypedArray> {
-  public readonly byteLength: number;
+> implements Schema<TTypedArray, TTypedArray> {
+  declare readonly $in: TTypedArray;
+  declare readonly $out: TTypedArray;
 
-  constructor(
-    public readonly length: number,
-    private readonly _arrayConstructor: TypedArrayConstructor<TTypedArray>,
-  ) {
-    super();
+  readonly byteLength: number;
+  readonly elementCount: number;
 
-    this.byteLength = length * _arrayConstructor.BYTES_PER_ELEMENT;
+  readonly #arrayConstructor: TypedArrayConstructor<TTypedArray>;
+
+  constructor(elementCount: number, arrayConstructor: TypedArrayConstructor<TTypedArray>) {
+    this.elementCount = elementCount;
+    this.byteLength = length * arrayConstructor.BYTES_PER_ELEMENT;
+    this.#arrayConstructor = arrayConstructor;
   }
 
-  write(output: ISerialOutput, value: Parsed<TTypedArray>): void {
+  write(output: ISerialOutput, value: TTypedArray): void {
     output.writeSlice(value);
   }
 
-  read(input: ISerialInput): Parsed<TTypedArray> {
+  read(input: ISerialInput): TTypedArray {
     const buffer = new ArrayBuffer(this.byteLength);
-    const view = new this._arrayConstructor(buffer, 0, this.length);
+    const view = new this.#arrayConstructor(buffer, 0, this.elementCount);
     input.readSlice(view, 0, this.byteLength);
-    return view as Parsed<TTypedArray>;
+    return view;
   }
 
-  measure(
-    _value: Parsed<TTypedArray> | typeof MaxValue,
-    measurer: IMeasurer = new Measurer(),
-  ): IMeasurer {
+  measure(_value: TTypedArray | typeof MaxValue, measurer: IMeasurer = new Measurer()): IMeasurer {
     return measurer.add(this.byteLength);
   }
 }
 
-// @__NO_SIDE_EFFECTS__
+/*#__NO_SIDE_EFFECTS__*/
 export const u8Array = (length: number): TypedArraySchema<Uint8Array> =>
   new TypedArraySchema(length, Uint8Array);
 
-// @__NO_SIDE_EFFECTS__
+/*#__NO_SIDE_EFFECTS__*/
 export const u8ClampedArray = (length: number): TypedArraySchema<Uint8ClampedArray> =>
   new TypedArraySchema(length, Uint8ClampedArray);
 
-// @__NO_SIDE_EFFECTS__
+/*#__NO_SIDE_EFFECTS__*/
 export const u16Array = (length: number): TypedArraySchema<Uint16Array> =>
   new TypedArraySchema(length, Uint16Array);
 
-// @__NO_SIDE_EFFECTS__
+/*#__NO_SIDE_EFFECTS__*/
 export const u32Array = (length: number): TypedArraySchema<Uint32Array> =>
   new TypedArraySchema(length, Uint32Array);
 
-// @__NO_SIDE_EFFECTS__
+/*#__NO_SIDE_EFFECTS__*/
 export const i8Array = (length: number): TypedArraySchema<Int8Array> =>
   new TypedArraySchema(length, Int8Array);
 
-// @__NO_SIDE_EFFECTS__
+/*#__NO_SIDE_EFFECTS__*/
 export const i16Array = (length: number): TypedArraySchema<Int16Array> =>
   new TypedArraySchema(length, Int16Array);
 
-// @__NO_SIDE_EFFECTS__
+/*#__NO_SIDE_EFFECTS__*/
 export const i32Array = (length: number): TypedArraySchema<Int32Array> =>
   new TypedArraySchema(length, Int32Array);
 
-// @__NO_SIDE_EFFECTS__
+/*#__NO_SIDE_EFFECTS__*/
 export const f32Array = (length: number): TypedArraySchema<Float32Array> =>
   new TypedArraySchema(length, Float32Array);
 
-// @__NO_SIDE_EFFECTS__
+/*#__NO_SIDE_EFFECTS__*/
 export const f64Array = (length: number): TypedArraySchema<Float64Array> =>
   new TypedArraySchema(length, Float64Array);

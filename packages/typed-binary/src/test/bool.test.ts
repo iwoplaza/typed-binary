@@ -1,14 +1,11 @@
 import { describe, expect, it } from 'vitest';
-
-// Importing from the public API
-import { bool } from '../index.ts';
-// Helpers
+import bin from 'typed-binary';
 import { encodeAndDecode } from './helpers/mock.ts';
 
-describe('BoolSchema', () => {
+describe('bin.bool', () => {
   it('should encode and decode a bool value', () => {
     const value = Math.random() < 0.5;
-    const decoded = encodeAndDecode(bool, value);
+    const decoded = encodeAndDecode(bin.bool, value);
 
     expect(decoded).to.equal(value);
   });

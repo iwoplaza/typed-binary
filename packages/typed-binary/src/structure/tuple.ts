@@ -1,32 +1,36 @@
 import { ValidationError } from '../error.ts';
 import { Measurer } from '../io/measurer.ts';
 import type { IMeasurer, ISerialInput, ISerialOutput } from '../io/types.ts';
-import type { Parsed } from '../utilityTypes.ts';
-import { type AnySchema, type IRefResolver, MaxValue, Schema, type UnwrapArray } from './types.ts';
+import { MaxValue, type Schema, ExtractInRecord, ExtractOutRecord } from './types.ts';
 
-// @__NO_SIDE_EFFECTS__
-export function resolveArray<T extends AnySchema[]>(ctx: IRefResolver, refs: T): T {
-  return refs.map((ref) => ctx.resolve(ref)) as T;
+export interface Tuple<TSequence extends [Schema, ...Schema[]]> extends Schema<
+  ExtractInRecord<Readonly<TSequence>>,
+  ExtractOutRecord<TSequence>
+> {
+  readonly schemas: TSequence;
+
+  /**
+   * The maximum number of bytes this schema can take up.
+   *
+   * Is `NaN` if the schema is unbounded. If you would like to know
+   * how many bytes a particular value encoding will take up, use `.measure(value)`.
+   *
+   * Alias for `.measure(MaxValue).size`
+   */
+  readonly maxSize: number;
 }
 
-export class TupleSchema<TSequence extends [AnySchema, ...AnySchema[]]> extends Schema<
-  UnwrapArray<TSequence>
+class TupleSchema<TSequence extends [Schema, ...Schema[]]> implements Schema<
+  ExtractInRecord<TSequence>,
+  ExtractOutRecord<TSequence>
 > {
-  private schemas: TSequence;
+  readonly schemas: TSequence;
 
-  constructor(private readonly _unstableSchemas: TSequence) {
-    super();
-
-    // In case this tuple isn't part of a keyed chain,
-    // let's assume the inner type is stable.
-    this.schemas = _unstableSchemas;
+  constructor(schemas: TSequence) {
+    this.schemas = schemas;
   }
 
-  override resolveReferences(ctx: IRefResolver): void {
-    this.schemas = resolveArray(ctx, this._unstableSchemas);
-  }
-
-  override write(output: ISerialOutput, values: Parsed<UnwrapArray<TSequence>>): void {
+  write(output: ISerialOutput, values: ExtractInRecord<TSequence>): void {
     if (values.length !== this.schemas.length) {
       throw new ValidationError(
         `Expected tuple of length ${this.schemas.length}, got ${values.length}`,
@@ -38,30 +42,18 @@ export class TupleSchema<TSequence extends [AnySchema, ...AnySchema[]]> extends 
     }
   }
 
-  override read(input: ISerialInput): Parsed<UnwrapArray<TSequence>> {
-    const array = [] as Parsed<UnwrapArray<TSequence>>;
-
-    for (let i = 0; i < this.schemas.length; ++i) {
-      array.push(this.schemas[i].read(input) as Parsed<UnwrapArray<TSequence>>[number]);
-    }
-
-    return array;
+  read(input: ISerialInput): ExtractOutRecord<TSequence> {
+    return this.schemas.map((schema) =>
+      schema.read(input),
+    ) as unknown as ExtractOutRecord<TSequence>;
   }
 
-  /**
-   * The maximum number of bytes this schema can take up.
-   *
-   * Is `NaN` if the schema is unbounded. If you would like to know
-   * how many bytes a particular value encoding will take up, use `.measure(value)`.
-   *
-   * Alias for `.measure(MaxValue).size`
-   */
   get maxSize(): number {
     return this.measure(MaxValue).size;
   }
 
   measure(
-    values: Parsed<UnwrapArray<TSequence>> | MaxValue,
+    values: ExtractInRecord<TSequence> | MaxValue,
     measurer: IMeasurer = new Measurer(),
   ): IMeasurer {
     for (let i = 0; i < this.schemas.length; ++i) {
@@ -72,9 +64,7 @@ export class TupleSchema<TSequence extends [AnySchema, ...AnySchema[]]> extends 
   }
 }
 
-// @__NO_SIDE_EFFECTS__
-export function tupleOf<TSchema extends [AnySchema, ...AnySchema[]]>(
-  schemas: TSchema,
-): TupleSchema<TSchema> {
+/*#__NO_SIDE_EFFECTS__*/
+export function tuple<TSchema extends [Schema, ...Schema[]]>(schemas: TSchema): Tuple<TSchema> {
   return new TupleSchema(schemas);
 }

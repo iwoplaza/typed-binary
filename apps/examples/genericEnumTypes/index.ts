@@ -16,14 +16,14 @@ const Animal = bin.genericEnum(
     age: bin.i32,
   },
   {
-    [AnimalType.DOG]: bin.object({
+    [AnimalType.DOG]: {
       // Animal can be a dog
       breed: bin.string,
-    }),
-    [AnimalType.CAT]: bin.object({
+    },
+    [AnimalType.CAT]: {
       // Animal can be a cat
       striped: bin.bool,
-    }),
+    },
   },
 );
 

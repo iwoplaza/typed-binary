@@ -1,31 +1,26 @@
 import { Measurer } from '../io/measurer.ts';
 import type { IMeasurer, ISerialInput, ISerialOutput } from '../io/types.ts';
-import type { ParseUnwrapped } from '../utilityTypes.ts';
 import {
-  type AnySchema,
-  type IRefResolver,
+  type ExtractIn,
+  type ExtractOut,
   MaxValue,
   type PropertyDescription,
-  Schema,
-  type Unwrap,
+  type Schema,
 } from './types.ts';
 
-export class DynamicArraySchema<TElement extends AnySchema> extends Schema<Unwrap<TElement>[]> {
-  public elementType: TElement;
+export interface DynamicArray<TElement extends Schema> extends Schema<
+  readonly ExtractIn<TElement>[],
+  ExtractOut<TElement>[]
+> {}
 
-  constructor(private readonly _unstableElementType: TElement) {
-    super();
+class DynamicArraySchema<TElement extends Schema> implements DynamicArray<TElement> {
+  readonly elementType: TElement;
 
-    // In case this array isn't part of a keyed chain,
-    // let's assume the inner type is stable.
-    this.elementType = _unstableElementType;
+  constructor(elementType: TElement) {
+    this.elementType = elementType;
   }
 
-  override resolveReferences(ctx: IRefResolver): void {
-    this.elementType = ctx.resolve(this._unstableElementType);
-  }
-
-  override write(output: ISerialOutput, values: ParseUnwrapped<TElement>[]): void {
+  write(output: ISerialOutput, values: readonly ExtractIn<TElement>[]): void {
     output.writeUint32(values.length);
 
     for (const value of values) {
@@ -33,13 +28,13 @@ export class DynamicArraySchema<TElement extends AnySchema> extends Schema<Unwra
     }
   }
 
-  override read(input: ISerialInput): ParseUnwrapped<TElement>[] {
-    const array: ParseUnwrapped<TElement>[] = [];
+  read(input: ISerialInput): ExtractOut<TElement>[] {
+    const array: ExtractOut<TElement>[] = [];
 
     const len = input.readUint32();
 
     for (let i = 0; i < len; ++i) {
-      array.push(this.elementType.read(input) as ParseUnwrapped<TElement>);
+      array.push(this.elementType.read(input));
     }
 
     return array;
@@ -57,8 +52,8 @@ export class DynamicArraySchema<TElement extends AnySchema> extends Schema<Unwra
     return this.measure(MaxValue).size;
   }
 
-  override measure(
-    values: ParseUnwrapped<TElement>[] | typeof MaxValue,
+  measure(
+    values: readonly ExtractIn<TElement>[] | typeof MaxValue,
     measurer: IMeasurer = new Measurer(),
   ): IMeasurer {
     if (values === MaxValue) {
@@ -76,47 +71,9 @@ export class DynamicArraySchema<TElement extends AnySchema> extends Schema<Unwra
 
     return measurer;
   }
-
-  override seekProperty(
-    reference: ParseUnwrapped<TElement>[] | MaxValue,
-    prop: number,
-  ): PropertyDescription | null {
-    if (typeof prop === 'symbol') {
-      return null;
-    }
-
-    const indexProp = Number.parseInt(String(prop), 10);
-    if (Number.isNaN(indexProp)) {
-      return null;
-    }
-
-    if (reference === MaxValue) {
-      return {
-        bufferOffset: this.elementType.measure(MaxValue).size * indexProp,
-        schema: this.elementType,
-      };
-    }
-
-    if (indexProp >= reference.length) {
-      // index out of range
-      return null;
-    }
-
-    const measurer = new Measurer();
-    for (let i = 0; i < indexProp; ++i) {
-      this.elementType.measure(reference[i], measurer);
-    }
-
-    return {
-      bufferOffset: measurer.size,
-      schema: this.elementType,
-    };
-  }
 }
 
-// @__NO_SIDE_EFFECTS__
-export function dynamicArrayOf<TSchema extends AnySchema>(
-  elementSchema: TSchema,
-): DynamicArraySchema<TSchema> {
+/*@__NO_SIDE_EFFECTS__*/
+export function dynamicArray<TSchema>(elementSchema: TSchema): DynamicArray<TSchema> {
   return new DynamicArraySchema(elementSchema);
 }

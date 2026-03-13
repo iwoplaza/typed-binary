@@ -1,8 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-// Importing from the public API
-import { CharsSchema } from '../index.ts';
-// Helpers
+import bin from 'typed-binary';
 import { encodeAndDecode } from './helpers/mock.ts';
 import { randIntBetween } from './random.ts';
 
@@ -20,7 +18,7 @@ describe('CharsSchema', () => {
       value += String.fromCharCode(randIntBetween(range[0].charCodeAt(0), range[1].charCodeAt(0)));
     }
 
-    const description = new CharsSchema(value.length);
+    const description = bin.chars(value.length);
     expect(encodeAndDecode(description, value)).to.equal(value);
   });
 });

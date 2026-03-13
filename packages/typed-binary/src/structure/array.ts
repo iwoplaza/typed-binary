@@ -1,28 +1,26 @@
 import { ValidationError } from '../error.ts';
 import { Measurer } from '../io/measurer.ts';
 import type { IMeasurer, ISerialInput, ISerialOutput } from '../io/types.ts';
-import type { ParseUnwrapped } from '../utilityTypes.ts';
-import { type AnySchema, type IRefResolver, MaxValue, Schema, type Unwrap } from './types.ts';
+import { type ExtractIn, type ExtractOut, MaxValue, type Schema } from './types.ts';
 
-export class ArraySchema<TElement extends AnySchema> extends Schema<Unwrap<TElement>[]> {
-  private elementSchema: TElement;
+export interface Array<TElement> extends Schema<
+  readonly ExtractIn<TElement>[],
+  ExtractOut<TElement>[]
+> {
+  readonly elementSchema: TElement;
+  readonly length: number;
+}
 
-  constructor(
-    private readonly _unstableElementSchema: TElement,
-    public readonly length: number,
-  ) {
-    super();
+class ArraySchema<TElement extends Schema> implements Array<TElement> {
+  readonly elementSchema: TElement;
+  readonly length: number;
 
-    // In case this array isn't part of a keyed chain,
-    // let's assume the inner type is stable.
-    this.elementSchema = _unstableElementSchema;
+  constructor(elementSchema: TElement, length: number) {
+    this.elementSchema = elementSchema;
+    this.length = length;
   }
 
-  override resolveReferences(ctx: IRefResolver): void {
-    this.elementSchema = ctx.resolve(this._unstableElementSchema);
-  }
-
-  override write(output: ISerialOutput, values: ParseUnwrapped<TElement>[]): void {
+  write(output: ISerialOutput, values: readonly ExtractIn<TElement>[]): void {
     if (values.length !== this.length) {
       throw new ValidationError(`Expected array of length ${this.length}, got ${values.length}`);
     }
@@ -32,11 +30,11 @@ export class ArraySchema<TElement extends AnySchema> extends Schema<Unwrap<TElem
     }
   }
 
-  override read(input: ISerialInput): ParseUnwrapped<TElement>[] {
-    const array: ParseUnwrapped<TElement>[] = [];
+  read(input: ISerialInput): ExtractOut<TElement>[] {
+    const array: ExtractOut<TElement>[] = [];
 
     for (let i = 0; i < this.length; ++i) {
-      array.push(this.elementSchema.read(input) as ParseUnwrapped<TElement>);
+      array.push(this.elementSchema.read(input));
     }
 
     return array;
@@ -54,8 +52,8 @@ export class ArraySchema<TElement extends AnySchema> extends Schema<Unwrap<TElem
     return this.elementSchema.measure(MaxValue).size * this.length;
   }
 
-  override measure(
-    values: ParseUnwrapped<TElement>[] | MaxValue,
+  measure(
+    values: readonly ExtractIn<TElement>[] | MaxValue,
     measurer: IMeasurer = new Measurer(),
   ): IMeasurer {
     for (let i = 0; i < this.length; ++i) {
@@ -66,8 +64,8 @@ export class ArraySchema<TElement extends AnySchema> extends Schema<Unwrap<TElem
   }
 }
 
-// @__NO_SIDE_EFFECTS__
-export function arrayOf<TSchema extends AnySchema>(
+/*#__NO_SIDE_EFFECTS__*/
+export function array<TSchema extends Schema>(
   elementSchema: TSchema,
   length: number,
 ): ArraySchema<TSchema> {
