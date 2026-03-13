@@ -90,8 +90,20 @@ export class BufferReader extends BufferIOBase implements ISerialInput {
     const unwrapped = unwrapBuffer(bufferView);
     const destU8 = new Uint8Array(unwrapped.buffer, unwrapped.byteOffset + offset);
 
-    for (let i = 0; i < byteLength; ++i) {
-      destU8[i] = this.dataView.getUint8(this.byteOffset++);
+    const bytesPerElement =
+      (bufferView as { BYTES_PER_ELEMENT?: number }).BYTES_PER_ELEMENT ?? 1;
+
+    if (this.needsByteSwap && bytesPerElement > 1) {
+      for (let i = 0; i < byteLength; i += bytesPerElement) {
+        for (let j = bytesPerElement - 1; j >= 0; j--) {
+          destU8[i + j] = this.dataView.getUint8(this.byteOffset++);
+        }
+      }
+    } else {
+      destU8.set(
+        new Uint8Array(this.dataView.buffer, this.byteOffset, byteLength),
+      );
+      this.byteOffset += byteLength;
     }
   }
 }
