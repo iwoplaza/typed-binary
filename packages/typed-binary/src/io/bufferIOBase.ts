@@ -16,6 +16,7 @@ export type BufferIOOptions = {
 export class BufferIOBase {
   protected readonly dataView: DataView;
   protected readonly littleEndian: boolean;
+  protected readonly needsByteSwap: boolean;
   protected byteOffset = 0;
 
   public readonly endianness: Endianness;
@@ -28,6 +29,7 @@ export class BufferIOBase {
     const systemEndianness = getSystemEndianness();
     this.endianness = endianness === 'system' ? systemEndianness : endianness;
     this.littleEndian = this.endianness === 'little';
+    this.needsByteSwap = this.endianness !== systemEndianness;
 
     // Getting rid of the outer shell, which causes the Uint8Array line to create a copy, instead of a view.
     const unwrapped = unwrapBuffer(buffer);

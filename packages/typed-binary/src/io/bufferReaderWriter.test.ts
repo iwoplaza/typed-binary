@@ -145,6 +145,80 @@ describe('BufferReader', () => {
   });
 });
 
+describe('BufferWriter slice endianness', () => {
+  it('writes Int32Array in big-endian byte order', () => {
+    const buffer = new ArrayBuffer(4);
+    const writer = new BufferWriter(buffer, { endianness: 'big' });
+    writer.writeSlice(new Int32Array([0x01020304]));
+
+    expect([...new Uint8Array(buffer)]).toEqual([0x01, 0x02, 0x03, 0x04]);
+  });
+
+  it('writes Int32Array in little-endian byte order', () => {
+    const buffer = new ArrayBuffer(4);
+    const writer = new BufferWriter(buffer, { endianness: 'little' });
+    writer.writeSlice(new Int32Array([0x01020304]));
+
+    expect([...new Uint8Array(buffer)]).toEqual([0x04, 0x03, 0x02, 0x01]);
+  });
+
+  it('writes Float32Array respecting endianness', () => {
+    const value = new Float32Array([1.5]);
+    const beBuffer = new ArrayBuffer(4);
+    const leBuffer = new ArrayBuffer(4);
+    new BufferWriter(beBuffer, { endianness: 'big' }).writeSlice(value);
+    new BufferWriter(leBuffer, { endianness: 'little' }).writeSlice(value);
+
+    const beBytes = [...new Uint8Array(beBuffer)];
+    const leBytes = [...new Uint8Array(leBuffer)];
+    expect(beBytes).toEqual([...leBytes].reverse());
+  });
+});
+
+describe('BufferReader slice endianness', () => {
+  it('reads Int32Array from big-endian buffer', () => {
+    const buffer = new ArrayBuffer(8);
+    new Uint8Array(buffer).set([0x00, 0x00, 0x00, 0x01, 0x00, 0x00, 0x00, 0x02]);
+
+    const dest = new Int32Array(2);
+    new BufferReader(buffer, { endianness: 'big' }).readSlice(dest, 0, 8);
+
+    expect([...dest]).toEqual([1, 2]);
+  });
+
+  it('reads Int32Array from little-endian buffer', () => {
+    const buffer = new ArrayBuffer(8);
+    new Uint8Array(buffer).set([0x01, 0x00, 0x00, 0x00, 0x02, 0x00, 0x00, 0x00]);
+
+    const dest = new Int32Array(2);
+    new BufferReader(buffer, { endianness: 'little' }).readSlice(dest, 0, 8);
+
+    expect([...dest]).toEqual([1, 2]);
+  });
+
+  it('roundtrips Int32Array through big-endian writer and reader', () => {
+    const src = new Int32Array([0, 1, -1, 2_147_483_647, -2_147_483_648]);
+    const buffer = new ArrayBuffer(src.byteLength);
+    new BufferWriter(buffer, { endianness: 'big' }).writeSlice(src);
+
+    const dest = new Int32Array(src.length);
+    new BufferReader(buffer, { endianness: 'big' }).readSlice(dest, 0, buffer.byteLength);
+
+    expect([...dest]).toEqual([...src]);
+  });
+
+  it('roundtrips Float64Array through big-endian writer and reader', () => {
+    const src = new Float64Array([0.1, -0.5, Math.PI]);
+    const buffer = new ArrayBuffer(src.byteLength);
+    new BufferWriter(buffer, { endianness: 'big' }).writeSlice(src);
+
+    const dest = new Float64Array(src.length);
+    new BufferReader(buffer, { endianness: 'big' }).readSlice(dest, 0, buffer.byteLength);
+
+    expect([...dest]).toEqual([...src]);
+  });
+});
+
 describe('BufferWriter/BufferReader', () => {
   it('parses options correctly', () => {
     const buffer = Buffer.alloc(16);

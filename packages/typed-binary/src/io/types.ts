@@ -1,6 +1,16 @@
 export type Endianness = 'big' | 'little';
 
-export type BufferView = ArrayLike<number> & ArrayBufferView;
+export type BufferView =
+  | Int8Array
+  | Uint8Array
+  | Uint8ClampedArray
+  | Int16Array
+  | Uint16Array
+  | Int32Array
+  | Uint32Array
+  | Float16Array
+  | Float32Array
+  | Float64Array;
 
 export interface ISerialInput {
   readBool(): boolean;
