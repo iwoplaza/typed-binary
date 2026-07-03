@@ -97,3 +97,47 @@ describe('bin.u32', () => {
     expect(decoded).to.equal(0);
   });
 });
+
+describe('BigInt64Schema', () => {
+  it('should encode and decode an bigint value', () => {
+    const value = BigInt(randIntBetween(-100, 100));
+    const decoded = encodeAndDecode(bin.bigint, value);
+
+    expect(decoded).to.equal(value);
+  });
+
+  it('should encode and decode the max bigint value', () => {
+    const value = BigInt(2 ** 63) - 1n;
+    const decoded = encodeAndDecode(bin.bigint, value);
+
+    expect(decoded).to.equal(value);
+  });
+
+  it('max + 1 should overflow into 0', () => {
+    const decoded = encodeAndDecode(bin.bigint, BigInt(2 ** 64));
+
+    expect(decoded).to.equal(0n);
+  });
+});
+
+describe('BigUint64Schema', () => {
+  it('should encode and decode an bigint value', () => {
+    const value = BigInt(randIntBetween(0, 100));
+    const decoded = encodeAndDecode(bin.biguint, value);
+
+    expect(decoded).to.equal(value);
+  });
+
+  it('should encode and decode the max biguint value', () => {
+    const value = BigInt(2 ** 64) - 1n;
+    const decoded = encodeAndDecode(bin.biguint, value);
+
+    expect(decoded).to.equal(value);
+  });
+
+  it('max + 1 should overflow into 0', () => {
+    const decoded = encodeAndDecode(bin.biguint, BigInt(2 ** 64));
+
+    expect(decoded).to.equal(0n);
+  });
+});
