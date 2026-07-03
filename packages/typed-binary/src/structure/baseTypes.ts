@@ -231,6 +231,60 @@ export class Uint32Schema extends Schema<number> {
 export const u32: Uint32Schema = new Uint32Schema();
 
 ////
+// BigInt64
+////
+
+export class BigInt64Schema extends Schema<bigint> {
+  /**
+   * The maximum number of bytes this schema can take up.
+   *
+   * Alias for `.measure(MaxValue).size`
+   */
+  readonly maxSize = 8;
+
+  read(input: ISerialInput): bigint {
+    return input.readBigInt64();
+  }
+
+  write(output: ISerialOutput, value: bigint): void {
+    output.writeBigInt64(value);
+  }
+
+  measure(_: bigint | MaxValue, measurer: IMeasurer = new Measurer()): IMeasurer {
+    return measurer.add(8);
+  }
+}
+
+export const bigint: BigInt64Schema = new BigInt64Schema();
+
+////
+// BigUint64
+////
+
+export class BigUint64Schema extends Schema<bigint> {
+  /**
+   * The maximum number of bytes this schema can take up.
+   *
+   * Alias for `.measure(MaxValue).size`
+   */
+  readonly maxSize = 8;
+
+  read(input: ISerialInput): bigint {
+    return input.readBigUint64();
+  }
+
+  write(output: ISerialOutput, value: bigint): void {
+    output.writeBigUint64(value);
+  }
+
+  measure(_: bigint | MaxValue, measurer: IMeasurer = new Measurer()): IMeasurer {
+    return measurer.add(8);
+  }
+}
+
+export const biguint: BigUint64Schema = new BigUint64Schema();
+
+////
 // f16
 ////
 

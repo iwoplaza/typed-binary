@@ -24,6 +24,8 @@ export interface ISerialInput {
   readUint16(): number;
   readInt32(): number;
   readUint32(): number;
+  readBigInt64(): bigint;
+  readBigUint64(): bigint;
   readFloat16(): number;
   readFloat32(): number;
   readString(): string;
@@ -46,6 +48,8 @@ export interface ISerialOutput {
   writeUint16(value: number): void;
   writeInt32(value: number): void;
   writeUint32(value: number): void;
+  writeBigInt64(value: bigint): void;
+  writeBigUint64(value: bigint): void;
   writeFloat16(value: number): void;
   writeFloat32(value: number): void;
   writeString(value: string): void;

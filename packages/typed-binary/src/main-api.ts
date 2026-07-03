@@ -1,5 +1,5 @@
 export { arrayOf } from './structure/array.ts';
-export { bool, byte, i8, u8, i16, u16, i32, u32, f16, f32, string } from './structure/baseTypes.ts';
+export { bool, byte, i8, u8, i16, u16, i32, u32, f16, f32, bigint, biguint, string } from './structure/baseTypes.ts';
 export { chars } from './structure/chars.ts';
 export { concat } from './structure/concat.ts';
 export { dynamicArrayOf } from './structure/dynamicArray.ts';
