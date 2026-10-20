@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 
 // Importing from the public API
-import { i8, i16, i32, u8, u16, u32 } from '../index.ts';
+import { i8, i16, i32, u8, u16, u32, bigint, biguint } from '../index.ts';
 // Helpers
 import { encodeAndDecode } from './helpers/mock.ts';
 import { randIntBetween } from './random.ts';
@@ -97,5 +97,49 @@ describe('Uint32Schema', () => {
     const decoded = encodeAndDecode(u32, 2 ** 32);
 
     expect(decoded).to.equal(0);
+  });
+});
+
+describe('BigInt64Schema', () => {
+  it('should encode and decode an bigint value', () => {
+    const value = BigInt(randIntBetween(-100, 100));
+    const decoded = encodeAndDecode(bigint, value);
+
+    expect(decoded).to.equal(value);
+  });
+
+  it('should encode and decode the max bigint value', () => {
+    const value = BigInt(2 ** 63) - 1n;
+    const decoded = encodeAndDecode(bigint, value);
+
+    expect(decoded).to.equal(value);
+  });
+
+  it('max + 1 should overflow into 0', () => {
+    const decoded = encodeAndDecode(bigint, BigInt(2 ** 64));
+
+    expect(decoded).to.equal(0n);
+  });
+});
+
+describe('BigUint64Schema', () => {
+  it('should encode and decode an bigint value', () => {
+    const value = BigInt(randIntBetween(0, 100));
+    const decoded = encodeAndDecode(biguint, value);
+
+    expect(decoded).to.equal(value);
+  });
+
+  it('should encode and decode the max biguint value', () => {
+    const value = BigInt(2 ** 64) - 1n;
+    const decoded = encodeAndDecode(biguint, value);
+
+    expect(decoded).to.equal(value);
+  });
+
+  it('max + 1 should overflow into 0', () => {
+    const decoded = encodeAndDecode(biguint, BigInt(2 ** 64));
+
+    expect(decoded).to.equal(0n);
   });
 });
