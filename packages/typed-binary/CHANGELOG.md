@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## 4.3.4 (2026-10-20)
 
 ### Bundles now contain only what you import
 
