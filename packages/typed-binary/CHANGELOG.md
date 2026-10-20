@@ -8,6 +8,9 @@
   size of the bounded ones (e.g. `8` for `object({ a: i32, b: string, c: i32 })`).
 - Fixed: `genericEnum` now considers an unbounded sub-type to be the biggest one when measuring
   its max size.
+- Fixed: `BufferReader` and `BufferWriter` accept array buffer views (e.g. a Node.js `Buffer`)
+  in their types, as they already did at runtime. Previously, `new BufferWriter(Buffer.alloc(64))`
+  failed to typecheck with recent TypeScript versions.
 
 ## 4.3.4 (2026-10-20)
 

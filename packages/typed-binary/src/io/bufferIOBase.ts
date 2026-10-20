@@ -21,7 +21,10 @@ export class BufferIOBase {
 
   public readonly endianness: Endianness;
 
-  constructor(buffer: ArrayBufferLike, options?: BufferIOOptions) {
+  /**
+   * @param buffer The buffer to read from/write to, or a view over it (e.g. a Node.js `Buffer`).
+   */
+  constructor(buffer: ArrayBufferLike | ArrayBufferView, options?: BufferIOOptions) {
     const { byteOffset = 0, endianness = 'system' } = options ?? {};
 
     this.byteOffset = byteOffset;
