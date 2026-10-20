@@ -14,10 +14,6 @@ export type BufferView =
 
 export interface ISerialInput {
   readBool(): boolean;
-  /**
-   * @deprecated Use `readUint8` instead.
-   */
-  readByte(): number;
   readInt8(): number;
   readUint8(): number;
   readInt16(): number;
@@ -36,10 +32,6 @@ export interface ISerialInput {
 
 export interface ISerialOutput {
   writeBool(value: boolean): void;
-  /**
-   * @deprecated Use `writeUint8` instead.
-   */
-  writeByte(value: number): void;
   writeInt8(value: number): void;
   writeUint8(value: number): void;
   writeInt16(value: number): void;

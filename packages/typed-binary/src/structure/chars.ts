@@ -3,9 +3,15 @@ import { Measurer } from '../io/measurer.ts';
 import type { IMeasurer, ISerialInput, ISerialOutput } from '../io/types.ts';
 import { Schema } from './types.ts';
 
-export class CharsSchema<TLength extends number = number> extends Schema<string> {
-  constructor(public readonly length: TLength) {
-    super();
+export interface Chars<TLength extends number = number> extends Schema<string> {
+  readonly length: TLength;
+}
+
+class CharsSchema<TLength extends number = number> implements Chars<TLength> {
+  readonly length: TLength;
+
+  constructor(length: TLength) {
+    this.length = length;
   }
 
   write(output: ISerialOutput, value: string): void {
@@ -24,7 +30,7 @@ export class CharsSchema<TLength extends number = number> extends Schema<string>
     let content = '';
 
     for (let i = 0; i < this.length; ++i) {
-      content += String.fromCharCode(input.readByte());
+      content += String.fromCharCode(input.readUint8());
     }
 
     return content;
@@ -35,7 +41,7 @@ export class CharsSchema<TLength extends number = number> extends Schema<string>
   }
 }
 
-// @__NO_SIDE_EFFECTS__
-export function chars<T extends number>(length: T): CharsSchema<T> {
+/*#__NO_SIDE_EFFECTS__*/
+export function chars<T extends number>(length: T): Chars<T> {
   return new CharsSchema(length);
 }

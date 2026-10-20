@@ -1,20 +1,16 @@
-import bin from 'typed-binary';
+import * as bin from 'typed-binary';
 
-type TriggerCondition = bin.Parsed<typeof TriggerCondition>;
-export const TriggerCondition = bin.keyed('trigger-condition', (TriggerCondition) =>
-  bin.generic(
-    {},
-    {
-      'core:state': bin.object({
-        state: bin.byte,
-      }),
-      'core:animation_finished': bin.object({}),
-      'core:not': bin.object({
-        condition: TriggerCondition,
-      }),
+export const TriggerCondition = bin.union(bin.string, {
+  'core:state': {
+    state: bin.u8,
+  },
+  'core:animation_finished': {},
+  'core:not': {
+    get condition() {
+      return TriggerCondition;
     },
-  ),
-);
+  },
+});
 
 export enum MobState {
   ON_GROUND = 0,

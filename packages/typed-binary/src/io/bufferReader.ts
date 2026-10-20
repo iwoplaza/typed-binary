@@ -16,10 +16,6 @@ export class BufferReader extends BufferIOBase implements ISerialInput {
     return this.dataView.getUint8(this.byteOffset++) !== 0;
   }
 
-  readByte(): number {
-    return this.dataView.getUint8(this.byteOffset++);
-  }
-
   readInt8(): number {
     return this.dataView.getInt8(this.byteOffset++);
   }

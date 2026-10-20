@@ -1,159 +1,63 @@
 import type { IMeasurer, ISerialInput, ISerialOutput } from '../io/types.ts';
-import type { Parsed } from '../utilityTypes.ts';
 
 export type MaxValue = typeof MaxValue;
 export const MaxValue = /* @__PURE__ */ Symbol(
   'The biggest (in amount of bytes needed) value a schema can represent',
 );
 
-export interface IKeyedSchema<TKeyDef extends string, TUnwrapped> extends ISchema<TUnwrapped> {
-  readonly __keyDefinition: TKeyDef;
+/**
+ * @param TIn the JavaScript type accepted by the schema for parsing.
+ * @param TOut the JavaScript type produced by the schema.
+ */
+export interface Schema<in TIn extends any = any, out TOut extends any = TIn> {
+  write(output: ISerialOutput, value: TIn): void;
+  read(input: ISerialInput): TOut;
+  measure(value: TIn | MaxValue, measurer?: IMeasurer): IMeasurer;
 }
 
-export type AnyKeyedSchema = IKeyedSchema<string, unknown>;
+/**
+ * Either a schema, or an object that defines itself as one by holding
+ * a schema under the `'~typed-binary'` key. Accepted wherever a schema is expected.
+ */
+export type WithSchema<TIn = any, TOut = any> =
+  | Schema<TIn, TOut>
+  | { readonly ['~typed-binary']: { readonly schema: Schema<TIn, TOut> } };
 
 /**
- * Removes one layer of schema wrapping.
- *
- * @example ```
- * Unwrap<ISchema<ISchema<number>>> -> ISchema<number>
- * Unwrap<ISchema<number>> -> number
- * ```
- *
- * Keyed schemas are bypassed.
- *
- * @example ```
- * Unwrap<IKeyedSchema<'abc', ISchema<number>>> -> IKeyedSchema<'abc', number>
- * ```
+ * The schema behind a `WithSchema` value.
  */
-export type Unwrap<T> =
-  T extends IKeyedSchema<infer TKeyDef, infer TInner>
-    ? // bypassing keyed schemas, as that information has to be preserved for parsing
-      IKeyedSchema<TKeyDef, Unwrap<TInner>>
-    : T extends ISchema<infer TInner>
-      ? TInner
-      : T;
+export type UnwrapSchema<T> = T extends {
+  readonly ['~typed-binary']: { readonly schema: infer TSchema };
+}
+  ? TSchema
+  : T;
 
-/**
- * Removes one layer of schema wrapping of record properties.
- *
- * @example ```
- * Unwrap<{
- *   a: ISchema<number>,
- *   b: ISchema<ISchema<string>>
- * }>
- * // <=>
- * {
- *   a: number,
- *   b: ISchema<string>
- * }
- * ```
- */
-export type UnwrapRecord<T> =
-  T extends IKeyedSchema<infer TKeyDef, Record<infer K, unknown>>
-    ? IKeyedSchema<TKeyDef, { [key in K]: Unwrap<T['__unwrapped'][key]> }>
-    : T extends Record<infer K, unknown>
-      ? { [key in K]: Unwrap<T[key]> }
-      : T;
-
-/* helper type for UnwrapArray */
-type __UnwrapArray<T> = T extends unknown[]
-  ? {
-      [key in keyof T]: Unwrap<T[key]>;
-    }
-  : never;
-
-/**
- * Removes one layer of schema wrapping of array elements.
- *
- * @example ```
- * Unwrap<[a: ISchema<number>, b: ISchema<ISchema<string>>]>
- * // <=>
- * [a: number, b: ISchema<string>]
- * ```
- */
-export type UnwrapArray<T> =
-  T extends IKeyedSchema<infer TKeyDef, unknown[]>
-    ? IKeyedSchema<TKeyDef, __UnwrapArray<T['__unwrapped']>>
-    : T extends unknown[]
-      ? __UnwrapArray<T>
-      : T;
-
-export interface ISchemaWithProperties<TProps extends Record<string, AnySchema>> extends ISchema<
-  UnwrapRecord<TProps>
-> {
-  readonly properties: TProps;
+export function isSchemaLike(value: unknown): value is Schema {
+  return (
+    !!value &&
+    typeof value === 'object' &&
+    typeof (value as any).write === 'function' &&
+    typeof (value as any).read === 'function' &&
+    typeof (value as any).measure === 'function'
+  );
 }
 
-export type AnySchemaWithProperties = ISchemaWithProperties<Record<string, AnySchema>>;
-
-export type PropertiesOf<T extends AnySchemaWithProperties> = T['properties'];
-
-export type PropertyDescription = {
-  bufferOffset: number;
-  schema: ISchema<unknown>;
-};
-
-/**
- * @param TUnwrap one level of unwrapping to the inferred type.
- */
-export interface ISchema<TUnwrapped> {
-  readonly __unwrapped: TUnwrapped;
-
-  resolveReferences(ctx: IRefResolver): void;
-  write(output: ISerialOutput, value: Parsed<TUnwrapped>): void;
-  read(input: ISerialInput): Parsed<TUnwrapped>;
-  measure(value: Parsed<TUnwrapped> | MaxValue, measurer?: IMeasurer): IMeasurer;
-  seekProperty(
-    reference: Parsed<TUnwrapped> | MaxValue,
-    prop: keyof TUnwrapped,
-  ): PropertyDescription | null;
-}
-
-export type AnySchema = ISchema<unknown>;
-
-export abstract class Schema<TUnwrapped> implements ISchema<TUnwrapped> {
-  readonly __unwrapped!: TUnwrapped;
-
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  resolveReferences(ctx: IRefResolver): void {
-    // override this if you need to resolve internal references.
+export function toSchema(value: unknown): Schema | undefined {
+  if (isSchemaLike(value)) {
+    return value;
   }
-  abstract write(output: ISerialOutput, value: Parsed<TUnwrapped>): void;
-  abstract read(input: ISerialInput): Parsed<TUnwrapped>;
-  abstract measure(value: Parsed<TUnwrapped> | MaxValue, measurer?: IMeasurer): IMeasurer;
-  seekProperty(
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    _reference: Parsed<TUnwrapped> | MaxValue,
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    _prop: keyof TUnwrapped,
-  ): PropertyDescription | null {
-    // override this if necessary.
-    return null;
+
+  const meta = (value as Extract<WithSchema, { ['~typed-binary']: any }>)?.['~typed-binary'];
+  if (meta && isSchemaLike(meta.schema)) {
+    return meta.schema;
   }
+
+  return undefined;
 }
 
-export class Ref<K extends string> {
-  constructor(public readonly key: K) {}
-}
-
-////
-// Generic types
-////
-
-export type SubTypeKey = 'string' | 'enum';
-export const SubTypeKey = {
-  STRING: 'string',
-  ENUM: 'enum',
-} as const;
-
-export interface IRefResolver {
-  hasKey(key: string): boolean;
-
-  resolve<TSchema extends AnySchema>(schemaOrRef: TSchema): TSchema;
-  register<K extends string>(key: K, schema: ISchema<unknown>): void;
-}
-
-////
-// Alias types
-////
+export type ExtractIn<T> = T extends WithSchema<infer TIn, infer _TOut> ? TIn : never;
+export type ExtractOut<T> = T extends WithSchema<infer _TIn, infer TOut> ? TOut : never;
+export type ExtractInRecord<T> =
+  T extends Record<string | symbol | number, any> ? { [K in keyof T]: ExtractIn<T[K]> } : never;
+export type ExtractOutRecord<T> =
+  T extends Record<string | symbol | number, any> ? { [K in keyof T]: ExtractOut<T[K]> } : never;

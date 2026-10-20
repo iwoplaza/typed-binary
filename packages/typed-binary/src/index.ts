@@ -1,46 +1,4 @@
+// Only named exports, which every bundler can tree-shake, also when accessed through
+// a namespace import (`import * as bin from 'typed-binary'`).
 export * from './main-api.ts';
-// Re-exported with ESM syntax (instead of `export default bin`), so that bundlers
-// can tree-shake `bin.*` member accesses.
-export * as bin from './main-api.ts';
-export * as default from './main-api.ts';
-
 export { getSystemEndianness } from './util.ts';
-export { MaxValue, SubTypeKey, Schema } from './structure/types.ts';
-export {
-  BoolSchema,
-  Float16Schema,
-  Float32Schema,
-  Int16Schema,
-  Int32Schema,
-  Int8Schema,
-  StringSchema,
-  Uint16Schema,
-  Uint32Schema,
-  Uint8Schema,
-  /** @deprecated Use Uint8Schema instead. */
-  Uint8Schema as ByteSchema,
-} from './structure/baseTypes.ts';
-export { ArraySchema } from './structure/array.ts';
-export { CharsSchema } from './structure/chars.ts';
-export { DynamicArraySchema } from './structure/dynamicArray.ts';
-export { KeyedSchema } from './structure/keyed.ts';
-export { ObjectSchema, GenericObjectSchema } from './structure/object.ts';
-export { OptionalSchema } from './structure/optional.ts';
-export { TupleSchema } from './structure/tuple.ts';
-export { TypedArraySchema } from './structure/typedArray.ts';
-
-export type { AnyObjectSchema } from './structure/object.ts';
-export type {
-  Unwrap,
-  UnwrapRecord,
-  UnwrapArray,
-  IKeyedSchema,
-  Ref,
-  IRefResolver,
-  ISchema,
-  AnyKeyedSchema,
-  AnySchema,
-  AnySchemaWithProperties,
-  ISchemaWithProperties,
-} from './structure/types.ts';
-export type { ParseUnwrapped } from './utilityTypes.ts';
