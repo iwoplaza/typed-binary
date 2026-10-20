@@ -250,7 +250,8 @@ export class GenericObjectSchema<
 
           return [subType, forkedMeasurer.size] as const;
         })
-        .reduce((a, b) => (a[1] > b[1] ? a : b))[0];
+        // An unbounded (NaN) sub-type is the biggest one
+        .reduce((a, b) => (Number.isNaN(a[1]) || a[1] > b[1] ? a : b))[0];
 
       // Going through extra properties
       for (const prop of Object.values(biggestSubType.properties)) {
