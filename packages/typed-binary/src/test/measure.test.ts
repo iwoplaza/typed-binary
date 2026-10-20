@@ -1,0 +1,46 @@
+import { describe, expect, it } from 'vitest';
+
+// Importing from the public API
+import bin from '../index.ts';
+
+describe('Measurer', () => {
+  it('stays unbounded once marked as unbounded', () => {
+    const measurer = new bin.Measurer();
+    measurer.add(4);
+    void measurer.unbounded;
+    measurer.add(4);
+
+    expect(measurer.size).toBeNaN();
+    expect(measurer.isUnbounded).toBe(true);
+    expect(measurer.fork().isUnbounded).toBe(true);
+  });
+});
+
+describe('unbounded max size', () => {
+  it('propagates through objects', () => {
+    expect(bin.object({ a: bin.i32, b: bin.string, c: bin.i32 }).maxSize).toBeNaN();
+    expect(bin.object({ a: bin.i32, b: bin.dynamicArrayOf(bin.i32) }).maxSize).toBeNaN();
+  });
+
+  it('propagates through other containers', () => {
+    expect(bin.optional(bin.string).measure(bin.MaxValue).size).toBeNaN();
+    expect(bin.tupleOf([bin.i32, bin.string]).measure(bin.MaxValue).size).toBeNaN();
+    expect(bin.arrayOf(bin.string, 2).measure(bin.MaxValue).size).toBeNaN();
+  });
+
+  it('treats an unbounded sub-type as the biggest one', () => {
+    const Generic = bin.genericEnum(
+      {},
+      {
+        0: bin.object({ label: bin.string }),
+        1: bin.object({ value: bin.i32 }),
+      },
+    );
+
+    expect(Generic.measure(bin.MaxValue).size).toBeNaN();
+  });
+
+  it('keeps bounded schemas bounded', () => {
+    expect(bin.object({ a: bin.i32, b: bin.tupleOf([bin.i32, bin.i32]) }).maxSize).toEqual(12);
+  });
+});

@@ -59,6 +59,9 @@ export interface ISerialOutput {
 export interface IMeasurer {
   add(bytes: number): IMeasurer;
   fork(): IMeasurer;
+  /**
+   * Marks the measurer as unbounded (its size becomes `NaN`), and returns it.
+   */
   readonly unbounded: IMeasurer;
 
   readonly size: number;

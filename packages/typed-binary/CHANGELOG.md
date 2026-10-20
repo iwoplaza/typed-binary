@@ -1,5 +1,14 @@
 # Changelog
 
+## Unreleased
+
+- Fixed: `maxSize`/`.measure(MaxValue)` of schemas containing an unbounded schema
+  (e.g. `string` or `dynamicArrayOf(...)`) is now `NaN`. Previously, containers like `object`,
+  `optional` or `tupleOf` ignored the unboundedness of their members, and reported only the
+  size of the bounded ones (e.g. `8` for `object({ a: i32, b: string, c: i32 })`).
+- Fixed: `genericEnum` now considers an unbounded sub-type to be the biggest one when measuring
+  its max size.
+
 ## 4.3.4 (2026-10-20)
 
 ### Bundles now contain only what you import
