@@ -1,5 +1,7 @@
 # Changelog
 
+## Unreleased (v5)
+
 ## Unreleased
 
 - Fixed: `maxSize`/`.measure(MaxValue)` of schemas containing an unbounded schema
