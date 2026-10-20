@@ -2,9 +2,9 @@ name: Code analysis & unit tests
 
 on:
   push:
-    branches: [master]
+    branches: [main]
   pull_request:
-    branches: [master]
+    branches: [main]
 
 jobs:
   # Runs all steps on the VM
