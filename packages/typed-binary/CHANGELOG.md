@@ -1,5 +1,7 @@
 # Changelog
 
+## Unreleased (v5)
+
 ## Unreleased
 
 ## 4.3.5 (2026-10-27)
