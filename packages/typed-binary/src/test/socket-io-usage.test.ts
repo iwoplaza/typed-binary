@@ -22,7 +22,7 @@ describe('Socket IO Usage', () => {
 
   beforeAll(
     () =>
-      new Promise((resolve) => {
+      new Promise<void>((resolve) => {
         const httpServer = createServer();
         io = new Server(httpServer);
 
@@ -34,7 +34,7 @@ describe('Socket IO Usage', () => {
             serverSocket = socket;
           });
 
-          clientSocket.on('connect', resolve);
+          clientSocket.on('connect', () => resolve());
         });
       }),
   );
