@@ -28,3 +28,129 @@ Under the hood:
 - Top-level schema singletons (`u32`, `string`, …) are annotated as `/* @__PURE__ */`.
 
 There are no changes to the runtime behavior or the public types.
+
+## 4.3.3 (2026-03-13)
+
+**Behavior change:** `writeSlice`/`readSlice` (and so the typed array schemas) now respect the
+endianness the reader/writer was configured with. A `Float32Array` is encoded as a series of
+float32 values in the target endianness, instead of in the system's endianness as before.
+To keep the old behavior, convert typed arrays to a `Uint8Array` view before serializing or
+deserializing them.
+
+- Float16 values are read and written with the now baseline `DataView.getFloat16`/`setFloat16`.
+- Bumped TypeScript to v5.9.3.
+
+## 4.3.2 (2025-01-18)
+
+- Pure functions are annotated with `@__NO_SIDE_EFFECTS__` for better tree-shaking.
+
+## 4.3.1 (2024-12-21)
+
+- Fixed: the `Schema` class is exported as a value, not just as a type, so it can be extended.
+
+## 4.3.0 (2024-12-18)
+
+- Added the missing numeric schemas: `u8`, `i8`, `u16` and `i16`.
+- Deprecated `byte`/`ByteSchema` in favor of `u8`/`Uint8Schema`, and `readByte`/`writeByte`
+  in favor of `readUint8`/`writeUint8`.
+- `BufferReader` and `BufferWriter` now use a `DataView` internally.
+- Imports in the source use `.ts` extensions, and exported functions have explicit return types.
+
+## 4.2.0 (2024-10-29)
+
+- Added `f16` (`Float16Schema`).
+
+## 4.1.1 (2024-10-05)
+
+- Fixed: UTF-8 strings are now encoded and decoded properly.
+- Fixed: `BufferWriter` respects the view's length when writing a slice.
+
+## 4.1.0 (2024-09-16)
+
+- Added typed array schemas: `u8Array`, `u8ClampedArray`, `u16Array`, `u32Array`, `i8Array`,
+  `i16Array`, `i32Array`, `f32Array` and `f64Array`.
+- Added a default export and a `bin` named export with the whole schema API
+  (`import bin from 'typed-binary'`).
+- Added a `maxSize` property to some schemas (alias for `.measure(MaxValue).size`).
+- New docs website: https://iwoplaza.github.io/typed-binary/
+- Internal: the repository is now a monorepo, with E2E browser compatibility tests.
+
+## 4.0.1 (2024-07-18)
+
+- Fixed: invalid typing of the `BufferReader`/`BufferWriter` options.
+
+## 4.0.0 (2024-03-01)
+
+**Breaking changes:**
+
+- Arrays were renamed to match what they are:
+  - `arrayOf(schema)` (length-prefixed) is now `dynamicArrayOf(schema)` (`DynamicArraySchema`).
+  - `tupleOf(schema, length)` (fixed length) is now `arrayOf(schema, length)` (`ArraySchema`).
+  - `tupleOf([a, b, c])` now creates an actual tuple of differently typed elements (`TupleSchema`).
+- `TypedBinaryError` was replaced by `UnresolvedReferenceError` and `ValidationError`.
+- `ISchema.resolve` was renamed to `resolveReferences`.
+- `isBigEndian()` was replaced by `getSystemEndianness()`.
+- Simplified type declarations: schemas are now typed by their schema types (e.g.
+  `object<P extends Record<string, AnySchema>>`) instead of the values they hold, and the
+  `SchemaMap`/`IStableSchema` helper types were removed.
+
+Other changes:
+
+- Better type unwrapping of compound and keyed schemas.
+- `BufferReader`/`BufferWriter` expose the resolved `endianness`, and gained `seekTo(offset)`.
+- Migrated tests to Vitest.
+
+## 3.2.0 (2023-12-25)
+
+- Added `concat([...objectSchemas])`, which merges the properties of several object schemas.
+
+## 3.1.0 (2023-12-25)
+
+- Fixed: the outer buffer's byte offset is applied when unwrapping a buffer view
+  (e.g. a Node.js `Buffer` from a pool).
+- Updated the documentation.
+
+## 3.0.0 (2023-11-26)
+
+**Breaking:** `schema.sizeOf(value)` was replaced by `schema.measure(value, measurer?)`,
+which returns an `IMeasurer` (read its `.size`).
+
+- Schemas can measure their maximum size with `schema.measure(MaxValue)`. Unbounded schemas
+  (strings, dynamic arrays) report `NaN` (`measurer.isUnbounded`).
+- Added the `Measurer` class and the `IMeasurer` type.
+- Added `skipBytes(bytes)` to `ISerialInput`/`ISerialOutput`.
+
+## 2.0.0 (2023-09-10)
+
+**Breaking:** base types are now lowercase and explicit about precision and sign:
+`BOOL` → `bool`, `STRING` → `string`, `BYTE` → `byte`, `INT` → `i32`, `FLOAT` → `f32`.
+
+- Added `u32`.
+
+## 1.2.2 (2023-08-04)
+
+- `BufferReader`/`BufferWriter` accept options: `byteOffset` and `endianness`
+  (`'big'`, `'little'` or `'system'`).
+
+## 1.2.1 (2023-08-04)
+
+- Fixed: `Buffer` is no longer referenced on the web.
+
+## 1.2.0 (2022-05-08)
+
+- A new pattern for recursive types.
+- Exposed the APIs for creating custom schemas.
+
+## 1.1.1 (2022-01-25)
+
+- Removed the redundant `TypeToken`.
+- Added a `typedGenericEnum` descriptor.
+
+## 1.1.0 (2022-01-25)
+
+- Object properties are now stored in insertion order.
+- Added support for recursive types.
+
+## 1.0.0 (2022-01-24)
+
+- First release of typed-binary.
