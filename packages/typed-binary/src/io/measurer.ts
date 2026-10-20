@@ -14,7 +14,7 @@ class UnboundedMeasurer implements IMeasurer {
   }
 }
 
-const unboundedMeasurer = new UnboundedMeasurer();
+const unboundedMeasurer = /* @__PURE__ */ new UnboundedMeasurer();
 
 export class Measurer implements IMeasurer {
   size = 0;

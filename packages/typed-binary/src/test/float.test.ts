@@ -83,6 +83,6 @@ describe('Float16Schema', () => {
 
     expect(decoded1).to.equal(value1);
     expect(decoded2).to.equal(value2);
-    expect(decoded3).to.be.NaN;
+    expect(decoded3).toBeNaN();
   });
 });

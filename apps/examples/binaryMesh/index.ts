@@ -20,7 +20,7 @@ async function loadMesh(): Promise<Mesh> {
     const reader = new bin.BufferReader(buffer);
 
     return Mesh.read(reader);
-  } catch (e) {
+  } catch {
     return DEFAULT_MESH;
   }
 }

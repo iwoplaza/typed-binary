@@ -1,7 +1,8 @@
-import * as bin from './main-api.ts';
 export * from './main-api.ts';
-export { bin };
-export default bin;
+// Re-exported with ESM syntax (instead of `export default bin`), so that bundlers
+// can tree-shake `bin.*` member accesses.
+export * as bin from './main-api.ts';
+export * as default from './main-api.ts';
 
 export { getSystemEndianness } from './util.ts';
 export { MaxValue, SubTypeKey, Schema } from './structure/types.ts';

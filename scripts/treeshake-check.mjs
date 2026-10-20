@@ -1,0 +1,127 @@
+// Bundles small apps that each import a few typed-binary exports, and prints how much
+// of the library ends up in them. Run after building:
+//   `node scripts/treeshake-check.mjs [packageDir] [--check]`
+// With `--check`, exits with a non-zero code if any case exceeds its budget.
+import { build, transform } from 'esbuild';
+import { resolve } from 'node:path';
+import process from 'node:process';
+import { gzipSync } from 'node:zlib';
+import { rollup } from 'rollup';
+
+const args = process.argv.slice(2);
+const enforce = args.includes('--check');
+const pkgDir = resolve(args.find((a) => !a.startsWith('--')) ?? '.');
+const entry = resolve(pkgDir, 'dist/index.js'); // the ESM entry from package.json "exports"
+
+// Budgets are minified bytes, with some headroom over the sizes at the time of writing.
+// A case blowing past its budget usually means a top-level side effect was (re)introduced.
+const cases = {
+  'nothing used': {
+    budget: 50,
+    code: `import { Measurer } from 'tb'; globalThis.x = 1;`,
+  },
+  getSystemEndianness: {
+    budget: 200,
+    code: `import { getSystemEndianness } from 'tb'; globalThis.x = getSystemEndianness;`,
+  },
+  Measurer: {
+    budget: 600,
+    code: `import { Measurer } from 'tb'; globalThis.x = Measurer;`,
+  },
+  BufferWriter: {
+    budget: 2600,
+    code: `import { BufferWriter } from 'tb'; globalThis.x = BufferWriter;`,
+  },
+  BufferReader: {
+    budget: 2700,
+    code: `import { BufferReader } from 'tb'; globalThis.x = BufferReader;`,
+  },
+  'TypeGPU set': {
+    budget: 4600,
+    code: `import { BufferReader, BufferWriter, getSystemEndianness, Measurer } from 'tb';
+    globalThis.x = [BufferReader, BufferWriter, getSystemEndianness, Measurer];`,
+  },
+  'u32 + object': {
+    budget: 1500,
+    code: `import { u32, object } from 'tb'; globalThis.x = object({ a: u32 });`,
+  },
+  // esbuild never tree-shakes member access on a re-exported namespace, so the
+  // esbuild budget for these is the whole library. See the rollup cases below.
+  'bin.object/bin.u32': {
+    budget: 16000,
+    code: `import bin from 'tb'; globalThis.x = bin.object({ a: bin.u32 });`,
+  },
+  'whole default': {
+    budget: 16000,
+    code: `import bin from 'tb'; globalThis.x = bin;`,
+  },
+};
+
+// Rollup does tree-shake namespace member access (as do Rolldown and webpack),
+// so `bin.*` users should pay about the same as named-import users.
+const rollupCases = {
+  'u32 + object': { budget: 1500, code: cases['u32 + object'].code },
+  'bin.object/bin.u32': { budget: 1500, code: cases['bin.object/bin.u32'].code },
+  '{ bin }.object/u32': {
+    budget: 1500,
+    code: `import { bin } from 'tb'; globalThis.x = bin.object({ a: bin.u32 });`,
+  },
+};
+
+const withEntry = (code) => code.replace(`'tb'`, JSON.stringify(entry));
+
+async function bundleEsbuild(code) {
+  const result = await build({
+    stdin: { contents: withEntry(code), loader: 'js', resolveDir: pkgDir },
+    bundle: true,
+    minify: true,
+    format: 'esm',
+    write: false,
+    logLevel: 'silent',
+  });
+  return result.outputFiles[0].contents;
+}
+
+async function bundleRollup(code) {
+  const bundle = await rollup({
+    input: 'app',
+    plugins: [
+      {
+        name: 'app',
+        resolveId: (id) => (id === 'app' ? id : null),
+        load: (id) => (id === 'app' ? withEntry(code) : null),
+      },
+    ],
+  });
+  const { output } = await bundle.generate({ format: 'esm' });
+  await bundle.close();
+  const minified = await transform(output[0].code, { minify: true, format: 'esm' });
+  return new TextEncoder().encode(minified.code);
+}
+
+let failed = false;
+
+async function run(title, bundler, suite) {
+  console.log(`\n${title}`);
+  console.log('case'.padEnd(20), 'minified'.padStart(9), 'gzip'.padStart(7), 'budget'.padStart(7));
+  for (const [name, { budget, code }] of Object.entries(suite)) {
+    const bytes = await bundler(code);
+    const over = bytes.length > budget;
+    failed ||= over;
+    console.log(
+      name.padEnd(20),
+      String(bytes.length).padStart(9),
+      String(gzipSync(bytes, { level: 9 }).length).padStart(7),
+      String(budget).padStart(7),
+      over ? ' OVER BUDGET' : '',
+    );
+  }
+}
+
+await run('esbuild', bundleEsbuild, cases);
+await run('rollup (minified with esbuild)', bundleRollup, rollupCases);
+
+if (enforce && failed) {
+  console.error('\nSome cases exceeded their size budget.');
+  process.exit(1);
+}

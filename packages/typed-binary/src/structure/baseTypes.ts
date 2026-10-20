@@ -27,7 +27,7 @@ export class BoolSchema extends Schema<boolean> {
   }
 }
 
-export const bool: BoolSchema = new BoolSchema();
+export const bool: BoolSchema = /* @__PURE__ */ new BoolSchema();
 
 ////
 // STRING
@@ -61,7 +61,7 @@ export class StringSchema extends Schema<string> {
   }
 }
 
-export const string: StringSchema = new StringSchema();
+export const string: StringSchema = /* @__PURE__ */ new StringSchema();
 
 ////
 // i8
@@ -88,7 +88,7 @@ export class Int8Schema extends Schema<number> {
   }
 }
 
-export const i8: Int8Schema = new Int8Schema();
+export const i8: Int8Schema = /* @__PURE__ */ new Int8Schema();
 
 ////
 // u8
@@ -115,7 +115,7 @@ export class Uint8Schema extends Schema<number> {
   }
 }
 
-export const u8: Uint8Schema = new Uint8Schema();
+export const u8: Uint8Schema = /* @__PURE__ */ new Uint8Schema();
 
 /**
  * Alias for `bin.u8`
@@ -147,7 +147,7 @@ export class Int16Schema extends Schema<number> {
   }
 }
 
-export const i16: Int16Schema = new Int16Schema();
+export const i16: Int16Schema = /* @__PURE__ */ new Int16Schema();
 
 ////
 // u16
@@ -174,7 +174,7 @@ export class Uint16Schema extends Schema<number> {
   }
 }
 
-export const u16: Uint16Schema = new Uint16Schema();
+export const u16: Uint16Schema = /* @__PURE__ */ new Uint16Schema();
 
 ////
 // i32
@@ -201,7 +201,7 @@ export class Int32Schema extends Schema<number> {
   }
 }
 
-export const i32: Int32Schema = new Int32Schema();
+export const i32: Int32Schema = /* @__PURE__ */ new Int32Schema();
 
 ////
 // u32
@@ -228,7 +228,7 @@ export class Uint32Schema extends Schema<number> {
   }
 }
 
-export const u32: Uint32Schema = new Uint32Schema();
+export const u32: Uint32Schema = /* @__PURE__ */ new Uint32Schema();
 
 ////
 // f16
@@ -255,7 +255,7 @@ export class Float16Schema extends Schema<number> {
   }
 }
 
-export const f16: Float16Schema = new Float16Schema();
+export const f16: Float16Schema = /* @__PURE__ */ new Float16Schema();
 
 ////
 // f32
@@ -282,4 +282,4 @@ export class Float32Schema extends Schema<number> {
   }
 }
 
-export const f32: Float32Schema = new Float32Schema();
+export const f32: Float32Schema = /* @__PURE__ */ new Float32Schema();

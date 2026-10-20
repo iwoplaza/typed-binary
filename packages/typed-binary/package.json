@@ -57,23 +57,23 @@
         "import": "./dist/index.js",
         "default": "./dist/index.cjs"
       },
-      "./*": {
-        "types": "./*.d.ts",
-        "module": "./dist/*.js",
-        "import": "./dist/*.js",
-        "default": "./dist/*.cjs"
+      "./index": {
+        "types": "./dist/index.d.ts",
+        "module": "./dist/index.js",
+        "import": "./dist/index.js",
+        "default": "./dist/index.cjs"
       }
     },
     "main": "./dist/index.js",
     "types": "./dist/index.d.ts"
   },
   "scripts": {
-    "dev": "tsup --watch",
-    "build": "tsup",
+    "dev": "tsc -p tsconfig.build.json --watch",
+    "build": "tsup && tsc -p tsconfig.build.json",
     "prepublishOnly": "pnpm -w run check && pnpm -w run build",
     "dryPublish": "pnpm publish --dry-run",
     "publish-package": "node ../../scripts/publish-to-npm.mjs",
-    "check": "tsup"
+    "check": "pnpm build && node ../../scripts/treeshake-check.mjs --check"
   },
   "devDependencies": {
     "@types/node": "^20.14.11",

@@ -36,5 +36,13 @@
     "builtin": true
   },
   "globals": {},
-  "ignorePatterns": []
+  "ignorePatterns": [],
+  "overrides": [
+    {
+      "files": ["apps/typed-binary-docs/src/env.d.ts"],
+      "rules": {
+        "typescript/triple-slash-reference": "off"
+      }
+    }
+  ]
 }

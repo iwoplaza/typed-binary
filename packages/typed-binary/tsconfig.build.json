@@ -1,0 +1,20 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    // Emitting one ES module per source file (instead of a bundle), so that
+    // consumers' bundlers can tree-shake unused exports.
+    "target": "es2022",
+    "module": "esnext",
+    "lib": ["esnext", "dom"],
+    "rewriteRelativeImportExtensions": true,
+    "emitDeclarationOnly": false,
+    "declarationDir": "dist",
+    "outDir": "dist",
+    "rootDir": "src",
+    "sourceMap": true,
+    "inlineSources": true,
+    "noEmitOnError": true
+  },
+  "include": ["src"],
+  "exclude": ["src/test", "src/**/*.test.ts"]
+}

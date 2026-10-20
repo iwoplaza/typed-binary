@@ -24,7 +24,7 @@ describe('DynamicArraySchema', () => {
   it('should fail to estimate size of max value', () => {
     const IntArray = bin.dynamicArrayOf(bin.i32);
 
-    expect(IntArray.measure(MaxValue).isUnbounded).to.be.true;
+    expect(IntArray.measure(MaxValue).isUnbounded).toBe(true);
   });
 
   it('should encode and decode a simple int array', () => {

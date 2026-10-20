@@ -2,7 +2,7 @@ import type { IMeasurer, ISerialInput, ISerialOutput } from '../io/types.ts';
 import type { Parsed } from '../utilityTypes.ts';
 
 export type MaxValue = typeof MaxValue;
-export const MaxValue = Symbol(
+export const MaxValue = /* @__PURE__ */ Symbol(
   'The biggest (in amount of bytes needed) value a schema can represent',
 );
 
