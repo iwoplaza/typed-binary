@@ -43,7 +43,7 @@ export {
   u32Array,
   u8Array,
   u8ClampedArray,
-  type TypedArraySchema,
+  type TypedArray,
 } from './structure/typedArray.ts';
 export { MaxValue } from './structure/types.ts';
 
