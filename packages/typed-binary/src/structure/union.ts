@@ -88,25 +88,29 @@ export interface Union<
   readonly maxSize: number;
 }
 
-class UnionImpl implements Schema<Record<string, unknown>> {
-  readonly tag: Schema;
-  readonly variants: Record<string, UnionVariant>;
-  readonly key: string;
-  readonly base: Struct | undefined;
+class UnionImpl<TTag, TVariants, TKey extends string, TBase> implements Union<
+  TTag,
+  TVariants,
+  TKey,
+  TBase
+> {
+  readonly tag: UnwrapSchema<TTag>;
+  readonly variants: TVariants;
+  readonly key: TKey;
+  readonly base: Struct<TBase & Record<string, WithSchema>> | undefined;
+  readonly #tag: Schema;
+  readonly #base: Schema<Record<string, unknown>> | undefined;
   readonly #variantSchemas: Map<string, Schema>;
 
-  constructor(
-    tag: Schema,
-    variants: Record<string, UnionVariant>,
-    key: string,
-    base: Record<string, WithSchema> | undefined,
-  ) {
-    this.tag = tag;
+  constructor(tag: Schema, variants: TVariants, key: TKey, base: TBase | undefined) {
+    this.tag = tag as UnwrapSchema<TTag>;
     this.variants = variants;
     this.key = key;
-    this.base = base ? struct(base) : undefined;
+    this.base = base ? struct(base as TBase & Record<string, WithSchema>) : undefined;
+    this.#tag = tag;
+    this.#base = this.base;
     this.#variantSchemas = new Map(
-      Object.entries(variants).map(([tagValue, variant]) => [
+      Object.entries(variants as Record<string, UnionVariant>).map(([tagValue, variant]) => [
         tagValue,
         toSchema(variant) ?? struct(variant as Record<string, WithSchema>),
       ]),
@@ -126,24 +130,24 @@ class UnionImpl implements Schema<Record<string, unknown>> {
     return variant;
   }
 
-  write(output: SerialOutput, value: Record<string, unknown>): void {
-    const tagValue = value[this.key];
+  write(output: SerialOutput, value: UnionIn<TKey, TBase, TVariants>): void {
+    const tagValue = (value as Record<string, unknown>)[this.key];
     const variant = this.#getVariant(tagValue);
 
-    this.tag.write(output, tagValue);
-    this.base?.write(output, value);
+    this.#tag.write(output, tagValue);
+    this.#base?.write(output, value);
     variant.write(output, value);
   }
 
-  read(input: SerialInput): Record<string, unknown> {
-    const tagValue = this.tag.read(input);
+  read(input: SerialInput): UnionOut<TKey, TBase, TVariants> {
+    const tagValue = this.#tag.read(input);
     const variant = this.#getVariant(tagValue);
 
     return {
       [this.key]: tagValue,
-      ...this.base?.read(input),
+      ...this.#base?.read(input),
       ...variant.read(input),
-    };
+    } as UnionOut<TKey, TBase, TVariants>;
   }
 
   get maxSize(): number {
@@ -151,21 +155,21 @@ class UnionImpl implements Schema<Record<string, unknown>> {
   }
 
   measure(
-    value: Record<string, unknown> | MaxValue,
+    value: UnionIn<TKey, TBase, TVariants> | MaxValue,
     measurer: Measurer = new Measurer(),
   ): Measurer {
     if (value !== MaxValue) {
-      const tagValue = value[this.key];
+      const tagValue = (value as Record<string, unknown>)[this.key];
       const variant = this.#getVariant(tagValue);
 
-      this.tag.measure(tagValue, measurer);
-      this.base?.measure(value, measurer);
+      this.#tag.measure(tagValue, measurer);
+      this.#base?.measure(value, measurer);
       return variant.measure(value, measurer);
     }
 
     // Variants can reference this union recursively
     return measureMax(this, measurer, () => {
-      this.base?.measure(MaxValue, measurer);
+      this.#base?.measure(MaxValue, measurer);
 
       // Measuring each variant together with its tag, as the size of the tag
       // can depend on its value (e.g. for `bin.prefixEnum` or `bin.string`).
@@ -173,7 +177,7 @@ class UnionImpl implements Schema<Record<string, unknown>> {
       let biggestSize = -1;
       for (const [tagValue, variant] of this.#variantSchemas) {
         const forked = measurer.fork();
-        this.tag.measure(tagValue, forked);
+        this.#tag.measure(tagValue, forked);
         variant.measure(MaxValue, forked);
         // An unbounded (NaN) variant is the biggest one
         if (Number.isNaN(forked.size) || forked.size > biggestSize) {
@@ -187,7 +191,7 @@ class UnionImpl implements Schema<Record<string, unknown>> {
 
       if (biggest) {
         // Measuring for real this time
-        this.tag.measure(biggest[0], measurer);
+        this.#tag.measure(biggest[0], measurer);
         biggest[1].measure(MaxValue, measurer);
       }
     });
@@ -228,10 +232,10 @@ export function union<
     );
   }
 
-  return new UnionImpl(
+  return new UnionImpl<TTag, TVariants, TKey, TBase>(
     tagSchema,
-    variants as Record<string, UnionVariant>,
-    options?.key ?? 'type',
+    variants,
+    options?.key ?? ('type' as TKey),
     options?.base,
-  ) as unknown as Union<TTag, TVariants, TKey, TBase>;
+  );
 }
