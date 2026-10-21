@@ -28,27 +28,40 @@ const cases = {
     budget: 600,
     code: `import { Measurer } from 'tb'; globalThis.x = Measurer;`,
   },
-  BufferWriter: {
-    budget: 2600,
-    code: `import { BufferWriter } from 'tb'; globalThis.x = BufferWriter;`,
-  },
-  BufferReader: {
-    budget: 2700,
-    code: `import { BufferReader } from 'tb'; globalThis.x = BufferReader;`,
+  cursor: {
+    budget: 550,
+    code: `import { cursor } from 'tb'; globalThis.x = cursor;`,
   },
   'TypeGPU set': {
-    budget: 4600,
-    code: `import { BufferReader, BufferWriter, getSystemEndianness, Measurer } from 'tb';
-    globalThis.x = [BufferReader, BufferWriter, getSystemEndianness, Measurer];`,
+    budget: 800,
+    code: `import { cursor, getSystemEndianness, Measurer } from 'tb';
+    globalThis.x = [cursor, getSystemEndianness, Measurer];`,
   },
   'u32 + struct': {
-    budget: 1500,
+    budget: 1700,
     code: `import { u32, struct } from 'tb'; globalThis.x = struct({ a: u32 });`,
   },
   // The recommended way of importing, which should cost the same as named imports.
   'bin.struct/bin.u32': {
-    budget: 1500,
+    budget: 1700,
     code: `import * as bin from 'tb'; globalThis.x = bin.struct({ a: bin.u32 });`,
+  },
+  // Writing through a cursor only bundles the primitives that are used. When the IO layer was
+  // a pair of classes, this pulled in every read/write method, including the text codecs.
+  'struct write': {
+    budget: 2300,
+    code: `import { cursor, struct, u32 } from 'tb';
+    const S = struct({ a: u32 }); globalThis.x = (buf) => S.write(cursor(buf), { a: 1 });`,
+  },
+  'string write': {
+    budget: 1700,
+    code: `import { cursor, string } from 'tb';
+    globalThis.x = (buf) => string.write(cursor(buf), 'hello');`,
+  },
+  'u32Array write': {
+    budget: 1850,
+    code: `import { cursor, u32Array } from 'tb';
+    globalThis.x = (buf) => u32Array(4).write(cursor(buf), new Uint32Array(4));`,
   },
   // Using the namespace as a value (instead of accessing its members) retains the whole library.
   'whole namespace': {
@@ -60,6 +73,7 @@ const cases = {
 const rollupCases = {
   'u32 + struct': cases['u32 + struct'],
   'bin.struct/bin.u32': cases['bin.struct/bin.u32'],
+  'struct write': cases['struct write'],
 };
 
 const withEntry = (code) => code.replace(`'tb'`, JSON.stringify(entry));

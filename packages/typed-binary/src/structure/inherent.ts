@@ -1,6 +1,6 @@
 import { ValidationError } from '../error.ts';
 import { Measurer } from '../io/measurer.ts';
-import type { SerialInput, SerialOutput } from '../io/types.ts';
+import type { ByteCursor } from '../io/cursor.ts';
 import type { MaxValue, Schema } from './types.ts';
 
 /**
@@ -22,7 +22,7 @@ class InherentImpl<T> implements Inherent<T> {
     this.value = value;
   }
 
-  write(_output: SerialOutput, value: T): void {
+  write(_cursor: ByteCursor, value: T): void {
     if (value !== this.value) {
       throw new ValidationError(
         `Expected inherent value ${String(this.value)}, got ${String(value)}`,
@@ -30,7 +30,7 @@ class InherentImpl<T> implements Inherent<T> {
     }
   }
 
-  read(_input: SerialInput): T {
+  read(_cursor: ByteCursor): T {
     return this.value;
   }
 

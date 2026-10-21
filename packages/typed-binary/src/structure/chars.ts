@@ -1,6 +1,6 @@
 import { ValidationError } from '../error.ts';
 import { Measurer } from '../io/measurer.ts';
-import type { SerialInput, SerialOutput } from '../io/types.ts';
+import type { ByteCursor } from '../io/cursor.ts';
 import { Schema } from './types.ts';
 
 export interface Chars<TLength extends number = number> extends Schema<string> {
@@ -14,7 +14,7 @@ class CharsImpl<TLength extends number = number> implements Chars<TLength> {
     this.length = length;
   }
 
-  write(output: SerialOutput, value: string): void {
+  write(cursor: ByteCursor, value: string): void {
     if (value.length !== this.length) {
       throw new ValidationError(
         `Expected char-string of length ${this.length}, got ${value.length}`,
@@ -22,15 +22,15 @@ class CharsImpl<TLength extends number = number> implements Chars<TLength> {
     }
 
     for (let i = 0; i < value.length; ++i) {
-      output.writeUint8(value.charCodeAt(i));
+      cursor.view.setUint8(cursor.offset++, value.charCodeAt(i));
     }
   }
 
-  read(input: SerialInput): string {
+  read(cursor: ByteCursor): string {
     let content = '';
 
     for (let i = 0; i < this.length; ++i) {
-      content += String.fromCharCode(input.readUint8());
+      content += String.fromCharCode(cursor.view.getUint8(cursor.offset++));
     }
 
     return content;

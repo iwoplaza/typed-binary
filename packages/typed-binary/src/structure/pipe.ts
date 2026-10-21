@@ -1,6 +1,6 @@
 import { InvalidSchemaShapeError } from '../error.ts';
 import { Measurer } from '../io/measurer.ts';
-import type { SerialInput, SerialOutput } from '../io/types.ts';
+import type { ByteCursor } from '../io/cursor.ts';
 import { measureMax } from './measureMax.ts';
 import {
   type ExtractIn,
@@ -59,16 +59,16 @@ class PipeImpl<THeadIn, THeadOut extends THeadIn, TTail> implements Pipe<THeadIn
     return tail;
   }
 
-  write(output: SerialOutput, value: THeadIn & ExtractIn<TTail>): void {
-    this.head.write(output, value);
+  write(cursor: ByteCursor, value: THeadIn & ExtractIn<TTail>): void {
+    this.head.write(cursor, value);
     // The input value is passed in place of the head's output, which `pipe` guarantees
     // to be assignable to the head's input.
-    this.#tail(value).write(output, value);
+    this.#tail(value).write(cursor, value);
   }
 
-  read(input: SerialInput): ExtractOut<TTail> {
-    const headValue = this.head.read(input);
-    return this.#tail(headValue).read(input);
+  read(cursor: ByteCursor): ExtractOut<TTail> {
+    const headValue = this.head.read(cursor);
+    return this.#tail(headValue).read(cursor);
   }
 
   get maxSize(): number {

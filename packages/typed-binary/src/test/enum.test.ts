@@ -31,8 +31,8 @@ describe('bin.prefixEnum', () => {
     const Kind = bin.prefixEnum('ab', 'c~');
     const { output, input } = makeIO(2);
     Kind.write(output, 'c~');
-    expect(input.readUint8()).toEqual('c'.charCodeAt(0));
-    expect(input.readUint8()).toEqual('~'.charCodeAt(0));
+    expect(bin.u8.read(input)).toEqual('c'.charCodeAt(0));
+    expect(bin.u8.read(input)).toEqual('~'.charCodeAt(0));
   });
 });
 
@@ -45,7 +45,7 @@ describe('bin.orderedEnum', () => {
 
     const { output, input } = makeIO(1);
     Kind.write(output, 'int_literal');
-    expect(input.readUint8()).toEqual(2);
+    expect(bin.u8.read(input)).toEqual(2);
 
     expect(encodeAndDecode(Kind, 'negate')).toEqual('negate');
     expect(Kind.measure('negate').size).toEqual(1);
@@ -68,7 +68,7 @@ describe('bin.orderedEnum', () => {
     expect(() => Kind.measure('c')).toThrow();
 
     const { output, input } = makeIO(1);
-    output.writeUint8(2);
+    bin.u8.write(output, 2);
     expect(() => Kind.read(input)).toThrow();
   });
 });

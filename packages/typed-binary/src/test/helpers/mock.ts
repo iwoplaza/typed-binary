@@ -1,15 +1,14 @@
 import * as bin from 'typed-binary';
 
-import { BufferReader } from '../../io/bufferReader.ts';
-import { BufferWriter } from '../../io/bufferWriter.ts';
+import { cursor } from '../../io/cursor.ts';
 import type { Schema } from '../../structure/types.ts';
 
 export function makeIO(bufferSize: number) {
   const buffer = new ArrayBuffer(bufferSize);
 
   return {
-    output: new BufferWriter(buffer),
-    input: new BufferReader(buffer),
+    output: cursor(buffer),
+    input: cursor(buffer),
   };
 }
 
@@ -18,6 +17,6 @@ export function encodeAndDecode<T extends Schema>(
   value: bin.ExtractIn<T>,
 ): bin.ExtractOut<T> {
   const buffer = new ArrayBuffer(schema.measure(value).size);
-  schema.write(new BufferWriter(buffer), value);
-  return schema.read(new BufferReader(buffer));
+  schema.write(cursor(buffer), value);
+  return schema.read(cursor(buffer));
 }

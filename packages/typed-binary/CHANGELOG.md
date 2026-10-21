@@ -10,6 +10,7 @@
 - [x] Unify names of classes to `*Impl`
 - [x] Let schema implementations implement their interface, not the plain `Schema<...>` interface
 - [x] Convert `TypedArraySchema` to an exported `TypedArray<T>` interface and an internal `TypedArrayImpl` class, and remove its leftover `$in`/`$out` fields
+- [x] Replace `BufferReader`/`BufferWriter` (and `SerialInput`/`SerialOutput`) with `bin.cursor()`/`bin.ByteCursor`, for better tree-shaking
 
 v5 reworks how schemas are defined and typed, makes recursion a matter of plain getters, and adds primitives
 for data whose layout depends on previously encoded values. The binary encoding of existing schemas is unchanged.
@@ -30,7 +31,15 @@ for data whose layout depends on previously encoded values. The binary encoding 
 | `class X extends Schema<T>`              | `class X implements bin.Schema<T>`                    |
 | `import bin from 'typed-binary'`         | `import * as bin from 'typed-binary'`                 |
 | `import { bin } from 'typed-binary'`     | `import * as bin from 'typed-binary'`                 |
-| `bin.ISerialInput`, `bin.ISerialOutput`  | `bin.SerialInput`, `bin.SerialOutput`                 |
+| `new bin.BufferWriter(buffer, options)`  | `bin.cursor(buffer, options)`                         |
+| `new bin.BufferReader(buffer, options)`  | `bin.cursor(buffer, options)`                         |
+| `bin.ISerialInput`, `bin.ISerialOutput`  | `bin.ByteCursor`                                      |
+| `output.writeUint32(value)` (etc.)       | `bin.u32.write(cursor, value)`                        |
+| `input.readUint32()` (etc.)              | `bin.u32.read(cursor)`                                |
+| `writeSlice(view)`, `readSlice(view, …)` | `bin.u32Array(length).write(cursor, view)` (etc.)     |
+| `io.currentByteOffset`                   | `cursor.offset`                                       |
+| `io.seekTo(offset)`, `io.skipBytes(n)`   | `cursor.offset = offset`, `cursor.offset += n`        |
+| `io.endianness`                          | `cursor.littleEndian`                                 |
 | `bin.IMeasurer`                          | `bin.Measurer`                                        |
 
 The replacements in the table encode data the same way as the v4 schemas they replace.
@@ -61,10 +70,20 @@ The replacements in the table encode data the same way as the v4 schemas they re
   Unlike `bin.generic`, a union tagged by `bin.string` has a bounded max size, as the tag can only be one of the variants.
 - **Renamed** `bin.object` to `bin.struct`, `bin.arrayOf` to `bin.array`, `bin.dynamicArrayOf` to `bin.dynamicArray` and
   `bin.tupleOf` to `bin.tuple`. Removed `bin.byte` (deprecated alias of `bin.u8`).
-- **Removed the `I` prefix from interfaces.** `ISerialInput`, `ISerialOutput` and `IMeasurer` are now `SerialInput`,
-  `SerialOutput` and `Measurer`. `Measurer` is both the interface and the constructor of the built-in measurer,
+- **Replaced `BufferReader`, `BufferWriter`, `ISerialInput` and `ISerialOutput` with a byte cursor.** Schemas read from and write to
+  a `bin.ByteCursor`, a plain `{ view: DataView, offset: number, littleEndian: boolean }` object created with
+  `bin.cursor(buffer, { byteOffset?, endianness? })` (or by hand), and the same cursor type is used for reading and writing.
+  The reading and writing of each primitive now lives in its schema, so an app only bundles the primitives it uses. Previously, using
+  `BufferWriter` bundled every one of its methods, including the UTF-8 encoding of strings and the byte swapping of typed arrays.
+  Writing a `bin.struct({ a: bin.u32 })` went from 3,657 B to 1,943 B (esbuild, minified).
+  - Custom schemas implement `read(cursor: bin.ByteCursor)` and `write(cursor: bin.ByteCursor, value)`, and either delegate to the
+    primitive schemas (`bin.u8.read(cursor)`) or use `cursor.view` directly. Custom implementations of `ISerialInput`/`ISerialOutput`
+    are no longer supported. A cursor views an `ArrayBuffer` (or `SharedArrayBuffer`), which can be resizable to support streaming.
+  - **Offsets are relative to the given view.** Given a typed array or a Node.js `Buffer`, `cursor.offset` counts from the start of
+    that view, whereas `currentByteOffset` (and `byteOffset` in the options) counted from the start of the underlying `ArrayBuffer`.
+    Reads and writes can no longer go past the end of the given view.
+- **Renamed `IMeasurer` to `Measurer`.** `Measurer` is both the interface and the constructor of the built-in measurer,
   so `new bin.Measurer()` still works.
-- **Removed `readByte` and `writeByte`** from `SerialInput`/`SerialOutput` (deprecated aliases of `readUint8` and `writeUint8`).
 - **Removed the internal type helpers** `ISchema`, `AnySchema`, `AnySchemaWithProperties`, `ISchemaWithProperties`, `AnyObjectSchema`,
   `IKeyedSchema`, `AnyKeyedSchema`, `Unwrap`, `UnwrapRecord`, `UnwrapArray` and `ParseUnwrapped`. Use `bin.Schema`, `bin.ExtractIn` and
   `bin.ExtractOut` instead.

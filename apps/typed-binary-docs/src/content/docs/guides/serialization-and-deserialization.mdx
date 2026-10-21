@@ -7,14 +7,14 @@ Each schema has the following methods:
 
 ```ts
 /**
- * Writes the value (according to the schema's structure) to the output.
+ * Writes the value (according to the schema's structure) at the cursor.
  */
-write(output: SerialOutput, value: TIn): void;
+write(cursor: ByteCursor, value: TIn): void;
 
 /**
- * Reads a value (according to the schema's structure) from the input.
+ * Reads a value (according to the schema's structure) at the cursor.
  */
-read(input: SerialInput): TOut;
+read(cursor: ByteCursor): TOut;
 
 /**
  * Estimates the size of the value (according to the schema's structure)
@@ -26,7 +26,8 @@ measure(value: TIn | MaxValue, measurer?: Measurer): Measurer;
 They can be extracted from any schema with `bin.ExtractIn<typeof Schema>` and `bin.ExtractOut<typeof Schema>`.
 They usually only differ in that `TIn` is readonly, so that readonly data can be written too.
 
-The `SerialInput/Output` interfaces have a basic built-in implementation that reads/writes to a buffer:
+Schemas read from and write to a `bin.ByteCursor`: a `DataView` over the buffer, the byte offset at which to read or write
+next, and the endianness to use. `bin.cursor()` creates one:
 
 ```ts
 import * as bin from 'typed-binary';
@@ -35,14 +36,56 @@ import * as bin from 'typed-binary';
 const buffer = new ArrayBuffer(64); // Or Buffer.alloc(64); in Node.js
 
 // Writing four bytes into the buffer
-const writer = new bin.BufferWriter(buffer); // Implements SerialOutput
+const writer = bin.cursor(buffer);
 bin.u8.write(writer, 'W'.charCodeAt(0));
 bin.u8.write(writer, 'o'.charCodeAt(0));
 bin.u8.write(writer, 'w'.charCodeAt(0));
 bin.u8.write(writer, 0);
 
-const reader = new bin.BufferReader(buffer); // Implements SerialInput
+const reader = bin.cursor(buffer);
 console.log(bin.string.read(reader)); // > Wow
+```
+
+Each read or write advances the cursor's `offset`, which is why separate cursors are used above for writing and reading.
+The offset can also be set directly, to seek (`reader.offset = 0`) or to skip bytes (`reader.offset += 4`).
+
+`bin.cursor()` accepts an `ArrayBuffer`, or a view of one (like a typed array or a Node.js `Buffer`), in which case
+offsets count from the start of that view. It also takes options:
+
+```ts
+const cursor = bin.cursor(buffer, {
+  byteOffset: 4, // The offset to start at. Defaults to 0.
+  endianness: 'big', // 'big', 'little' or 'system'. Defaults to 'system'.
+});
+```
+
+Since a cursor is a plain object, it can also be created by hand:
+
+```ts
+const cursor: bin.ByteCursor = { view: new DataView(buffer), offset: 0, littleEndian: true };
+```
+
+### Writing to a stream
+
+A `DataView` can only view an `ArrayBuffer` (or a `SharedArrayBuffer`), so data meant for a stream is first written
+into a buffer. A resizable `ArrayBuffer` can grow as needed, and a `DataView` created without a length follows its size:
+
+```ts
+const buffer = new ArrayBuffer(1024, { maxByteLength: 64 * 1024 });
+const cursor = bin.cursor(buffer);
+
+function send(message: bin.ExtractIn<typeof Message>) {
+  const size = Message.measure(message).size;
+  if (buffer.byteLength < cursor.offset + size) {
+    buffer.resize(cursor.offset + size);
+  }
+  Message.write(cursor, message);
+}
+
+function flush() {
+  stream.write(new Uint8Array(buffer.slice(0, cursor.offset)));
+  cursor.offset = 0;
+}
 ```
 
 ### Creating a buffer with the most optimal size

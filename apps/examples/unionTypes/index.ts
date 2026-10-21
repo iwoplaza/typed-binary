@@ -19,8 +19,8 @@ const Animal = bin.union(
 
 // A buffer to serialize into/out of
 const buffer = new ArrayBuffer(16);
-const writer = new bin.BufferWriter(buffer);
-const reader = new bin.BufferReader(buffer);
+const writer = bin.cursor(buffer);
+const reader = bin.cursor(buffer);
 
 // Writing an Animal
 Animal.write(writer, {
@@ -68,8 +68,8 @@ const Shape = bin.union(bin.u8, {
 });
 
 const shapeBuffer = new ArrayBuffer(Shape.maxSize);
-Shape.write(new bin.BufferWriter(shapeBuffer), { type: ShapeType.RECT, width: 2, height: 3 });
-const shape = Shape.read(new bin.BufferReader(shapeBuffer));
+Shape.write(bin.cursor(shapeBuffer), { type: ShapeType.RECT, width: 2, height: 3 });
+const shape = Shape.read(bin.cursor(shapeBuffer));
 
 if (shape.type === ShapeType.RECT) {
   // shape.width, shape.height => number

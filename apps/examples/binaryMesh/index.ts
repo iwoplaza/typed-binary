@@ -17,7 +17,7 @@ const DEFAULT_MESH: Mesh = {
 async function loadMesh(): Promise<Mesh> {
   try {
     const buffer = await fs.readFile('./binaryMesh/mesh.bin');
-    const reader = new bin.BufferReader(buffer);
+    const reader = bin.cursor(buffer);
 
     return Mesh.read(reader);
   } catch {
@@ -28,7 +28,7 @@ async function loadMesh(): Promise<Mesh> {
 async function saveMesh(mesh: Mesh): Promise<void> {
   try {
     const buffer = Buffer.alloc(Mesh.measure(mesh).size);
-    const writer = new bin.BufferWriter(buffer);
+    const writer = bin.cursor(buffer);
 
     Mesh.write(writer, mesh);
 

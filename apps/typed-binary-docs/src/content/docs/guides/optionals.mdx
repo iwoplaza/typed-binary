@@ -14,8 +14,8 @@ They are encoded as:
 import * as bin from 'typed-binary';
 
 const buffer = new ArrayBuffer(128);
-const writer = new bin.BufferWriter(buffer);
-const reader = new bin.BufferReader(buffer);
+const writer = bin.cursor(buffer);
+const reader = bin.cursor(buffer);
 
 // Simple object schema
 const Address = bin.struct({

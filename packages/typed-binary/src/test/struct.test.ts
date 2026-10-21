@@ -63,9 +63,9 @@ describe('bin.struct', () => {
     const { output, input } = makeIO(schema.measure(value).size);
     schema.write(output, value);
 
-    expect(input.readInt32()).to.equal(1); // a
-    expect(input.readInt32()).to.equal(3); // c
-    expect(input.readInt32()).to.equal(2); // b
+    expect(bin.i32.read(input)).to.equal(1); // a
+    expect(bin.i32.read(input)).to.equal(3); // c
+    expect(bin.i32.read(input)).to.equal(2); // b
   });
 
   it('allows to extend it with more properties', () => {
@@ -92,10 +92,10 @@ describe('bin.struct', () => {
     const { output, input } = makeIO(extended.measure(value).size);
     extended.write(output, value);
 
-    expect(input.readInt32()).to.equal(1); // a
-    expect(input.readInt32()).to.equal(2); // b
-    expect(input.readInt32()).to.equal(3); // c
-    expect(input.readInt32()).to.equal(4); // d
+    expect(bin.i32.read(input)).to.equal(1); // a
+    expect(bin.i32.read(input)).to.equal(2); // b
+    expect(bin.i32.read(input)).to.equal(3); // c
+    expect(bin.i32.read(input)).to.equal(4); // d
   });
 
   it('allows to prepend it with more properties', () => {
@@ -122,10 +122,10 @@ describe('bin.struct', () => {
     const { output, input } = makeIO(prepended.measure(value).size);
     prepended.write(output, value);
 
-    expect(input.readInt32()).to.equal(3); // c
-    expect(input.readInt32()).to.equal(4); // d
-    expect(input.readInt32()).to.equal(1); // a
-    expect(input.readInt32()).to.equal(2); // b
+    expect(bin.i32.read(input)).to.equal(3); // c
+    expect(bin.i32.read(input)).to.equal(4); // d
+    expect(bin.i32.read(input)).to.equal(1); // a
+    expect(bin.i32.read(input)).to.equal(2); // b
   });
 
   it('keeps getters lazy when concatenating', () => {
