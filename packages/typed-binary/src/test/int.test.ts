@@ -4,7 +4,7 @@ import * as bin from 'typed-binary';
 import { encodeAndDecode } from './helpers/mock.ts';
 import { randIntBetween } from './random.ts';
 
-describe('Int8Schema', () => {
+describe('bin.i8', () => {
   it('should encode and decode a signed int8 value', () => {
     const value = randIntBetween(-128, 127);
     const decoded = encodeAndDecode(bin.i8, value);
@@ -13,7 +13,7 @@ describe('Int8Schema', () => {
   });
 });
 
-describe('Uint8Schema', () => {
+describe('bin.u8', () => {
   it('should encode and decode a byte value', () => {
     const value = randIntBetween(0, 256);
     const decoded = encodeAndDecode(bin.u8, value);
@@ -22,7 +22,7 @@ describe('Uint8Schema', () => {
   });
 });
 
-describe('Int16Schema', () => {
+describe('bin.i16', () => {
   it('should encode and decode an int value', () => {
     const value = randIntBetween(-100, 100);
     const decoded = encodeAndDecode(bin.i16, value);
@@ -38,7 +38,7 @@ describe('Int16Schema', () => {
   });
 });
 
-describe('Uint16Schema', () => {
+describe('bin.u16', () => {
   it('should encode and decode an uint16 value', () => {
     const value = randIntBetween(0, 100);
     const decoded = encodeAndDecode(bin.u16, value);
@@ -60,7 +60,7 @@ describe('Uint16Schema', () => {
   });
 });
 
-describe('Int32Schema', () => {
+describe('bin.i32', () => {
   it('should encode and decode an int value', () => {
     const value = randIntBetween(-100, 100);
     const decoded = encodeAndDecode(bin.i32, value);
@@ -76,7 +76,7 @@ describe('Int32Schema', () => {
   });
 });
 
-describe('Uint32Schema', () => {
+describe('bin.u32', () => {
   it('should encode and decode an uint value', () => {
     const value = randIntBetween(0, 100);
     const decoded = encodeAndDecode(bin.u32, value);

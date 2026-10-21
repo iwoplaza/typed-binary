@@ -26,7 +26,7 @@ export interface Optional<TInner = Schema> extends Schema<
   readonly maxSize: number;
 }
 
-class OptionalSchemaImpl<TInner> implements Optional<TInner> {
+class OptionalImpl<TInner> implements Optional<TInner> {
   readonly inner: UnwrapSchema<TInner>;
   readonly #inner: Schema;
 
@@ -87,5 +87,5 @@ export function optional<TSchema extends any>(_inner: TSchema): Optional<TSchema
     );
   }
 
-  return new OptionalSchemaImpl<TSchema>(inner);
+  return new OptionalImpl<TSchema>(inner);
 }

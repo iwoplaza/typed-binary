@@ -4,7 +4,7 @@ import * as bin from 'typed-binary';
 import { encodeAndDecode } from './helpers/mock.ts';
 import { randIntBetween } from './random.ts';
 
-describe('CharsSchema', () => {
+describe('bin.chars', () => {
   it('should encode and decode fixed-size char array', () => {
     const length = randIntBetween(0, 100);
     let value = '';
