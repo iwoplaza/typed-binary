@@ -9,7 +9,7 @@
 - [x] Remove the `I` prefix from public interfaces
 - [x] Unify names of classes to `*Impl`
 - [x] Let schema implementations implement their interface, not the plain `Schema<...>` interface
-- [ ] Convert `TypedArraySchema` to an exported `TypedArray<T>` interface and an internal `TypedArrayImpl` class, and remove its leftover `$in`/`$out` fields
+- [x] Convert `TypedArraySchema` to an exported `TypedArray<T>` interface and an internal `TypedArrayImpl` class, and remove its leftover `$in`/`$out` fields
 
 v5 reworks how schemas are defined and typed, makes recursion a matter of plain getters, and adds primitives
 for data whose layout depends on previously encoded values. The binary encoding of existing schemas is unchanged.
@@ -42,7 +42,7 @@ The replacements in the table encode data the same way as the v4 schemas they re
   (in v4, esbuild couldn't tree-shake `bin.*` member access at all). Named imports (e.g. `import { struct, u32 } from 'typed-binary'`)
   work too, with the renames listed in the table above.
 - **Schema classes are no longer exported** (`ObjectSchema`, `Uint8Schema`, `ArraySchema`, ...). Use the types describing each schema instead
-  (`bin.Struct`, `bin.Uint8`, `bin.Array`, ...).
+  (`bin.Struct`, `bin.Uint8`, `bin.Array`, ...). `TypedArraySchema` is replaced by the `bin.TypedArray` interface.
 - **Schemas have separate input and output types.** `Schema<TIn, TOut>` is now an interface instead of a base class, where `TIn` is the type
   of values accepted when writing (and measuring), and `TOut` the type of values produced when reading. `bin.Parsed` is replaced by
   `bin.ExtractOut`, and `bin.ExtractIn` is added. Input types of structs and arrays are readonly, so readonly data can be written.
