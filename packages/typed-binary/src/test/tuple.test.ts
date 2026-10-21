@@ -2,7 +2,7 @@ import { describe, expect, expectTypeOf, it } from 'vitest';
 
 import * as bin from 'typed-binary';
 import { encodeAndDecode } from './helpers/mock.ts';
-import { ExtractOut } from '../main-api.ts';
+import { ExtractOut } from '../index.ts';
 
 describe('bin.tuple', () => {
   it('should estimate an [i32, bool] encoding size', () => {
