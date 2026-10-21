@@ -6,7 +6,7 @@ import * as bin from '../index.ts';
 import { encodeAndDecode } from './helpers/mock.ts';
 import { randIntBetween } from './random.ts';
 
-describe('StringSchema', () => {
+describe('bin.string', () => {
   it('has an unbounded max size', () => {
     expect(bin.string.maxSize).toBeNaN();
   });

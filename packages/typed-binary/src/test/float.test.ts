@@ -4,7 +4,7 @@ import * as bin from 'typed-binary';
 import { encodeAndDecode } from './helpers/mock.ts';
 import { randBetween } from './random.ts';
 
-describe('Float32Schema', () => {
+describe('bin.f32', () => {
   it('has a max size of 4 bytes', () => {
     expect(bin.f32.maxSize).toEqual(4);
   });
@@ -17,7 +17,7 @@ describe('Float32Schema', () => {
   });
 });
 
-describe('Float16Schema', () => {
+describe('bin.f16', () => {
   it('should encode and decode a f16 value near or equal a power of 2 with high precision', () => {
     // near 2^-10
     const value1 = 0.000976;

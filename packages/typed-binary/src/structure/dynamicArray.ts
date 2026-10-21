@@ -18,7 +18,7 @@ export interface DynamicArray<TElement> extends Schema<
   readonly maxSize: number;
 }
 
-class DynamicArraySchema<TElement> implements DynamicArray<TElement> {
+class DynamicArrayImpl<TElement> implements DynamicArray<TElement> {
   readonly elementType: Schema;
 
   constructor(elementType: Schema) {
@@ -86,5 +86,5 @@ export function dynamicArray<TSchema>(_elementSchema: TSchema): DynamicArray<TSc
       `bin.dynamicArray(...) expects a schema, got '${String(_elementSchema)}'`,
     );
   }
-  return new DynamicArraySchema<TSchema>(elementSchema);
+  return new DynamicArrayImpl<TSchema>(elementSchema);
 }

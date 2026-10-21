@@ -15,7 +15,7 @@ export interface Bool extends Schema<boolean> {
   readonly maxSize: 1;
 }
 
-class BoolSchema implements Bool {
+class BoolImpl implements Bool {
   get maxSize(): 1 {
     return 1;
   }
@@ -33,7 +33,7 @@ class BoolSchema implements Bool {
   }
 }
 
-export const bool: Bool = /* @__PURE__ */ new BoolSchema();
+export const bool: Bool = /* @__PURE__ */ new BoolImpl();
 
 ////
 // STRING
@@ -49,7 +49,7 @@ export interface String extends Schema<string, string> {
   readonly maxSize: number;
 }
 
-class StringSchema implements String {
+class StringImpl implements String {
   static #cachedEncoder: TextEncoder | undefined;
 
   get maxSize(): number {
@@ -57,10 +57,10 @@ class StringSchema implements String {
   }
 
   private static get _encoder() {
-    if (!StringSchema.#cachedEncoder) {
-      StringSchema.#cachedEncoder = new TextEncoder();
+    if (!StringImpl.#cachedEncoder) {
+      StringImpl.#cachedEncoder = new TextEncoder();
     }
-    return StringSchema.#cachedEncoder;
+    return StringImpl.#cachedEncoder;
   }
 
   read(input: SerialInput): string {
@@ -76,12 +76,12 @@ class StringSchema implements String {
       // A string cannot be bound
       return measurer.unbounded;
     }
-    const encoded = StringSchema._encoder.encode(value);
+    const encoded = StringImpl._encoder.encode(value);
     return measurer.add(encoded.byteLength + 1);
   }
 }
 
-export const string: String = /* @__PURE__ */ new StringSchema();
+export const string: String = /* @__PURE__ */ new StringImpl();
 
 ////
 // i8
@@ -96,7 +96,7 @@ export interface Int8 extends Schema<number> {
   readonly maxSize: 1;
 }
 
-class Int8Schema implements Int8 {
+class Int8Impl implements Int8 {
   get maxSize(): 1 {
     return 1;
   }
@@ -114,7 +114,7 @@ class Int8Schema implements Int8 {
   }
 }
 
-export const i8: Int8 = /* @__PURE__ */ new Int8Schema();
+export const i8: Int8 = /* @__PURE__ */ new Int8Impl();
 
 ////
 // u8
@@ -129,7 +129,7 @@ export interface Uint8 extends Schema<number> {
   readonly maxSize: 1;
 }
 
-class Uint8Schema implements Uint8 {
+class Uint8Impl implements Uint8 {
   get maxSize(): 1 {
     return 1;
   }
@@ -147,7 +147,7 @@ class Uint8Schema implements Uint8 {
   }
 }
 
-export const u8: Uint8 = /* @__PURE__ */ new Uint8Schema();
+export const u8: Uint8 = /* @__PURE__ */ new Uint8Impl();
 
 ////
 // i16
@@ -162,7 +162,7 @@ export interface Int16 extends Schema<number> {
   readonly maxSize: 2;
 }
 
-class Int16Schema implements Int16 {
+class Int16Impl implements Int16 {
   get maxSize(): 2 {
     return 2;
   }
@@ -180,7 +180,7 @@ class Int16Schema implements Int16 {
   }
 }
 
-export const i16: Int16 = /* @__PURE__ */ new Int16Schema();
+export const i16: Int16 = /* @__PURE__ */ new Int16Impl();
 
 ////
 // u16
@@ -195,7 +195,7 @@ export interface Uint16 extends Schema<number> {
   readonly maxSize: 2;
 }
 
-class Uint16Schema implements Uint16 {
+class Uint16Impl implements Uint16 {
   get maxSize(): 2 {
     return 2;
   }
@@ -213,7 +213,7 @@ class Uint16Schema implements Uint16 {
   }
 }
 
-export const u16: Uint16 = /* @__PURE__ */ new Uint16Schema();
+export const u16: Uint16 = /* @__PURE__ */ new Uint16Impl();
 
 ////
 // i32
@@ -228,7 +228,7 @@ export interface Int32 extends Schema<number, number> {
   readonly maxSize: 4;
 }
 
-class Int32Schema implements Int32 {
+class Int32Impl implements Int32 {
   get maxSize(): 4 {
     return 4;
   }
@@ -246,7 +246,7 @@ class Int32Schema implements Int32 {
   }
 }
 
-export const i32: Int32 = /* @__PURE__ */ new Int32Schema();
+export const i32: Int32 = /* @__PURE__ */ new Int32Impl();
 
 ////
 // u32
@@ -261,7 +261,7 @@ export interface Uint32 extends Schema<number> {
   readonly maxSize: 4;
 }
 
-class Uint32Schema implements Uint32 {
+class Uint32Impl implements Uint32 {
   get maxSize(): 4 {
     return 4;
   }
@@ -279,7 +279,7 @@ class Uint32Schema implements Uint32 {
   }
 }
 
-export const u32: Uint32 = /* @__PURE__ */ new Uint32Schema();
+export const u32: Uint32 = /* @__PURE__ */ new Uint32Impl();
 
 ////
 // f16
@@ -294,7 +294,7 @@ export interface Float16 extends Schema<number> {
   readonly maxSize: 2;
 }
 
-class Float16Schema implements Float16 {
+class Float16Impl implements Float16 {
   get maxSize(): 2 {
     return 2;
   }
@@ -312,7 +312,7 @@ class Float16Schema implements Float16 {
   }
 }
 
-export const f16: Float16 = /* @__PURE__ */ new Float16Schema();
+export const f16: Float16 = /* @__PURE__ */ new Float16Impl();
 
 ////
 // f32
@@ -327,7 +327,7 @@ export interface Float32 extends Schema<number> {
   readonly maxSize: 4;
 }
 
-class Float32Schema implements Float32 {
+class Float32Impl implements Float32 {
   get maxSize(): 4 {
     return 4;
   }
@@ -345,4 +345,4 @@ class Float32Schema implements Float32 {
   }
 }
 
-export const f32: Float32 = /* @__PURE__ */ new Float32Schema();
+export const f32: Float32 = /* @__PURE__ */ new Float32Impl();
