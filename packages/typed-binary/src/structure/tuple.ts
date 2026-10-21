@@ -28,7 +28,7 @@ export interface Tuple<TSequence extends [WithSchema, ...WithSchema[]]> extends 
   readonly maxSize: number;
 }
 
-class TupleSchema<TSequence extends [WithSchema, ...WithSchema[]]> implements Tuple<TSequence> {
+class TupleImpl<TSequence extends [WithSchema, ...WithSchema[]]> implements Tuple<TSequence> {
   readonly schemas: { [K in keyof TSequence]: UnwrapSchema<TSequence[K]> };
   readonly #schemas: Schema[];
 
@@ -75,7 +75,7 @@ class TupleSchema<TSequence extends [WithSchema, ...WithSchema[]]> implements Tu
 export function tuple<TSchema extends [WithSchema, ...WithSchema[]]>(
   schemas: TSchema,
 ): Tuple<TSchema> {
-  return new TupleSchema<TSchema>(
+  return new TupleImpl<TSchema>(
     schemas.map((element, idx) => {
       const schema = toSchema(element);
       if (!schema) {

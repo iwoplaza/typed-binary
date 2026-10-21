@@ -27,7 +27,7 @@ export interface Array<TElement> extends Schema<
   readonly maxSize: number;
 }
 
-class ArraySchema<TElement> implements Array<TElement> {
+class ArrayImpl<TElement> implements Array<TElement> {
   readonly elementSchema: UnwrapSchema<TElement>;
   readonly length: number;
   readonly #element: Schema;
@@ -90,5 +90,5 @@ export function array<TSchema>(_elementSchema: TSchema, length: number): Array<T
       `bin.array(...) expects a schema, got '${String(_elementSchema)}'`,
     );
   }
-  return new ArraySchema<TSchema>(elementSchema, length);
+  return new ArrayImpl<TSchema>(elementSchema, length);
 }

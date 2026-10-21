@@ -7,7 +7,7 @@ export interface Chars<TLength extends number = number> extends Schema<string> {
   readonly length: TLength;
 }
 
-class CharsSchema<TLength extends number = number> implements Chars<TLength> {
+class CharsImpl<TLength extends number = number> implements Chars<TLength> {
   readonly length: TLength;
 
   constructor(length: TLength) {
@@ -43,5 +43,5 @@ class CharsSchema<TLength extends number = number> implements Chars<TLength> {
 
 /*#__NO_SIDE_EFFECTS__*/
 export function chars<T extends number>(length: T): Chars<T> {
-  return new CharsSchema(length);
+  return new CharsImpl(length);
 }
