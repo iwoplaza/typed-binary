@@ -1,13 +1,13 @@
-import bin from 'typed-binary';
+import * as bin from 'typed-binary';
 import { TriggerCondition } from './triggerCondition';
 
-export const ConnectionTemplate = bin.object({
+export const ConnectionTemplate = bin.struct({
   targetNodeIndex: bin.i32,
   /**
    * The duration of the transition in Minecraft ticks
    */
   transitionDuration: bin.f32,
-  transitionEasing: bin.byte,
+  transitionEasing: bin.u8,
   triggerCondition: TriggerCondition,
 });
 

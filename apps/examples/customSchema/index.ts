@@ -2,7 +2,7 @@
 // Run with `npm run example:customSchema`
 //
 
-import bin from 'typed-binary';
+import * as bin from 'typed-binary';
 import { writeAndRead } from '../__util';
 import { radians } from './radians';
 
@@ -10,8 +10,8 @@ import { radians } from './radians';
  * ROTATION
  */
 
-type Rotation = bin.Parsed<typeof Rotation>;
-const Rotation = bin.object({
+type Rotation = bin.ExtractOut<typeof Rotation>;
+const Rotation = bin.struct({
   roll: radians,
   pitch: radians,
   yaw: radians,

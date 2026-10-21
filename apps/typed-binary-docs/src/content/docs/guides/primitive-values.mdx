@@ -5,29 +5,51 @@ description: There are a few primitives to choose from in Typed Binary, here is 
 
 There are a few primitives to choose from:
 
-- `bool` is an 8-bit value representing either `true` or `false`.
-  - Encoded as `1` if true, and as `0` if false.
-- `byte` is an 8-bit value representing an unsigned number between 0 and 255.
-  - Encoded as-is
-- `i32` is a 32-bit signed integer number container.
-  - Encoded as-is
-- `f32` is a 32-bit signed floating-point number container.
-  - Encoded as-is
-- `string` is a variable-length string of ASCII characters.
-  - A string of characters followed by a `\0` terminal character.
+| Schema       | JavaScript value | Size     | Encoded as                                    |
+| ------------ | ---------------- | -------- | --------------------------------------------- |
+| `bin.bool`   | `boolean`        | 1 byte   | `1` if true, `0` if false                     |
+| `bin.i8`     | `number`         | 1 byte   | 8-bit signed integer                          |
+| `bin.u8`     | `number`         | 1 byte   | 8-bit unsigned integer                        |
+| `bin.i16`    | `number`         | 2 bytes  | 16-bit signed integer                         |
+| `bin.u16`    | `number`         | 2 bytes  | 16-bit unsigned integer                       |
+| `bin.i32`    | `number`         | 4 bytes  | 32-bit signed integer                         |
+| `bin.u32`    | `number`         | 4 bytes  | 32-bit unsigned integer                       |
+| `bin.f16`    | `number`         | 2 bytes  | 16-bit (half precision) floating-point number |
+| `bin.f32`    | `number`         | 4 bytes  | 32-bit floating-point number                  |
+| `bin.string` | `string`         | variable | UTF-8 characters, followed by a `\0` character |
+
+Multi-byte values are encoded in the endianness of the `bin.BufferWriter`/`bin.BufferReader`,
+which defaults to the endianness of the system.
 
 ```ts
-import bin from 'typed-binary';
+import * as bin from 'typed-binary';
 
-const buffer = Buffer.alloc(16);
+const buffer = new ArrayBuffer(16);
 
 // Writing four bytes into the buffer
 const writer = new bin.BufferWriter(buffer);
-bin.byte.write(writer, 'W'.charCodeAt(0));
-bin.byte.write(writer, 'o'.charCodeAt(0));
-bin.byte.write(writer, 'w'.charCodeAt(0));
-bin.byte.write(writer, 0);
+bin.u8.write(writer, 'W'.charCodeAt(0));
+bin.u8.write(writer, 'o'.charCodeAt(0));
+bin.u8.write(writer, 'w'.charCodeAt(0));
+bin.u8.write(writer, 0);
 
 const reader = new bin.BufferReader(buffer);
 console.log(bin.string.read(reader)); // > Wow
 ```
+
+## Enums
+
+When a value can only be one of a few known strings, an enum schema encodes it in fewer bytes than `bin.string` would.
+
+```ts
+const Direction = bin.orderedEnum('north', 'east', 'south', 'west');
+type Direction = bin.ExtractOut<typeof Direction>; // 'north' | 'east' | 'south' | 'west'
+```
+
+There are two kinds of enums, differing in how they encode values:
+
+- `bin.orderedEnum(...values)` encodes the index of the value in a single byte, so it can have at most 256 values.
+  Changing the order of values changes the encoding, so new values should be appended at the end.
+- `bin.prefixEnum(...values)` encodes the ASCII characters of the value, without a terminating character.
+  It's independent of the order of values, but no value can be a prefix of another (e.g. `'a'` and `'ab'`), and values
+  can only contain ASCII characters.

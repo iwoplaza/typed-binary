@@ -1,25 +1,18 @@
-import {
-  type IMeasurer,
-  type ISerialInput,
-  type ISerialOutput,
-  type MaxValue,
-  Measurer,
-  Schema,
-} from 'typed-binary';
+import * as bin from 'typed-binary';
 
 /**
  * A schema storing radians with 2 bytes of precision.
  */
-class RadiansSchema extends Schema<number> {
-  read(input: ISerialInput): number {
-    const low = input.readByte();
-    const high = input.readByte();
+class RadiansSchema implements bin.Schema<number> {
+  read(input: bin.ISerialInput): number {
+    const low = input.readUint8();
+    const high = input.readUint8();
 
     const discrete = (high << 8) | low;
     return (discrete / 65535) * Math.PI;
   }
 
-  write(output: ISerialOutput, value: number): void {
+  write(output: bin.ISerialOutput, value: number): void {
     // The value will be wrapped to be in range of [0, Math.PI)
     const wrapped = ((value % Math.PI) + Math.PI) % Math.PI;
     // Clipping the value to be ints in range of [0, 65535]
@@ -32,7 +25,7 @@ class RadiansSchema extends Schema<number> {
     output.writeUint8(high);
   }
 
-  measure(_: number | MaxValue, measurer: IMeasurer = new Measurer()): IMeasurer {
+  measure(_: number | bin.MaxValue, measurer: bin.IMeasurer = new bin.Measurer()): bin.IMeasurer {
     // The size of the data serialized by this schema
     // doesn't depend on the actual value. It's always 2 bytes.
     return measurer.add(2);

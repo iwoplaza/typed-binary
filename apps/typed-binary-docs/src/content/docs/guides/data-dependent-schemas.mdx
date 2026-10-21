@@ -1,0 +1,51 @@
+---
+title: Data-dependent Schemas
+description: A guide on how to describe data whose layout depends on values encoded earlier.
+---
+
+Sometimes the layout of data depends on values that were encoded before it, like an array whose length is stored
+in a header. That can be described with a pipe.
+
+`bin.pipe(head, action)` reads (or writes) the `head` schema first, then passes its value to `action`,
+which returns the schema of the rest of the data.
+
+```ts
+import * as bin from 'typed-binary';
+
+const Samples = bin.pipe(bin.struct({ count: bin.u8 }), (head) => {
+  // Accounting for the biggest possible value
+  const count = head === bin.MaxValue ? 255 : head.count;
+
+  return bin.struct({
+    count: bin.inherent(count),
+    data: bin.array(bin.f32, count),
+  });
+});
+
+type Samples = bin.ExtractOut<typeof Samples>;
+//   ^? { count: number, data: number[] }
+```
+
+The value produced by a pipe is the value produced by the schema returned from `action`. Values of the head that
+should be part of the result have to be carried over, which is what `bin.inherent(value)` is for. It describes a value
+that is already known from context, so it takes up no space in the encoding. When writing, it checks that the written
+value matches.
+
+`action` receives `bin.MaxValue` when the max size of the pipe is being measured.
+
+When writing or measuring a value, `action` receives that value (the input of the whole pipe), not a value read by
+the head. That's why the value read by the head has to be assignable to the value it accepts, which holds for all
+built-in schemas. Heads that transform values, like a custom `bin.Schema<string, Version>` that writes `'2.1'` and reads
+`{ major: 2, minor: 1 }`, are rejected by the type checker. So is a pipe used as the head of another pipe, unless it
+carries the values of its head over.
+
+:::caution
+The max size of a pipe is an upper bound, not always the exact maximum. The head and the schema returned for
+`bin.MaxValue` are measured independently, so if the biggest head value doesn't lead to the biggest rest of the data,
+the max size will be bigger than any value can actually take up. `bin.union` measures each variant exactly.
+:::
+
+:::tip
+For values that can take one of several shapes depending on a tag, [`bin.union`](/typed-binary/guides/objects/#tagged-unions)
+is a more convenient alternative to a pipe.
+:::

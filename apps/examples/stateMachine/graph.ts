@@ -1,7 +1,7 @@
-import bin from 'typed-binary';
+import * as bin from 'typed-binary';
 import { NodeTemplate } from './node';
 
-export const Graph = bin.object({
+export const Graph = bin.struct({
   entryNode: bin.i32,
-  nodes: bin.dynamicArrayOf(NodeTemplate),
+  nodes: bin.dynamicArray(NodeTemplate),
 });

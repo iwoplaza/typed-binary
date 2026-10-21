@@ -37,6 +37,10 @@ export default defineConfig({
             { label: 'Typed Arrays', slug: 'guides/typed-arrays' },
             { label: 'Recursive Types', slug: 'guides/recursive-types' },
             {
+              label: 'Data-dependent Schemas',
+              slug: 'guides/data-dependent-schemas',
+            },
+            {
               label: 'Custom Schema Types',
               slug: 'guides/custom-schema-types',
             },

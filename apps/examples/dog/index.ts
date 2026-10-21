@@ -2,17 +2,17 @@
 // Run with `npm run example:dog`
 //
 
-import bin from 'typed-binary';
+import * as bin from 'typed-binary';
 
 // Describing the Dog schema
-const Dog = bin.object({
+const Dog = bin.struct({
   name: bin.string,
-  position: bin.tupleOf([bin.f32, bin.f32, bin.f32]),
+  position: bin.tuple([bin.f32, bin.f32, bin.f32]),
   age: bin.i32,
 });
 
 // Creating a type-alias for ease-of-use.
-type Dog = bin.Parsed<typeof Dog>;
+type Dog = bin.ExtractOut<typeof Dog>;
 
 // Creating a 'Dog' object.
 const dog: Dog = {

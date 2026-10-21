@@ -1,12 +1,36 @@
-export { arrayOf } from './structure/array.ts';
-export { bool, byte, i8, u8, i16, u16, i32, u32, f16, f32, string } from './structure/baseTypes.ts';
-export { chars } from './structure/chars.ts';
+export { array, type Array } from './structure/array.ts';
+export {
+  bool,
+  i8,
+  u8,
+  i16,
+  u16,
+  i32,
+  u32,
+  f16,
+  f32,
+  string,
+  type Bool,
+  type Int8,
+  type Uint8,
+  type Int16,
+  type Uint16,
+  type Int32,
+  type Uint32,
+  type Float16,
+  type Float32,
+  type String,
+} from './structure/baseTypes.ts';
+export { chars, type Chars } from './structure/chars.ts';
+export { inherent, type Inherent } from './structure/inherent.ts';
+export { pipe, type Pipe, type PipeAction } from './structure/pipe.ts';
 export { concat } from './structure/concat.ts';
-export { dynamicArrayOf } from './structure/dynamicArray.ts';
-export { keyed } from './structure/keyed.ts';
-export { object, generic, genericEnum } from './structure/object.ts';
-export { optional } from './structure/optional.ts';
-export { tupleOf } from './structure/tuple.ts';
+export { dynamicArray, type DynamicArray } from './structure/dynamicArray.ts';
+export { struct, type Struct } from './structure/struct.ts';
+export { optional, type Optional } from './structure/optional.ts';
+export { tuple, type Tuple } from './structure/tuple.ts';
+export { union, type Union, type UnionOptions, type UnionVariant } from './structure/union.ts';
+export { prefixEnum, orderedEnum, type PrefixEnum, type OrderedEnum } from './structure/enum.ts';
 export {
   f32Array,
   f64Array,
@@ -17,13 +41,14 @@ export {
   u32Array,
   u8Array,
   u8ClampedArray,
+  type TypedArraySchema,
 } from './structure/typedArray.ts';
 export { MaxValue } from './structure/types.ts';
 
 export { BufferReader } from './io/bufferReader.ts';
 export { BufferWriter } from './io/bufferWriter.ts';
 export { Measurer } from './io/measurer.ts';
-export { UnresolvedReferenceError, ValidationError } from './error.ts';
+export { ValidationError, InvalidSchemaShapeError } from './error.ts';
 
 export type { Endianness, IMeasurer, ISerialInput, ISerialOutput } from './io/types.ts';
-export type { Parsed } from './utilityTypes.ts';
+export type { ExtractIn, ExtractOut, Schema, WithSchema } from './structure/types.ts';

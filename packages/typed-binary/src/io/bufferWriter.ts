@@ -16,10 +16,6 @@ export class BufferWriter extends BufferIOBase implements ISerialOutput {
     this.dataView.setUint8(this.byteOffset++, value ? 1 : 0);
   }
 
-  writeByte(value: number) {
-    this.dataView.setUint8(this.byteOffset++, value);
-  }
-
   writeInt8(value: number) {
     this.dataView.setInt8(this.byteOffset++, value);
   }

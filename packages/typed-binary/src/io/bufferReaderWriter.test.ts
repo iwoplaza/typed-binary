@@ -15,14 +15,14 @@ describe('BufferWriter', () => {
     writer.writeSlice(uint8s);
 
     const reader = new BufferReader(buffer);
-    expect(reader.readByte()).to.eq(0);
-    expect(reader.readByte()).to.eq(1);
-    expect(reader.readByte()).to.eq(1);
-    expect(reader.readByte()).to.eq(2);
-    expect(reader.readByte()).to.eq(3);
-    expect(reader.readByte()).to.eq(5);
-    expect(reader.readByte()).to.eq(8);
-    expect(reader.readByte()).to.eq(255);
+    expect(reader.readUint8()).to.eq(0);
+    expect(reader.readUint8()).to.eq(1);
+    expect(reader.readUint8()).to.eq(1);
+    expect(reader.readUint8()).to.eq(2);
+    expect(reader.readUint8()).to.eq(3);
+    expect(reader.readUint8()).to.eq(5);
+    expect(reader.readUint8()).to.eq(8);
+    expect(reader.readUint8()).to.eq(255);
   });
 
   it('should encode a Int32Array', () => {

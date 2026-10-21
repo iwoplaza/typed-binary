@@ -2,28 +2,29 @@
 // Run with `npm run example:recursiveTypes`
 //
 
-import bin from 'typed-binary';
+import * as bin from 'typed-binary';
 
-type Expression = bin.Parsed<typeof Expression>;
-const Expression = bin.keyed('expression', (Expression) =>
-  bin.generic(
-    {},
-    {
-      multiply: bin.object({
-        a: Expression,
-        b: Expression,
-      }),
-      negate: bin.object({
-        inner: Expression,
-      }),
-      int_literal: bin.object({
-        value: bin.i32,
-      }),
+// Recursive tagged union: variants referencing the union through getters
+
+type Expression = bin.ExtractOut<typeof Expression>;
+const Expression = bin.union(bin.orderedEnum('int_literal', 'negate', 'multiply'), {
+  int_literal: { value: bin.i32 },
+  negate: {
+    get inner() {
+      return Expression;
     },
-  ),
-);
+  },
+  multiply: {
+    get a() {
+      return Expression;
+    },
+    get b() {
+      return Expression;
+    },
+  },
+});
 
-const expr: bin.Parsed<typeof Expression> = {
+const expr: Expression = {
   type: 'multiply',
   a: {
     type: 'negate',
@@ -38,29 +39,33 @@ const expr: bin.Parsed<typeof Expression> = {
   },
 };
 
-type Instruction = bin.Parsed<typeof Instruction>;
-const Instruction = bin.object({
+// Recursive structs
+
+type Instruction = bin.ExtractOut<typeof Instruction>;
+const Instruction = bin.struct({
   target_variable: bin.string,
   expression: bin.optional(Expression),
 });
 
-type Complex = bin.Parsed<typeof Complex>;
-const Complex = bin.keyed('complex' as const, (Complex) =>
-  bin.object({
-    label: bin.string,
-    inner: bin.optional(Complex),
-    cycle: bin.keyed('cycle' as const, (Cycle) =>
-      bin.object({
-        value: bin.string,
-        next: bin.optional(Cycle),
-      }),
-    ),
-  }),
-);
+const Cycle = bin.struct({
+  value: bin.string,
+  get next() {
+    return bin.optional(Cycle);
+  },
+});
+
+type Complex = bin.ExtractOut<typeof Complex>;
+const Complex = bin.struct({
+  label: bin.string,
+  get inner() {
+    return bin.optional(Complex);
+  },
+  cycle: Cycle,
+});
 
 const inst: Instruction = {
   target_variable: 'firstlevel',
-  expression: undefined,
+  expression: expr,
 };
 
 const complex: Complex = {
@@ -82,6 +87,14 @@ const complex: Complex = {
   },
 };
 
-console.log(expr);
-console.log(inst);
-console.log(complex);
+// Round-tripping through binary
+
+function roundTrip<T extends bin.Schema>(schema: T, value: bin.ExtractIn<T>): bin.ExtractOut<T> {
+  const buffer = new ArrayBuffer(schema.measure(value).size);
+  schema.write(new bin.BufferWriter(buffer), value);
+  return schema.read(new bin.BufferReader(buffer));
+}
+
+console.log(JSON.stringify(roundTrip(Instruction, inst), null, 2));
+console.log(JSON.stringify(roundTrip(Complex, complex), null, 2));
+console.log('Max size of a recursive schema:', Expression.maxSize);
