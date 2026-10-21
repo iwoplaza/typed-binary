@@ -4,7 +4,7 @@
 
 ### TODO
 
-- [ ] Update README code images
+- [x] Update README code images
 - [x] Make `getSystemEndianness` part of `main-api.ts`, and since that was the only thing that wasn't part of the public API, merge `main-api.ts` into `index.ts`
 - [x] Remove the `I` prefix from public interfaces
 - [x] Unify names of classes to `*Impl`
