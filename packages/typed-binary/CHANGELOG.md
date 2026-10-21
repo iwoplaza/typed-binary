@@ -84,6 +84,7 @@ The replacements in the table encode data the same way as the v4 schemas they re
     Reads and writes can no longer go past the end of the given view.
 - **Renamed `IMeasurer` to `Measurer`.** `Measurer` is both the interface and the constructor of the built-in measurer,
   so `new bin.Measurer()` still works.
+- **Removed the `typed-binary/index` subpath export.** Import from `typed-binary` instead.
 - **Removed the internal type helpers** `ISchema`, `AnySchema`, `AnySchemaWithProperties`, `ISchemaWithProperties`, `AnyObjectSchema`,
   `IKeyedSchema`, `AnyKeyedSchema`, `Unwrap`, `UnwrapRecord`, `UnwrapArray` and `ParseUnwrapped`. Use `bin.Schema`, `bin.ExtractIn` and
   `bin.ExtractOut` instead.
