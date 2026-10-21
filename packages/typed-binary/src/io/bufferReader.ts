@@ -1,8 +1,8 @@
 import { BufferIOBase } from './bufferIOBase.ts';
-import type { BufferView, ISerialInput } from './types.ts';
+import type { BufferView, SerialInput } from './types.ts';
 import { unwrapBuffer } from './unwrapBuffer.ts';
 
-export class BufferReader extends BufferIOBase implements ISerialInput {
+export class BufferReader extends BufferIOBase implements SerialInput {
   private _cachedTextDecoder: TextDecoder | undefined;
 
   private get _textDecoder() {

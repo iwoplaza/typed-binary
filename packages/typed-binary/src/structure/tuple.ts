@@ -1,6 +1,6 @@
 import { InvalidSchemaShapeError, ValidationError } from '../error.ts';
 import { Measurer } from '../io/measurer.ts';
-import type { IMeasurer, ISerialInput, ISerialOutput } from '../io/types.ts';
+import type { SerialInput, SerialOutput } from '../io/types.ts';
 import {
   type ExtractInRecord,
   type ExtractOutRecord,
@@ -37,7 +37,7 @@ class TupleSchema<TSequence extends [WithSchema, ...WithSchema[]]> implements Tu
     this.#schemas = schemas;
   }
 
-  write(output: ISerialOutput, values: ExtractInRecord<TSequence>): void {
+  write(output: SerialOutput, values: ExtractInRecord<TSequence>): void {
     if (values.length !== this.#schemas.length) {
       throw new ValidationError(
         `Expected tuple of length ${this.#schemas.length}, got ${values.length}`,
@@ -49,7 +49,7 @@ class TupleSchema<TSequence extends [WithSchema, ...WithSchema[]]> implements Tu
     }
   }
 
-  read(input: ISerialInput): ExtractOutRecord<TSequence> {
+  read(input: SerialInput): ExtractOutRecord<TSequence> {
     return this.#schemas.map((schema) =>
       schema.read(input),
     ) as unknown as ExtractOutRecord<TSequence>;
@@ -61,8 +61,8 @@ class TupleSchema<TSequence extends [WithSchema, ...WithSchema[]]> implements Tu
 
   measure(
     values: ExtractInRecord<TSequence> | MaxValue,
-    measurer: IMeasurer = new Measurer(),
-  ): IMeasurer {
+    measurer: Measurer = new Measurer(),
+  ): Measurer {
     for (let i = 0; i < this.#schemas.length; ++i) {
       this.#schemas[i].measure(values === MaxValue ? MaxValue : values[i], measurer);
     }

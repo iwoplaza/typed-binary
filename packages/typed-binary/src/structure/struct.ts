@@ -1,6 +1,6 @@
 import { InvalidSchemaShapeError } from '../error.ts';
 import { Measurer } from '../io/measurer.ts';
-import type { IMeasurer, ISerialInput, ISerialOutput } from '../io/types.ts';
+import type { SerialInput, SerialOutput } from '../io/types.ts';
 import { MutableRecord, Prettify } from '../utilityTypes.ts';
 import { measureMax } from './measureMax.ts';
 import {
@@ -59,7 +59,7 @@ class StructImpl<out TProps extends Record<string, WithSchema>> implements Struc
     return this.#resolvedProperties;
   }
 
-  write(output: ISerialOutput, value: TIn<TProps>): void {
+  write(output: SerialOutput, value: TIn<TProps>): void {
     type Property = keyof TIn<TProps>;
 
     for (const [key, property] of this.#properties) {
@@ -67,7 +67,7 @@ class StructImpl<out TProps extends Record<string, WithSchema>> implements Struc
     }
   }
 
-  read(input: ISerialInput) {
+  read(input: SerialInput) {
     type Property = keyof TOut<TProps>;
 
     const result = {} as TOut<TProps>;
@@ -82,7 +82,7 @@ class StructImpl<out TProps extends Record<string, WithSchema>> implements Struc
     return this.measure(MaxValue).size;
   }
 
-  measure(value: TIn<TProps> | typeof MaxValue, measurer: IMeasurer = new Measurer()): IMeasurer {
+  measure(value: TIn<TProps> | typeof MaxValue, measurer: Measurer = new Measurer()): Measurer {
     if (value === MaxValue) {
       // Properties can be getters that reference this schema recursively
       return measureMax(this, measurer, () => this.#measureProperties(value, measurer));
@@ -90,7 +90,7 @@ class StructImpl<out TProps extends Record<string, WithSchema>> implements Struc
     return this.#measureProperties(value, measurer);
   }
 
-  #measureProperties(value: TIn<TProps> | typeof MaxValue, measurer: IMeasurer): IMeasurer {
+  #measureProperties(value: TIn<TProps> | typeof MaxValue, measurer: Measurer): Measurer {
     type Property = keyof TIn<TProps>;
 
     for (const [key, property] of this.#properties) {

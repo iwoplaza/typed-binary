@@ -1,8 +1,8 @@
 import { BufferIOBase } from './bufferIOBase.ts';
-import type { BufferView, ISerialOutput } from './types.ts';
+import type { BufferView, SerialOutput } from './types.ts';
 import { unwrapBuffer } from './unwrapBuffer.ts';
 
-export class BufferWriter extends BufferIOBase implements ISerialOutput {
+export class BufferWriter extends BufferIOBase implements SerialOutput {
   private _cachedTextEncoder: TextEncoder | undefined;
 
   private get _textEncoder() {

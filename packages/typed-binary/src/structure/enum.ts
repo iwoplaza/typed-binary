@@ -1,6 +1,6 @@
 import { ValidationError } from '../error.ts';
 import { Measurer } from '../io/measurer.ts';
-import type { IMeasurer, ISerialInput, ISerialOutput } from '../io/types.ts';
+import type { SerialInput, SerialOutput } from '../io/types.ts';
 import { MaxValue, Schema } from './types.ts';
 
 ////
@@ -30,7 +30,7 @@ class PrefixEnumImpl<TValues extends string> implements PrefixEnum<TValues> {
     }
   }
 
-  write(output: ISerialOutput, value: TValues): void {
+  write(output: SerialOutput, value: TValues): void {
     if (!this.values.includes(value)) {
       throw new ValidationError(`Expected enum value, got ${value}`);
     }
@@ -40,7 +40,7 @@ class PrefixEnumImpl<TValues extends string> implements PrefixEnum<TValues> {
     }
   }
 
-  read(input: ISerialInput): TValues {
+  read(input: SerialInput): TValues {
     let content = '';
 
     const possibleMatches = new Set(this.values);
@@ -59,7 +59,7 @@ class PrefixEnumImpl<TValues extends string> implements PrefixEnum<TValues> {
     throw new ValidationError(`Expected enum value, got ${content}`);
   }
 
-  measure(value: string | MaxValue, measurer: IMeasurer = new Measurer()): IMeasurer {
+  measure(value: string | MaxValue, measurer: Measurer = new Measurer()): Measurer {
     if (value === MaxValue) {
       return measurer.add(this.values.reduce((max, value) => Math.max(max, value.length), 0));
     }
@@ -114,7 +114,7 @@ class OrderedEnumImpl<TValues extends string> implements OrderedEnum<TValues> {
     }
   }
 
-  write(output: ISerialOutput, value: TValues): void {
+  write(output: SerialOutput, value: TValues): void {
     const index = this.values.indexOf(value);
     if (index === -1) {
       throw new ValidationError(`Expected enum value, got ${value}`);
@@ -122,7 +122,7 @@ class OrderedEnumImpl<TValues extends string> implements OrderedEnum<TValues> {
     output.writeUint8(index);
   }
 
-  read(input: ISerialInput): TValues {
+  read(input: SerialInput): TValues {
     const index = input.readUint8();
     if (index >= this.values.length) {
       throw new ValidationError(`Expected enum index below ${this.values.length}, got ${index}`);
@@ -130,7 +130,7 @@ class OrderedEnumImpl<TValues extends string> implements OrderedEnum<TValues> {
     return this.values[index] as TValues;
   }
 
-  measure(value: string | MaxValue, measurer: IMeasurer = new Measurer()): IMeasurer {
+  measure(value: string | MaxValue, measurer: Measurer = new Measurer()): Measurer {
     if (value !== MaxValue && !this.values.includes(value as TValues)) {
       throw new ValidationError(`Expected enum value, got ${value}`);
     }
