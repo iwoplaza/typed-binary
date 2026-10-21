@@ -50,12 +50,12 @@ describe('Socket IO Usage', () => {
         : [clientSocket, serverSocket];
 
     const buffer = Buffer.alloc(schema.measure(value).size);
-    schema.write(new bin.BufferWriter(buffer), value);
+    schema.write(bin.cursor(buffer), value);
     from.send(buffer);
 
     // Receiving
 
-    const response = schema.read(new bin.BufferReader(await waitFor(to)));
+    const response = schema.read(bin.cursor(await waitFor(to)));
     expect(response).to.deep.equal(value);
   }
 

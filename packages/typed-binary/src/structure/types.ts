@@ -1,5 +1,5 @@
 import type { Measurer } from '../io/measurer.ts';
-import type { SerialInput, SerialOutput } from '../io/types.ts';
+import type { ByteCursor } from '../io/cursor.ts';
 
 export type MaxValue = typeof MaxValue;
 export const MaxValue = /* @__PURE__ */ Symbol(
@@ -11,8 +11,8 @@ export const MaxValue = /* @__PURE__ */ Symbol(
  * @param TOut the JavaScript type produced by the schema.
  */
 export interface Schema<in TIn extends any = any, out TOut extends any = TIn> {
-  write(output: SerialOutput, value: TIn): void;
-  read(input: SerialInput): TOut;
+  write(cursor: ByteCursor, value: TIn): void;
+  read(cursor: ByteCursor): TOut;
   measure(value: TIn | MaxValue, measurer?: Measurer): Measurer;
 }
 

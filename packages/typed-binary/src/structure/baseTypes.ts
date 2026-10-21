@@ -1,5 +1,5 @@
 import { Measurer } from '../io/measurer.ts';
-import type { SerialInput, SerialOutput } from '../io/types.ts';
+import type { ByteCursor } from '../io/cursor.ts';
 import { MaxValue, type Schema } from './types.ts';
 
 ////
@@ -20,12 +20,12 @@ class BoolImpl implements Bool {
     return 1;
   }
 
-  read(input: SerialInput): boolean {
-    return input.readBool();
+  read(cursor: ByteCursor): boolean {
+    return cursor.view.getUint8(cursor.offset++) !== 0;
   }
 
-  write(output: SerialOutput, value: boolean): void {
-    output.writeBool(value);
+  write(cursor: ByteCursor, value: boolean): void {
+    cursor.view.setUint8(cursor.offset++, value ? 1 : 0);
   }
 
   measure(_: boolean | MaxValue, measurer: Measurer = new Measurer()): Measurer {
@@ -51,6 +51,7 @@ export interface String extends Schema<string, string> {
 
 class StringImpl implements String {
   static #cachedEncoder: TextEncoder | undefined;
+  static #cachedDecoder: TextDecoder | undefined;
 
   get maxSize(): number {
     return Number.NaN;
@@ -63,12 +64,42 @@ class StringImpl implements String {
     return StringImpl.#cachedEncoder;
   }
 
-  read(input: SerialInput): string {
-    return input.readString();
+  private static get _decoder() {
+    if (!StringImpl.#cachedDecoder) {
+      StringImpl.#cachedDecoder = new TextDecoder(undefined, { fatal: true });
+    }
+    return StringImpl.#cachedDecoder;
   }
 
-  write<T extends string>(output: SerialOutput, value: T): void {
-    output.writeString(value);
+  read(cursor: ByteCursor): string {
+    const { view } = cursor;
+    // Looking for the 'NULL' byte.
+    let strLength = 0;
+    while (cursor.offset + strLength < view.byteLength) {
+      if (view.getUint8(cursor.offset + strLength++) === 0) {
+        break;
+      }
+    }
+
+    const result = StringImpl._decoder.decode(
+      new Uint8Array(view.buffer, view.byteOffset + cursor.offset, strLength - 1),
+    );
+
+    cursor.offset += strLength;
+
+    return result;
+  }
+
+  write<T extends string>(cursor: ByteCursor, value: T): void {
+    const { view } = cursor;
+    const result = StringImpl._encoder.encodeInto(
+      value,
+      new Uint8Array(view.buffer, view.byteOffset + cursor.offset, view.byteLength - cursor.offset),
+    );
+    cursor.offset += result.written;
+
+    // Extra null character
+    view.setUint8(cursor.offset++, 0);
   }
 
   measure(value: string | typeof MaxValue, measurer: Measurer = new Measurer()): Measurer {
@@ -101,12 +132,12 @@ class Int8Impl implements Int8 {
     return 1;
   }
 
-  read(input: SerialInput): number {
-    return input.readInt8();
+  read(cursor: ByteCursor): number {
+    return cursor.view.getInt8(cursor.offset++);
   }
 
-  write(output: SerialOutput, value: number): void {
-    output.writeInt8(value);
+  write(cursor: ByteCursor, value: number): void {
+    cursor.view.setInt8(cursor.offset++, value);
   }
 
   measure(_: number | MaxValue, measurer: Measurer = new Measurer()): Measurer {
@@ -134,12 +165,12 @@ class Uint8Impl implements Uint8 {
     return 1;
   }
 
-  read(input: SerialInput): number {
-    return input.readUint8();
+  read(cursor: ByteCursor): number {
+    return cursor.view.getUint8(cursor.offset++);
   }
 
-  write(output: SerialOutput, value: number): void {
-    output.writeUint8(value);
+  write(cursor: ByteCursor, value: number): void {
+    cursor.view.setUint8(cursor.offset++, value);
   }
 
   measure(_: number | MaxValue, measurer: Measurer = new Measurer()): Measurer {
@@ -167,12 +198,15 @@ class Int16Impl implements Int16 {
     return 2;
   }
 
-  read(input: SerialInput): number {
-    return input.readInt16();
+  read(cursor: ByteCursor): number {
+    const value = cursor.view.getInt16(cursor.offset, cursor.littleEndian);
+    cursor.offset += 2;
+    return value;
   }
 
-  write(output: SerialOutput, value: number): void {
-    output.writeInt16(value);
+  write(cursor: ByteCursor, value: number): void {
+    cursor.view.setInt16(cursor.offset, value, cursor.littleEndian);
+    cursor.offset += 2;
   }
 
   measure(_: number | MaxValue, measurer: Measurer = new Measurer()): Measurer {
@@ -200,12 +234,15 @@ class Uint16Impl implements Uint16 {
     return 2;
   }
 
-  read(input: SerialInput): number {
-    return input.readUint16();
+  read(cursor: ByteCursor): number {
+    const value = cursor.view.getUint16(cursor.offset, cursor.littleEndian);
+    cursor.offset += 2;
+    return value;
   }
 
-  write(output: SerialOutput, value: number): void {
-    output.writeUint16(value);
+  write(cursor: ByteCursor, value: number): void {
+    cursor.view.setUint16(cursor.offset, value, cursor.littleEndian);
+    cursor.offset += 2;
   }
 
   measure(_: number | MaxValue, measurer: Measurer = new Measurer()): Measurer {
@@ -233,12 +270,15 @@ class Int32Impl implements Int32 {
     return 4;
   }
 
-  read(input: SerialInput): number {
-    return input.readInt32();
+  read(cursor: ByteCursor): number {
+    const value = cursor.view.getInt32(cursor.offset, cursor.littleEndian);
+    cursor.offset += 4;
+    return value;
   }
 
-  write(output: SerialOutput, value: number): void {
-    output.writeInt32(value);
+  write(cursor: ByteCursor, value: number): void {
+    cursor.view.setInt32(cursor.offset, value, cursor.littleEndian);
+    cursor.offset += 4;
   }
 
   measure(_: number | MaxValue, measurer: Measurer = new Measurer()): Measurer {
@@ -266,12 +306,15 @@ class Uint32Impl implements Uint32 {
     return 4;
   }
 
-  read(input: SerialInput): number {
-    return input.readUint32();
+  read(cursor: ByteCursor): number {
+    const value = cursor.view.getUint32(cursor.offset, cursor.littleEndian);
+    cursor.offset += 4;
+    return value;
   }
 
-  write(output: SerialOutput, value: number): void {
-    output.writeUint32(value);
+  write(cursor: ByteCursor, value: number): void {
+    cursor.view.setUint32(cursor.offset, value, cursor.littleEndian);
+    cursor.offset += 4;
   }
 
   measure(_: number | MaxValue, measurer: Measurer = new Measurer()): Measurer {
@@ -299,12 +342,15 @@ class Float16Impl implements Float16 {
     return 2;
   }
 
-  read(input: SerialInput): number {
-    return input.readFloat16();
+  read(cursor: ByteCursor): number {
+    const value = cursor.view.getFloat16(cursor.offset, cursor.littleEndian);
+    cursor.offset += 2;
+    return value;
   }
 
-  write(output: SerialOutput, value: number): void {
-    output.writeFloat16(value);
+  write(cursor: ByteCursor, value: number): void {
+    cursor.view.setFloat16(cursor.offset, value, cursor.littleEndian);
+    cursor.offset += 2;
   }
 
   measure(_: number | MaxValue, measurer: Measurer = new Measurer()): Measurer {
@@ -332,12 +378,15 @@ class Float32Impl implements Float32 {
     return 4;
   }
 
-  read(input: SerialInput): number {
-    return input.readFloat32();
+  read(cursor: ByteCursor): number {
+    const value = cursor.view.getFloat32(cursor.offset, cursor.littleEndian);
+    cursor.offset += 4;
+    return value;
   }
 
-  write(output: SerialOutput, value: number): void {
-    output.writeFloat32(value);
+  write(cursor: ByteCursor, value: number): void {
+    cursor.view.setFloat32(cursor.offset, value, cursor.littleEndian);
+    cursor.offset += 4;
   }
 
   measure(_: number | MaxValue, measurer: Measurer = new Measurer()): Measurer {

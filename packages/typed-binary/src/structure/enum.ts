@@ -1,6 +1,6 @@
 import { ValidationError } from '../error.ts';
 import { Measurer } from '../io/measurer.ts';
-import type { SerialInput, SerialOutput } from '../io/types.ts';
+import type { ByteCursor } from '../io/cursor.ts';
 import { MaxValue, Schema } from './types.ts';
 
 ////
@@ -30,22 +30,22 @@ class PrefixEnumImpl<TValues extends string> implements PrefixEnum<TValues> {
     }
   }
 
-  write(output: SerialOutput, value: TValues): void {
+  write(cursor: ByteCursor, value: TValues): void {
     if (!this.values.includes(value)) {
       throw new ValidationError(`Expected enum value, got ${value}`);
     }
 
     for (let i = 0; i < value.length; ++i) {
-      output.writeUint8(value.charCodeAt(i));
+      cursor.view.setUint8(cursor.offset++, value.charCodeAt(i));
     }
   }
 
-  read(input: SerialInput): TValues {
+  read(cursor: ByteCursor): TValues {
     let content = '';
 
     const possibleMatches = new Set(this.values);
     while (possibleMatches.size > 0) {
-      content += String.fromCharCode(input.readUint8());
+      content += String.fromCharCode(cursor.view.getUint8(cursor.offset++));
       for (const possibleMatch of possibleMatches) {
         if (possibleMatch === content) {
           return possibleMatch;
@@ -114,16 +114,16 @@ class OrderedEnumImpl<TValues extends string> implements OrderedEnum<TValues> {
     }
   }
 
-  write(output: SerialOutput, value: TValues): void {
+  write(cursor: ByteCursor, value: TValues): void {
     const index = this.values.indexOf(value);
     if (index === -1) {
       throw new ValidationError(`Expected enum value, got ${value}`);
     }
-    output.writeUint8(index);
+    cursor.view.setUint8(cursor.offset++, index);
   }
 
-  read(input: SerialInput): TValues {
-    const index = input.readUint8();
+  read(cursor: ByteCursor): TValues {
+    const index = cursor.view.getUint8(cursor.offset++);
     if (index >= this.values.length) {
       throw new ValidationError(`Expected enum index below ${this.values.length}, got ${index}`);
     }

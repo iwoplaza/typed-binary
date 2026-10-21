@@ -1,6 +1,6 @@
 import { InvalidSchemaShapeError } from '../error.ts';
 import { Measurer } from '../io/measurer.ts';
-import type { SerialInput, SerialOutput } from '../io/types.ts';
+import type { ByteCursor } from '../io/cursor.ts';
 import {
   type ExtractIn,
   type ExtractOut,
@@ -35,20 +35,20 @@ class OptionalImpl<TInner> implements Optional<TInner> {
     this.#inner = inner;
   }
 
-  write(output: SerialOutput, value: ExtractIn<TInner> | undefined): void {
+  write(cursor: ByteCursor, value: ExtractIn<TInner> | undefined): void {
     if (value !== undefined && value !== null) {
-      output.writeBool(true);
-      this.#inner.write(output, value);
+      cursor.view.setUint8(cursor.offset++, 1);
+      this.#inner.write(cursor, value);
     } else {
-      output.writeBool(false);
+      cursor.view.setUint8(cursor.offset++, 0);
     }
   }
 
-  read(input: SerialInput): ExtractOut<TInner> | undefined {
-    const valueExists = input.readBool();
+  read(cursor: ByteCursor): ExtractOut<TInner> | undefined {
+    const valueExists = cursor.view.getUint8(cursor.offset++) !== 0;
 
     if (valueExists) {
-      return this.#inner.read(input);
+      return this.#inner.read(cursor);
     }
 
     return undefined;

@@ -1,6 +1,6 @@
 import { InvalidSchemaShapeError, ValidationError } from '../error.ts';
 import { Measurer } from '../io/measurer.ts';
-import type { SerialInput, SerialOutput } from '../io/types.ts';
+import type { ByteCursor } from '../io/cursor.ts';
 import {
   type ExtractInRecord,
   type ExtractOutRecord,
@@ -37,7 +37,7 @@ class TupleImpl<TSequence extends [WithSchema, ...WithSchema[]]> implements Tupl
     this.#schemas = schemas;
   }
 
-  write(output: SerialOutput, values: ExtractInRecord<TSequence>): void {
+  write(cursor: ByteCursor, values: ExtractInRecord<TSequence>): void {
     if (values.length !== this.#schemas.length) {
       throw new ValidationError(
         `Expected tuple of length ${this.#schemas.length}, got ${values.length}`,
@@ -45,13 +45,13 @@ class TupleImpl<TSequence extends [WithSchema, ...WithSchema[]]> implements Tupl
     }
 
     for (let i = 0; i < this.#schemas.length; ++i) {
-      this.#schemas[i].write(output, values[i]);
+      this.#schemas[i].write(cursor, values[i]);
     }
   }
 
-  read(input: SerialInput): ExtractOutRecord<TSequence> {
+  read(cursor: ByteCursor): ExtractOutRecord<TSequence> {
     return this.#schemas.map((schema) =>
-      schema.read(input),
+      schema.read(cursor),
     ) as unknown as ExtractOutRecord<TSequence>;
   }
 

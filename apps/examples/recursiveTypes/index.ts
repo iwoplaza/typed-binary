@@ -91,8 +91,8 @@ const complex: Complex = {
 
 function roundTrip<T extends bin.Schema>(schema: T, value: bin.ExtractIn<T>): bin.ExtractOut<T> {
   const buffer = new ArrayBuffer(schema.measure(value).size);
-  schema.write(new bin.BufferWriter(buffer), value);
-  return schema.read(new bin.BufferReader(buffer));
+  schema.write(bin.cursor(buffer), value);
+  return schema.read(bin.cursor(buffer));
 }
 
 console.log(JSON.stringify(roundTrip(Instruction, inst), null, 2));

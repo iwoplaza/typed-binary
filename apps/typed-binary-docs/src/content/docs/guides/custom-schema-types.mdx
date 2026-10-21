@@ -14,15 +14,15 @@ import * as bin from 'typed-binary';
  * A schema storing radians with 2 bytes of precision.
  */
 class RadiansSchema implements bin.Schema<number> {
-  read(input: bin.SerialInput): number {
-    const low = input.readUint8();
-    const high = input.readUint8();
+  read(cursor: bin.ByteCursor): number {
+    const low = bin.u8.read(cursor);
+    const high = bin.u8.read(cursor);
 
     const discrete = (high << 8) | low;
     return (discrete / 65535) * Math.PI;
   }
 
-  write(output: bin.SerialOutput, value: number): void {
+  write(cursor: bin.ByteCursor, value: number): void {
     // The value will be wrapped to be in range of [0, Math.PI)
     const wrapped = ((value % Math.PI) + Math.PI) % Math.PI;
     // Quantizing the value to range of [0, 65535]
@@ -31,8 +31,8 @@ class RadiansSchema implements bin.Schema<number> {
     const low = discrete & 0xff;
     const high = (discrete >> 8) & 0xff;
 
-    output.writeUint8(low);
-    output.writeUint8(high);
+    bin.u8.write(cursor, low);
+    bin.u8.write(cursor, high);
   }
 
   measure(_: number | bin.MaxValue, measurer: bin.Measurer = new bin.Measurer()): bin.Measurer {
@@ -48,6 +48,18 @@ export const radians = new RadiansSchema();
 
 // Custom schemas can be used like any other schema
 const Rotation = bin.struct({ roll: radians, pitch: radians, yaw: radians });
+```
+
+Schemas read and write through a `bin.ByteCursor`, which is a `DataView` along with the current byte offset
+and the endianness to use. Custom schemas can delegate to the primitive schemas, like the `bin.u8` calls above,
+or use the `DataView` directly:
+
+```ts
+read(cursor: bin.ByteCursor): number {
+  const value = cursor.view.getUint16(cursor.offset, cursor.littleEndian);
+  cursor.offset += 2;
+  return value;
+}
 ```
 
 When measuring with `bin.MaxValue`, a schema should add the biggest size its values can take. If there is no upper
@@ -90,7 +102,7 @@ that contains it:
 
 ```ts
 const buffer = new ArrayBuffer(Entity.maxSize);
-Entity.write(new bin.BufferWriter(buffer), {
+Entity.write(bin.cursor(buffer), {
   id: 1,
   health: 100,
   position: { x: 0.5, y: 0.25 },

@@ -4,15 +4,15 @@ import * as bin from 'typed-binary';
  * A schema storing radians with 2 bytes of precision.
  */
 class RadiansSchema implements bin.Schema<number> {
-  read(input: bin.SerialInput): number {
-    const low = input.readUint8();
-    const high = input.readUint8();
+  read(cursor: bin.ByteCursor): number {
+    const low = bin.u8.read(cursor);
+    const high = bin.u8.read(cursor);
 
     const discrete = (high << 8) | low;
     return (discrete / 65535) * Math.PI;
   }
 
-  write(output: bin.SerialOutput, value: number): void {
+  write(cursor: bin.ByteCursor, value: number): void {
     // The value will be wrapped to be in range of [0, Math.PI)
     const wrapped = ((value % Math.PI) + Math.PI) % Math.PI;
     // Clipping the value to be ints in range of [0, 65535]
@@ -21,8 +21,8 @@ class RadiansSchema implements bin.Schema<number> {
     const low = discrete & 0xff;
     const high = (discrete >> 8) & 0xff;
 
-    output.writeUint8(low);
-    output.writeUint8(high);
+    bin.u8.write(cursor, low);
+    bin.u8.write(cursor, high);
   }
 
   measure(_: number | bin.MaxValue, measurer: bin.Measurer = new bin.Measurer()): bin.Measurer {
