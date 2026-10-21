@@ -1,6 +1,6 @@
 import { InvalidSchemaShapeError } from '../error.ts';
 import { Measurer } from '../io/measurer.ts';
-import type { SerialInput, SerialOutput } from '../io/types.ts';
+import type { ByteCursor } from '../io/cursor.ts';
 import { MutableRecord, Prettify } from '../utilityTypes.ts';
 import { measureMax } from './measureMax.ts';
 import {
@@ -59,20 +59,20 @@ class StructImpl<out TProps extends Record<string, WithSchema>> implements Struc
     return this.#resolvedProperties;
   }
 
-  write(output: SerialOutput, value: TIn<TProps>): void {
+  write(cursor: ByteCursor, value: TIn<TProps>): void {
     type Property = keyof TIn<TProps>;
 
     for (const [key, property] of this.#properties) {
-      property.write(output, value[key as Property] as ExtractIn<TProps[keyof TProps]>);
+      property.write(cursor, value[key as Property] as ExtractIn<TProps[keyof TProps]>);
     }
   }
 
-  read(input: SerialInput) {
+  read(cursor: ByteCursor) {
     type Property = keyof TOut<TProps>;
 
     const result = {} as TOut<TProps>;
     for (const [key, property] of this.#properties) {
-      result[key as Property] = property.read(input) as TOut<TProps>[Property];
+      result[key as Property] = property.read(cursor) as TOut<TProps>[Property];
     }
 
     return result;

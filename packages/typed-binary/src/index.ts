@@ -47,11 +47,11 @@ export {
 } from './structure/typedArray.ts';
 export { MaxValue } from './structure/types.ts';
 
-export { BufferReader } from './io/bufferReader.ts';
-export { BufferWriter } from './io/bufferWriter.ts';
+export { cursor } from './io/cursor.ts';
 export { Measurer } from './io/measurer.ts';
 export { getSystemEndianness } from './util.ts';
 export { ValidationError, InvalidSchemaShapeError } from './error.ts';
 
-export type { Endianness, SerialInput, SerialOutput } from './io/types.ts';
+export type { ByteCursor, CursorOptions } from './io/cursor.ts';
+export type { Endianness } from './io/types.ts';
 export type { ExtractIn, ExtractOut, Schema, WithSchema } from './structure/types.ts';

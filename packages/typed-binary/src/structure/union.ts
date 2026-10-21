@@ -1,6 +1,6 @@
 import { InvalidSchemaShapeError, ValidationError } from '../error.ts';
 import { Measurer } from '../io/measurer.ts';
-import type { SerialInput, SerialOutput } from '../io/types.ts';
+import type { ByteCursor } from '../io/cursor.ts';
 import { measureMax } from './measureMax.ts';
 import { struct, type Struct } from './struct.ts';
 import {
@@ -130,23 +130,23 @@ class UnionImpl<TTag, TVariants, TKey extends string, TBase> implements Union<
     return variant;
   }
 
-  write(output: SerialOutput, value: UnionIn<TKey, TBase, TVariants>): void {
+  write(cursor: ByteCursor, value: UnionIn<TKey, TBase, TVariants>): void {
     const tagValue = (value as Record<string, unknown>)[this.key];
     const variant = this.#getVariant(tagValue);
 
-    this.#tag.write(output, tagValue);
-    this.#base?.write(output, value);
-    variant.write(output, value);
+    this.#tag.write(cursor, tagValue);
+    this.#base?.write(cursor, value);
+    variant.write(cursor, value);
   }
 
-  read(input: SerialInput): UnionOut<TKey, TBase, TVariants> {
-    const tagValue = this.#tag.read(input);
+  read(cursor: ByteCursor): UnionOut<TKey, TBase, TVariants> {
+    const tagValue = this.#tag.read(cursor);
     const variant = this.#getVariant(tagValue);
 
     return {
       [this.key]: tagValue,
-      ...this.#base?.read(input),
-      ...variant.read(input),
+      ...this.#base?.read(cursor),
+      ...variant.read(cursor),
     } as UnionOut<TKey, TBase, TVariants>;
   }
 

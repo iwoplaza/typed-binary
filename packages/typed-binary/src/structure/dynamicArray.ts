@@ -1,6 +1,7 @@
 import { InvalidSchemaShapeError } from '../error.ts';
 import { Measurer } from '../io/measurer.ts';
-import type { SerialInput, SerialOutput } from '../io/types.ts';
+import type { ByteCursor } from '../io/cursor.ts';
+import { u32 } from './baseTypes.ts';
 import { type ExtractIn, type ExtractOut, MaxValue, type Schema, toSchema } from './types.ts';
 
 export interface DynamicArray<TElement> extends Schema<
@@ -25,21 +26,21 @@ class DynamicArrayImpl<TElement> implements DynamicArray<TElement> {
     this.elementType = elementType;
   }
 
-  write(output: SerialOutput, values: readonly ExtractIn<TElement>[]): void {
-    output.writeUint32(values.length);
+  write(cursor: ByteCursor, values: readonly ExtractIn<TElement>[]): void {
+    u32.write(cursor, values.length);
 
     for (const value of values) {
-      this.elementType.write(output, value);
+      this.elementType.write(cursor, value);
     }
   }
 
-  read(input: SerialInput): ExtractOut<TElement>[] {
+  read(cursor: ByteCursor): ExtractOut<TElement>[] {
     const array: ExtractOut<TElement>[] = [];
 
-    const len = input.readUint32();
+    const len = u32.read(cursor);
 
     for (let i = 0; i < len; ++i) {
-      array.push(this.elementType.read(input));
+      array.push(this.elementType.read(cursor));
     }
 
     return array;

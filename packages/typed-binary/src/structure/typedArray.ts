@@ -1,5 +1,8 @@
+import type { ByteCursor } from '../io/cursor.ts';
 import { Measurer } from '../io/measurer.ts';
-import type { BufferView, SerialInput, SerialOutput } from '../io/types.ts';
+import type { BufferView } from '../io/types.ts';
+import { unwrapBuffer } from '../io/unwrapBuffer.ts';
+import { getSystemEndianness } from '../util.ts';
 import type { MaxValue, Schema } from './types.ts';
 
 type TypedArrayConstructor<T> = {
@@ -10,6 +13,10 @@ type TypedArrayConstructor<T> = {
 export interface TypedArray<TTypedArray extends BufferView> extends Schema<TTypedArray> {
   readonly byteLength: number;
   readonly elementCount: number;
+}
+
+function needsByteSwap(cursor: ByteCursor): boolean {
+  return cursor.littleEndian !== (getSystemEndianness() === 'little');
 }
 
 class TypedArrayImpl<TTypedArray extends BufferView> implements TypedArray<TTypedArray> {
@@ -24,15 +31,42 @@ class TypedArrayImpl<TTypedArray extends BufferView> implements TypedArray<TType
     this.#arrayConstructor = arrayConstructor;
   }
 
-  write(output: SerialOutput, value: TTypedArray): void {
-    output.writeSlice(value);
+  write(cursor: ByteCursor, value: TTypedArray): void {
+    const { view } = cursor;
+    const unwrapped = unwrapBuffer(value);
+    const srcU8 = new Uint8Array(unwrapped.buffer, unwrapped.byteOffset, unwrapped.byteLength);
+    const bytesPerElement = value.BYTES_PER_ELEMENT;
+
+    if (bytesPerElement > 1 && needsByteSwap(cursor)) {
+      for (let i = 0; i < srcU8.length; i += bytesPerElement) {
+        for (let j = bytesPerElement - 1; j >= 0; j--) {
+          view.setUint8(cursor.offset++, srcU8[i + j]);
+        }
+      }
+    } else {
+      new Uint8Array(view.buffer, view.byteOffset + cursor.offset, srcU8.length).set(srcU8);
+      cursor.offset += srcU8.length;
+    }
   }
 
-  read(input: SerialInput): TTypedArray {
+  read(cursor: ByteCursor): TTypedArray {
+    const { view } = cursor;
     const buffer = new ArrayBuffer(this.byteLength);
-    const view = new this.#arrayConstructor(buffer, 0, this.elementCount);
-    input.readSlice(view, 0, this.byteLength);
-    return view;
+    const destU8 = new Uint8Array(buffer);
+    const bytesPerElement = this.#arrayConstructor.BYTES_PER_ELEMENT;
+
+    if (bytesPerElement > 1 && needsByteSwap(cursor)) {
+      for (let i = 0; i < this.byteLength; i += bytesPerElement) {
+        for (let j = bytesPerElement - 1; j >= 0; j--) {
+          destU8[i + j] = view.getUint8(cursor.offset++);
+        }
+      }
+    } else {
+      destU8.set(new Uint8Array(view.buffer, view.byteOffset + cursor.offset, this.byteLength));
+      cursor.offset += this.byteLength;
+    }
+
+    return new this.#arrayConstructor(buffer, 0, this.elementCount);
   }
 
   measure(_value: TTypedArray | typeof MaxValue, measurer: Measurer = new Measurer()): Measurer {

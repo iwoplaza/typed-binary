@@ -1,6 +1,6 @@
 import { InvalidSchemaShapeError, ValidationError } from '../error.ts';
 import { Measurer } from '../io/measurer.ts';
-import type { SerialInput, SerialOutput } from '../io/types.ts';
+import type { ByteCursor } from '../io/cursor.ts';
 import {
   type ExtractIn,
   type ExtractOut,
@@ -38,21 +38,21 @@ class ArrayImpl<TElement> implements Array<TElement> {
     this.#element = elementSchema;
   }
 
-  write(output: SerialOutput, values: readonly ExtractIn<TElement>[]): void {
+  write(cursor: ByteCursor, values: readonly ExtractIn<TElement>[]): void {
     if (values.length !== this.length) {
       throw new ValidationError(`Expected array of length ${this.length}, got ${values.length}`);
     }
 
     for (const value of values) {
-      this.#element.write(output, value);
+      this.#element.write(cursor, value);
     }
   }
 
-  read(input: SerialInput): ExtractOut<TElement>[] {
+  read(cursor: ByteCursor): ExtractOut<TElement>[] {
     const array: ExtractOut<TElement>[] = [];
 
     for (let i = 0; i < this.length; ++i) {
-      array.push(this.#element.read(input));
+      array.push(this.#element.read(cursor));
     }
 
     return array;

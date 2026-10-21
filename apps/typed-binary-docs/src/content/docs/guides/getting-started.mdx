@@ -42,7 +42,7 @@ const Vec2f = bin.tuple([bin.f32, bin.f32]);
 const Vec2fSize = Vec2f.measure(bin.MaxValue).size;
 
 const buffer = new ArrayBuffer(Vec2fSize);
-Vec2f.write(new bin.BufferWriter(buffer), [0.5, 3.14]);
+Vec2f.write(bin.cursor(buffer), [0.5, 3.14]);
 
 // Infer the type of values the schema reads
 type Vec2f = bin.ExtractOut<typeof Vec2f>; // [number, number]
@@ -58,5 +58,5 @@ const Vec2f = bin.tuple([bin.f32, bin.f32]);
 const Vec2fSize = Vec2f.measure(bin.MaxValue).size;
 
 const buffer = Buffer.alloc(Vec2fSize);
-Vec2f.write(new bin.BufferWriter(buffer), [0.5, 3.14]);
+Vec2f.write(bin.cursor(buffer), [0.5, 3.14]);
 ```
