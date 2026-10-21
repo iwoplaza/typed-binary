@@ -1,6 +1,6 @@
 import { InvalidSchemaShapeError } from '../error.ts';
 import { Measurer } from '../io/measurer.ts';
-import type { IMeasurer, ISerialInput, ISerialOutput } from '../io/types.ts';
+import type { SerialInput, SerialOutput } from '../io/types.ts';
 import { type ExtractIn, type ExtractOut, MaxValue, type Schema, toSchema } from './types.ts';
 
 export interface DynamicArray<TElement> extends Schema<
@@ -25,7 +25,7 @@ class DynamicArraySchema<TElement> implements DynamicArray<TElement> {
     this.elementType = elementType;
   }
 
-  write(output: ISerialOutput, values: readonly ExtractIn<TElement>[]): void {
+  write(output: SerialOutput, values: readonly ExtractIn<TElement>[]): void {
     output.writeUint32(values.length);
 
     for (const value of values) {
@@ -33,7 +33,7 @@ class DynamicArraySchema<TElement> implements DynamicArray<TElement> {
     }
   }
 
-  read(input: ISerialInput): ExtractOut<TElement>[] {
+  read(input: SerialInput): ExtractOut<TElement>[] {
     const array: ExtractOut<TElement>[] = [];
 
     const len = input.readUint32();
@@ -59,8 +59,8 @@ class DynamicArraySchema<TElement> implements DynamicArray<TElement> {
 
   measure(
     values: readonly ExtractIn<TElement>[] | typeof MaxValue,
-    measurer: IMeasurer = new Measurer(),
-  ): IMeasurer {
+    measurer: Measurer = new Measurer(),
+  ): Measurer {
     if (values === MaxValue) {
       // arrays cannot be bound
       return measurer.unbounded;

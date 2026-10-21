@@ -1,6 +1,6 @@
 import { InvalidSchemaShapeError, ValidationError } from '../error.ts';
 import { Measurer } from '../io/measurer.ts';
-import type { IMeasurer, ISerialInput, ISerialOutput } from '../io/types.ts';
+import type { SerialInput, SerialOutput } from '../io/types.ts';
 import {
   type ExtractIn,
   type ExtractOut,
@@ -38,7 +38,7 @@ class ArraySchema<TElement> implements Array<TElement> {
     this.#element = elementSchema;
   }
 
-  write(output: ISerialOutput, values: readonly ExtractIn<TElement>[]): void {
+  write(output: SerialOutput, values: readonly ExtractIn<TElement>[]): void {
     if (values.length !== this.length) {
       throw new ValidationError(`Expected array of length ${this.length}, got ${values.length}`);
     }
@@ -48,7 +48,7 @@ class ArraySchema<TElement> implements Array<TElement> {
     }
   }
 
-  read(input: ISerialInput): ExtractOut<TElement>[] {
+  read(input: SerialInput): ExtractOut<TElement>[] {
     const array: ExtractOut<TElement>[] = [];
 
     for (let i = 0; i < this.length; ++i) {
@@ -72,8 +72,8 @@ class ArraySchema<TElement> implements Array<TElement> {
 
   measure(
     values: readonly ExtractIn<TElement>[] | MaxValue,
-    measurer: IMeasurer = new Measurer(),
-  ): IMeasurer {
+    measurer: Measurer = new Measurer(),
+  ): Measurer {
     for (let i = 0; i < this.length; ++i) {
       this.#element.measure(values === MaxValue ? MaxValue : values[i], measurer);
     }

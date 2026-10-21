@@ -1,4 +1,4 @@
-import type { IMeasurer } from '../io/types.ts';
+import type { Measurer } from '../io/measurer.ts';
 
 const schemasBeingMeasured = new Set<object>();
 
@@ -7,7 +7,7 @@ const schemasBeingMeasured = new Set<object>();
  * If the schema is already being measured further up the stack, it is recursive,
  * so its max size is unbounded.
  */
-export function measureMax(schema: object, measurer: IMeasurer, measure: () => void): IMeasurer {
+export function measureMax(schema: object, measurer: Measurer, measure: () => void): Measurer {
   if (schemasBeingMeasured.has(schema)) {
     return measurer.unbounded;
   }

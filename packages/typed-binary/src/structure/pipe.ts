@@ -1,6 +1,6 @@
 import { InvalidSchemaShapeError } from '../error.ts';
 import { Measurer } from '../io/measurer.ts';
-import type { IMeasurer, ISerialInput, ISerialOutput } from '../io/types.ts';
+import type { SerialInput, SerialOutput } from '../io/types.ts';
 import { measureMax } from './measureMax.ts';
 import {
   type ExtractIn,
@@ -59,14 +59,14 @@ class PipeImpl<THeadIn, THeadOut extends THeadIn, TTail> implements Pipe<THeadIn
     return tail;
   }
 
-  write(output: ISerialOutput, value: THeadIn & ExtractIn<TTail>): void {
+  write(output: SerialOutput, value: THeadIn & ExtractIn<TTail>): void {
     this.head.write(output, value);
     // The input value is passed in place of the head's output, which `pipe` guarantees
     // to be assignable to the head's input.
     this.#tail(value).write(output, value);
   }
 
-  read(input: ISerialInput): ExtractOut<TTail> {
+  read(input: SerialInput): ExtractOut<TTail> {
     const headValue = this.head.read(input);
     return this.#tail(headValue).read(input);
   }
@@ -77,8 +77,8 @@ class PipeImpl<THeadIn, THeadOut extends THeadIn, TTail> implements Pipe<THeadIn
 
   measure(
     value: (THeadIn & ExtractIn<TTail>) | MaxValue,
-    measurer: IMeasurer = new Measurer(),
-  ): IMeasurer {
+    measurer: Measurer = new Measurer(),
+  ): Measurer {
     if (value === MaxValue) {
       // The action can return schemas that reference this pipe recursively
       return measureMax(this, measurer, () => this.#measure(value, measurer));
@@ -86,7 +86,7 @@ class PipeImpl<THeadIn, THeadOut extends THeadIn, TTail> implements Pipe<THeadIn
     return this.#measure(value, measurer);
   }
 
-  #measure(value: (THeadIn & ExtractIn<TTail>) | MaxValue, measurer: IMeasurer): IMeasurer {
+  #measure(value: (THeadIn & ExtractIn<TTail>) | MaxValue, measurer: Measurer): Measurer {
     // When measuring MaxValue, the head and the tail are measured independently of each other,
     // which can overestimate the max size (see `Pipe.maxSize`).
     this.head.measure(value, measurer);

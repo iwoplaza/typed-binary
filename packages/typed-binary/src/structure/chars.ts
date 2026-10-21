@@ -1,6 +1,6 @@
 import { ValidationError } from '../error.ts';
 import { Measurer } from '../io/measurer.ts';
-import type { IMeasurer, ISerialInput, ISerialOutput } from '../io/types.ts';
+import type { SerialInput, SerialOutput } from '../io/types.ts';
 import { Schema } from './types.ts';
 
 export interface Chars<TLength extends number = number> extends Schema<string> {
@@ -14,7 +14,7 @@ class CharsSchema<TLength extends number = number> implements Chars<TLength> {
     this.length = length;
   }
 
-  write(output: ISerialOutput, value: string): void {
+  write(output: SerialOutput, value: string): void {
     if (value.length !== this.length) {
       throw new ValidationError(
         `Expected char-string of length ${this.length}, got ${value.length}`,
@@ -26,7 +26,7 @@ class CharsSchema<TLength extends number = number> implements Chars<TLength> {
     }
   }
 
-  read(input: ISerialInput): string {
+  read(input: SerialInput): string {
     let content = '';
 
     for (let i = 0; i < this.length; ++i) {
@@ -36,7 +36,7 @@ class CharsSchema<TLength extends number = number> implements Chars<TLength> {
     return content;
   }
 
-  measure(_: string, measurer: IMeasurer = new Measurer()): IMeasurer {
+  measure(_: string, measurer: Measurer = new Measurer()): Measurer {
     return measurer.add(this.length);
   }
 }

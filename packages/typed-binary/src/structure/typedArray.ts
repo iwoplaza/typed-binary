@@ -1,5 +1,5 @@
 import { Measurer } from '../io/measurer.ts';
-import type { BufferView, IMeasurer, ISerialInput, ISerialOutput } from '../io/types.ts';
+import type { BufferView, SerialInput, SerialOutput } from '../io/types.ts';
 import { type MaxValue, Schema } from './types.ts';
 
 type TypedArrayConstructor<T> = {
@@ -25,18 +25,18 @@ export class TypedArraySchema<TTypedArray extends BufferView> implements Schema<
     this.#arrayConstructor = arrayConstructor;
   }
 
-  write(output: ISerialOutput, value: TTypedArray): void {
+  write(output: SerialOutput, value: TTypedArray): void {
     output.writeSlice(value);
   }
 
-  read(input: ISerialInput): TTypedArray {
+  read(input: SerialInput): TTypedArray {
     const buffer = new ArrayBuffer(this.byteLength);
     const view = new this.#arrayConstructor(buffer, 0, this.elementCount);
     input.readSlice(view, 0, this.byteLength);
     return view;
   }
 
-  measure(_value: TTypedArray | typeof MaxValue, measurer: IMeasurer = new Measurer()): IMeasurer {
+  measure(_value: TTypedArray | typeof MaxValue, measurer: Measurer = new Measurer()): Measurer {
     return measurer.add(this.byteLength);
   }
 }

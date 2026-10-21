@@ -1,5 +1,5 @@
 import { Measurer } from '../io/measurer.ts';
-import type { IMeasurer, ISerialInput, ISerialOutput } from '../io/types.ts';
+import type { SerialInput, SerialOutput } from '../io/types.ts';
 import { MaxValue, type Schema } from './types.ts';
 
 ////
@@ -20,15 +20,15 @@ class BoolSchema implements Bool {
     return 1;
   }
 
-  read(input: ISerialInput): boolean {
+  read(input: SerialInput): boolean {
     return input.readBool();
   }
 
-  write(output: ISerialOutput, value: boolean): void {
+  write(output: SerialOutput, value: boolean): void {
     output.writeBool(value);
   }
 
-  measure(_: boolean | MaxValue, measurer: IMeasurer = new Measurer()): IMeasurer {
+  measure(_: boolean | MaxValue, measurer: Measurer = new Measurer()): Measurer {
     return measurer.add(1);
   }
 }
@@ -63,15 +63,15 @@ class StringSchema implements String {
     return StringSchema.#cachedEncoder;
   }
 
-  read(input: ISerialInput): string {
+  read(input: SerialInput): string {
     return input.readString();
   }
 
-  write<T extends string>(output: ISerialOutput, value: T): void {
+  write<T extends string>(output: SerialOutput, value: T): void {
     output.writeString(value);
   }
 
-  measure(value: string | typeof MaxValue, measurer: IMeasurer = new Measurer()): IMeasurer {
+  measure(value: string | typeof MaxValue, measurer: Measurer = new Measurer()): Measurer {
     if (value === MaxValue) {
       // A string cannot be bound
       return measurer.unbounded;
@@ -101,15 +101,15 @@ class Int8Schema implements Int8 {
     return 1;
   }
 
-  read(input: ISerialInput): number {
+  read(input: SerialInput): number {
     return input.readInt8();
   }
 
-  write(output: ISerialOutput, value: number): void {
+  write(output: SerialOutput, value: number): void {
     output.writeInt8(value);
   }
 
-  measure(_: number | MaxValue, measurer: IMeasurer = new Measurer()): IMeasurer {
+  measure(_: number | MaxValue, measurer: Measurer = new Measurer()): Measurer {
     return measurer.add(1);
   }
 }
@@ -134,15 +134,15 @@ class Uint8Schema implements Uint8 {
     return 1;
   }
 
-  read(input: ISerialInput): number {
+  read(input: SerialInput): number {
     return input.readUint8();
   }
 
-  write(output: ISerialOutput, value: number): void {
+  write(output: SerialOutput, value: number): void {
     output.writeUint8(value);
   }
 
-  measure(_: number | MaxValue, measurer: IMeasurer = new Measurer()): IMeasurer {
+  measure(_: number | MaxValue, measurer: Measurer = new Measurer()): Measurer {
     return measurer.add(1);
   }
 }
@@ -167,15 +167,15 @@ class Int16Schema implements Int16 {
     return 2;
   }
 
-  read(input: ISerialInput): number {
+  read(input: SerialInput): number {
     return input.readInt16();
   }
 
-  write(output: ISerialOutput, value: number): void {
+  write(output: SerialOutput, value: number): void {
     output.writeInt16(value);
   }
 
-  measure(_: number | MaxValue, measurer: IMeasurer = new Measurer()): IMeasurer {
+  measure(_: number | MaxValue, measurer: Measurer = new Measurer()): Measurer {
     return measurer.add(2);
   }
 }
@@ -200,15 +200,15 @@ class Uint16Schema implements Uint16 {
     return 2;
   }
 
-  read(input: ISerialInput): number {
+  read(input: SerialInput): number {
     return input.readUint16();
   }
 
-  write(output: ISerialOutput, value: number): void {
+  write(output: SerialOutput, value: number): void {
     output.writeUint16(value);
   }
 
-  measure(_: number | MaxValue, measurer: IMeasurer = new Measurer()): IMeasurer {
+  measure(_: number | MaxValue, measurer: Measurer = new Measurer()): Measurer {
     return measurer.add(2);
   }
 }
@@ -233,15 +233,15 @@ class Int32Schema implements Int32 {
     return 4;
   }
 
-  read(input: ISerialInput): number {
+  read(input: SerialInput): number {
     return input.readInt32();
   }
 
-  write(output: ISerialOutput, value: number): void {
+  write(output: SerialOutput, value: number): void {
     output.writeInt32(value);
   }
 
-  measure(_: number | MaxValue, measurer: IMeasurer = new Measurer()): IMeasurer {
+  measure(_: number | MaxValue, measurer: Measurer = new Measurer()): Measurer {
     return measurer.add(4);
   }
 }
@@ -266,15 +266,15 @@ class Uint32Schema implements Uint32 {
     return 4;
   }
 
-  read(input: ISerialInput): number {
+  read(input: SerialInput): number {
     return input.readUint32();
   }
 
-  write(output: ISerialOutput, value: number): void {
+  write(output: SerialOutput, value: number): void {
     output.writeUint32(value);
   }
 
-  measure(_: number | MaxValue, measurer: IMeasurer = new Measurer()): IMeasurer {
+  measure(_: number | MaxValue, measurer: Measurer = new Measurer()): Measurer {
     return measurer.add(4);
   }
 }
@@ -299,15 +299,15 @@ class Float16Schema implements Float16 {
     return 2;
   }
 
-  read(input: ISerialInput): number {
+  read(input: SerialInput): number {
     return input.readFloat16();
   }
 
-  write(output: ISerialOutput, value: number): void {
+  write(output: SerialOutput, value: number): void {
     output.writeFloat16(value);
   }
 
-  measure(_: number | MaxValue, measurer: IMeasurer = new Measurer()): IMeasurer {
+  measure(_: number | MaxValue, measurer: Measurer = new Measurer()): Measurer {
     return measurer.add(2);
   }
 }
@@ -332,15 +332,15 @@ class Float32Schema implements Float32 {
     return 4;
   }
 
-  read(input: ISerialInput): number {
+  read(input: SerialInput): number {
     return input.readFloat32();
   }
 
-  write(output: ISerialOutput, value: number): void {
+  write(output: SerialOutput, value: number): void {
     output.writeFloat32(value);
   }
 
-  measure(_: number | MaxValue, measurer: IMeasurer = new Measurer()): IMeasurer {
+  measure(_: number | MaxValue, measurer: Measurer = new Measurer()): Measurer {
     return measurer.add(4);
   }
 }
