@@ -1,52 +1,21 @@
-import { ValidationError } from '../error.ts';
+import { InvalidSchemaShapeError, ValidationError } from '../error.ts';
 import { Measurer } from '../io/measurer.ts';
 import type { IMeasurer, ISerialInput, ISerialOutput } from '../io/types.ts';
-import type { Parsed } from '../utilityTypes.ts';
-import { type AnySchema, type IRefResolver, MaxValue, Schema, type UnwrapArray } from './types.ts';
+import {
+  type ExtractInRecord,
+  type ExtractOutRecord,
+  MaxValue,
+  type Schema,
+  toSchema,
+  type UnwrapSchema,
+  type WithSchema,
+} from './types.ts';
 
-// @__NO_SIDE_EFFECTS__
-export function resolveArray<T extends AnySchema[]>(ctx: IRefResolver, refs: T): T {
-  return refs.map((ref) => ctx.resolve(ref)) as T;
-}
-
-export class TupleSchema<TSequence extends [AnySchema, ...AnySchema[]]> extends Schema<
-  UnwrapArray<TSequence>
+export interface Tuple<TSequence extends [WithSchema, ...WithSchema[]]> extends Schema<
+  ExtractInRecord<Readonly<TSequence>>,
+  ExtractOutRecord<TSequence>
 > {
-  private schemas: TSequence;
-
-  constructor(private readonly _unstableSchemas: TSequence) {
-    super();
-
-    // In case this tuple isn't part of a keyed chain,
-    // let's assume the inner type is stable.
-    this.schemas = _unstableSchemas;
-  }
-
-  override resolveReferences(ctx: IRefResolver): void {
-    this.schemas = resolveArray(ctx, this._unstableSchemas);
-  }
-
-  override write(output: ISerialOutput, values: Parsed<UnwrapArray<TSequence>>): void {
-    if (values.length !== this.schemas.length) {
-      throw new ValidationError(
-        `Expected tuple of length ${this.schemas.length}, got ${values.length}`,
-      );
-    }
-
-    for (let i = 0; i < this.schemas.length; ++i) {
-      this.schemas[i].write(output, values[i]);
-    }
-  }
-
-  override read(input: ISerialInput): Parsed<UnwrapArray<TSequence>> {
-    const array = [] as Parsed<UnwrapArray<TSequence>>;
-
-    for (let i = 0; i < this.schemas.length; ++i) {
-      array.push(this.schemas[i].read(input) as Parsed<UnwrapArray<TSequence>>[number]);
-    }
-
-    return array;
-  }
+  readonly schemas: { [K in keyof TSequence]: UnwrapSchema<TSequence[K]> };
 
   /**
    * The maximum number of bytes this schema can take up.
@@ -56,25 +25,65 @@ export class TupleSchema<TSequence extends [AnySchema, ...AnySchema[]]> extends 
    *
    * Alias for `.measure(MaxValue).size`
    */
+  readonly maxSize: number;
+}
+
+class TupleSchema<TSequence extends [WithSchema, ...WithSchema[]]> implements Tuple<TSequence> {
+  readonly schemas: { [K in keyof TSequence]: UnwrapSchema<TSequence[K]> };
+  readonly #schemas: Schema[];
+
+  constructor(schemas: Schema[]) {
+    this.schemas = schemas as unknown as { [K in keyof TSequence]: UnwrapSchema<TSequence[K]> };
+    this.#schemas = schemas;
+  }
+
+  write(output: ISerialOutput, values: ExtractInRecord<TSequence>): void {
+    if (values.length !== this.#schemas.length) {
+      throw new ValidationError(
+        `Expected tuple of length ${this.#schemas.length}, got ${values.length}`,
+      );
+    }
+
+    for (let i = 0; i < this.#schemas.length; ++i) {
+      this.#schemas[i].write(output, values[i]);
+    }
+  }
+
+  read(input: ISerialInput): ExtractOutRecord<TSequence> {
+    return this.#schemas.map((schema) =>
+      schema.read(input),
+    ) as unknown as ExtractOutRecord<TSequence>;
+  }
+
   get maxSize(): number {
     return this.measure(MaxValue).size;
   }
 
   measure(
-    values: Parsed<UnwrapArray<TSequence>> | MaxValue,
+    values: ExtractInRecord<TSequence> | MaxValue,
     measurer: IMeasurer = new Measurer(),
   ): IMeasurer {
-    for (let i = 0; i < this.schemas.length; ++i) {
-      this.schemas[i].measure(values === MaxValue ? MaxValue : values[i], measurer);
+    for (let i = 0; i < this.#schemas.length; ++i) {
+      this.#schemas[i].measure(values === MaxValue ? MaxValue : values[i], measurer);
     }
 
     return measurer;
   }
 }
 
-// @__NO_SIDE_EFFECTS__
-export function tupleOf<TSchema extends [AnySchema, ...AnySchema[]]>(
+/*#__NO_SIDE_EFFECTS__*/
+export function tuple<TSchema extends [WithSchema, ...WithSchema[]]>(
   schemas: TSchema,
-): TupleSchema<TSchema> {
-  return new TupleSchema(schemas);
+): Tuple<TSchema> {
+  return new TupleSchema<TSchema>(
+    schemas.map((element, idx) => {
+      const schema = toSchema(element);
+      if (!schema) {
+        throw new InvalidSchemaShapeError(
+          `bin.tuple(...) expects element ${idx} to be a schema, got '${String(element)}'`,
+        );
+      }
+      return schema;
+    }),
+  );
 }

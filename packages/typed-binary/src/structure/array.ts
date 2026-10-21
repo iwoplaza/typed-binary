@@ -1,42 +1,58 @@
-import { ValidationError } from '../error.ts';
+import { InvalidSchemaShapeError, ValidationError } from '../error.ts';
 import { Measurer } from '../io/measurer.ts';
 import type { IMeasurer, ISerialInput, ISerialOutput } from '../io/types.ts';
-import type { ParseUnwrapped } from '../utilityTypes.ts';
-import { type AnySchema, type IRefResolver, MaxValue, Schema, type Unwrap } from './types.ts';
+import {
+  type ExtractIn,
+  type ExtractOut,
+  MaxValue,
+  type Schema,
+  toSchema,
+  type UnwrapSchema,
+} from './types.ts';
 
-export class ArraySchema<TElement extends AnySchema> extends Schema<Unwrap<TElement>[]> {
-  private elementSchema: TElement;
+export interface Array<TElement> extends Schema<
+  readonly ExtractIn<TElement>[],
+  ExtractOut<TElement>[]
+> {
+  readonly elementSchema: UnwrapSchema<TElement>;
+  readonly length: number;
+  /**
+   * The maximum number of bytes this schema can take up.
+   *
+   * Is `NaN` if the schema is unbounded. If you would like to know
+   * how many bytes a particular value encoding will take up, use `.measure(value)`.
+   *
+   * Alias for `.measure(MaxValue).size`
+   */
+  readonly maxSize: number;
+}
 
-  constructor(
-    private readonly _unstableElementSchema: TElement,
-    public readonly length: number,
-  ) {
-    super();
+class ArraySchema<TElement> implements Array<TElement> {
+  readonly elementSchema: UnwrapSchema<TElement>;
+  readonly length: number;
+  readonly #element: Schema;
 
-    // In case this array isn't part of a keyed chain,
-    // let's assume the inner type is stable.
-    this.elementSchema = _unstableElementSchema;
+  constructor(elementSchema: Schema, length: number) {
+    this.elementSchema = elementSchema as UnwrapSchema<TElement>;
+    this.length = length;
+    this.#element = elementSchema;
   }
 
-  override resolveReferences(ctx: IRefResolver): void {
-    this.elementSchema = ctx.resolve(this._unstableElementSchema);
-  }
-
-  override write(output: ISerialOutput, values: ParseUnwrapped<TElement>[]): void {
+  write(output: ISerialOutput, values: readonly ExtractIn<TElement>[]): void {
     if (values.length !== this.length) {
       throw new ValidationError(`Expected array of length ${this.length}, got ${values.length}`);
     }
 
     for (const value of values) {
-      this.elementSchema.write(output, value);
+      this.#element.write(output, value);
     }
   }
 
-  override read(input: ISerialInput): ParseUnwrapped<TElement>[] {
-    const array: ParseUnwrapped<TElement>[] = [];
+  read(input: ISerialInput): ExtractOut<TElement>[] {
+    const array: ExtractOut<TElement>[] = [];
 
     for (let i = 0; i < this.length; ++i) {
-      array.push(this.elementSchema.read(input) as ParseUnwrapped<TElement>);
+      array.push(this.#element.read(input));
     }
 
     return array;
@@ -51,25 +67,28 @@ export class ArraySchema<TElement extends AnySchema> extends Schema<Unwrap<TElem
    * Alias for `.measure(MaxValue).size`
    */
   get maxSize(): number {
-    return this.elementSchema.measure(MaxValue).size * this.length;
+    return this.#element.measure(MaxValue).size * this.length;
   }
 
-  override measure(
-    values: ParseUnwrapped<TElement>[] | MaxValue,
+  measure(
+    values: readonly ExtractIn<TElement>[] | MaxValue,
     measurer: IMeasurer = new Measurer(),
   ): IMeasurer {
     for (let i = 0; i < this.length; ++i) {
-      this.elementSchema.measure(values === MaxValue ? MaxValue : values[i], measurer);
+      this.#element.measure(values === MaxValue ? MaxValue : values[i], measurer);
     }
 
     return measurer;
   }
 }
 
-// @__NO_SIDE_EFFECTS__
-export function arrayOf<TSchema extends AnySchema>(
-  elementSchema: TSchema,
-  length: number,
-): ArraySchema<TSchema> {
-  return new ArraySchema(elementSchema, length);
+/*#__NO_SIDE_EFFECTS__*/
+export function array<TSchema>(_elementSchema: TSchema, length: number): Array<TSchema> {
+  const elementSchema = toSchema(_elementSchema);
+  if (!elementSchema) {
+    throw new InvalidSchemaShapeError(
+      `bin.array(...) expects a schema, got '${String(_elementSchema)}'`,
+    );
+  }
+  return new ArraySchema<TSchema>(elementSchema, length);
 }

@@ -6,6 +6,10 @@ description: A guide on how to get started using Typed Binary.
 Gives tools to describe binary structures with full TypeScript support. Encodes and decodes into pure JavaScript
 objects, while giving type context for the parsed data.
 
+We recommend importing the library as a namespace (`import * as bin from 'typed-binary'`), which is what the guides
+use. Bundlers only include the parts of the library you use either way, so named imports
+(`import { struct, u32 } from 'typed-binary'`) work just as well.
+
 import { Tabs, TabItem } from '@astrojs/starlight/components';
 
 ## Install
@@ -31,23 +35,26 @@ import { Tabs, TabItem } from '@astrojs/starlight/components';
 ## Use in the browser
 
 ```ts {7}
-import bin from 'typed-binary';
+import * as bin from 'typed-binary';
 
 // Define a schema
-const Vec2f = bin.tupleOf([bin.f32, bin.f32]);
+const Vec2f = bin.tuple([bin.f32, bin.f32]);
 const Vec2fSize = Vec2f.measure(bin.MaxValue).size;
 
 const buffer = new ArrayBuffer(Vec2fSize);
 Vec2f.write(new bin.BufferWriter(buffer), [0.5, 3.14]);
+
+// Infer the type of values the schema reads
+type Vec2f = bin.ExtractOut<typeof Vec2f>; // [number, number]
 ```
 
 ## Use in Node.js
 
 ```ts {7}
-import bin from 'typed-binary';
+import * as bin from 'typed-binary';
 
 // Define a schema
-const Vec2f = bin.tupleOf([bin.f32, bin.f32]);
+const Vec2f = bin.tuple([bin.f32, bin.f32]);
 const Vec2fSize = Vec2f.measure(bin.MaxValue).size;
 
 const buffer = Buffer.alloc(Vec2fSize);

@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 
 // Importing from the public API
-import bin from '../index.ts';
+import * as bin from '../index.ts';
 
 describe('Measurer', () => {
   it('stays unbounded once marked as unbounded', () => {
@@ -18,29 +18,26 @@ describe('Measurer', () => {
 
 describe('unbounded max size', () => {
   it('propagates through objects', () => {
-    expect(bin.object({ a: bin.i32, b: bin.string, c: bin.i32 }).maxSize).toBeNaN();
-    expect(bin.object({ a: bin.i32, b: bin.dynamicArrayOf(bin.i32) }).maxSize).toBeNaN();
+    expect(bin.struct({ a: bin.i32, b: bin.string, c: bin.i32 }).maxSize).toBeNaN();
+    expect(bin.struct({ a: bin.i32, b: bin.dynamicArray(bin.i32) }).maxSize).toBeNaN();
   });
 
   it('propagates through other containers', () => {
     expect(bin.optional(bin.string).measure(bin.MaxValue).size).toBeNaN();
-    expect(bin.tupleOf([bin.i32, bin.string]).measure(bin.MaxValue).size).toBeNaN();
-    expect(bin.arrayOf(bin.string, 2).measure(bin.MaxValue).size).toBeNaN();
+    expect(bin.tuple([bin.i32, bin.string]).measure(bin.MaxValue).size).toBeNaN();
+    expect(bin.array(bin.string, 2).measure(bin.MaxValue).size).toBeNaN();
   });
 
   it('treats an unbounded sub-type as the biggest one', () => {
-    const Generic = bin.genericEnum(
-      {},
-      {
-        0: bin.object({ label: bin.string }),
-        1: bin.object({ value: bin.i32 }),
-      },
-    );
+    const Generic = bin.union(bin.u8, {
+      0: { label: bin.string },
+      1: { value: bin.i32 },
+    });
 
     expect(Generic.measure(bin.MaxValue).size).toBeNaN();
   });
 
   it('keeps bounded schemas bounded', () => {
-    expect(bin.object({ a: bin.i32, b: bin.tupleOf([bin.i32, bin.i32]) }).maxSize).toEqual(12);
+    expect(bin.struct({ a: bin.i32, b: bin.tuple([bin.i32, bin.i32]) }).maxSize).toEqual(12);
   });
 });

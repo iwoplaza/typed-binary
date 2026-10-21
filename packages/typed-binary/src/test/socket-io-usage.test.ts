@@ -7,7 +7,7 @@ import { Server, type Socket as ServerSocket } from 'socket.io';
 import { type Socket as ClientSocket, io as ioClient } from 'socket.io-client';
 
 // Importing from the public API
-import bin, { type AnySchema } from '../index.ts';
+import * as bin from '../index.ts';
 
 function waitFor(socket: ServerSocket | ClientSocket, event = 'message') {
   return new Promise<Buffer>((resolve) => {
@@ -39,10 +39,10 @@ describe('Socket IO Usage', () => {
       }),
   );
 
-  async function sendAndReceive<TSchema extends AnySchema>(
+  async function sendAndReceive<TSchema extends bin.Schema>(
     direction: 'server-to-client' | 'client-to-server',
     schema: TSchema,
-    value: bin.Parsed<TSchema>,
+    value: bin.ExtractIn<TSchema>,
   ) {
     const [from, to] =
       direction === 'server-to-client'
@@ -65,13 +65,13 @@ describe('Socket IO Usage', () => {
   });
 
   it('should send a byte array successfully', async () => {
-    const schema = bin.dynamicArrayOf(bin.u8);
+    const schema = bin.dynamicArray(bin.u8);
 
     await sendAndReceive('server-to-client', schema, [1, 2, 254, 255]);
   });
 
   it('should send a basic struct successfully', async () => {
-    const schema = bin.object({
+    const schema = bin.struct({
       name: bin.string,
       age: bin.u32,
     });

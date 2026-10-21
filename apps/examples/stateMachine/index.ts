@@ -2,12 +2,12 @@
 // Run with `npm run example:stateMachine`
 //
 
-import type { Parsed } from 'typed-binary';
+import type * as bin from 'typed-binary';
 import { Easing } from './connection';
 import type { Graph } from './graph';
 import { MobState } from './triggerCondition';
 
-const graph: Parsed<typeof Graph> = {
+const graph: bin.ExtractOut<typeof Graph> = {
   entryNode: 0,
   nodes: [
     {

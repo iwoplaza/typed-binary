@@ -1,18 +1,18 @@
 ---
 title: Objects
-description: Objects store their properties in key-ascending-alphabetical order, one next to another.
+description: A guide on how objects and tagged unions can be represented in Typed Binary.
 ---
 
 Primitive values in JavaScript can be composed into *Plain-Old-JavaScript-Objects*. This can be
-easily represented using the `bin.object()` schema constructor function.
+easily represented using the `bin.struct()` schema constructor function.
 
-## Simple objects
+## Structs
 
 ```ts
-import bin from 'typed-binary';
+import * as bin from 'typed-binary';
 
 // Simple object schema
-const Person = bin.object({
+const Person = bin.struct({
   firstName: bin.string,
   lastName: bin.string,
   age: bin.i32,
@@ -29,62 +29,70 @@ console.log(JSON.stringify(Person.read(reader))); // { "firstName": "John", ... 
 ```
 
 :::note
-Objects store their properties in the order they are defined in the record passed into the `bin.object()` constructor function.
+Structs store their properties one next to another, in the order they are defined in the record passed into the `bin.struct()` constructor function.
 :::
 
-## Generic objects
+### Inferring the type
 
-This feature allows for the parsing of a type that contains different fields depending on its previous values. For example, if you want to store an animal description, certain animal types might have differing features from one another.
-
-### Keyed by strings
+The type of values a struct reads can be extracted with `bin.ExtractOut`, and the type of values it accepts when writing
+with `bin.ExtractIn`. The latter is a readonly version of the former, so that readonly data can be written too.
 
 ```ts
-import bin from 'typed-binary';
+type Person = bin.ExtractOut<typeof Person>;
+//   ^? { firstName: string, lastName: string, age: number }
+```
 
-// Generic object schema
-const Animal = bin.generic(
+### Extending structs
+
+`bin.concat` creates a struct with the properties of all the passed in structs, in order.
+
+```ts
+const Employee = bin.concat([Person, bin.struct({ salary: bin.u32 })]);
+// { firstName: string, lastName: string, age: number, salary: number }
+```
+
+## Tagged unions
+
+`bin.union` describes a value that can take one of several shapes (variants), depending on a tag
+that is encoded before it. For example, if you want to store an animal description, certain animal
+types might have differing features from one another.
+
+```ts
+import * as bin from 'typed-binary';
+
+const Animal = bin.union(
+  // The tag, encoded first
+  bin.orderedEnum('dog', 'cat'),
+  // The properties of each variant, keyed by the value of the tag
   {
-    nickname: bin.string,
-    age: bin.i32,
+    dog: { breed: bin.string },
+    cat: { striped: bin.bool },
   },
-  {
-    dog: bin.object({
-      // Animal can be a dog
-      breed: bin.string,
-    }),
-    cat: bin.object({
-      // Animal can be a cat
-      striped: bin.bool,
-    }),
-  }
+  // Properties shared by all variants, encoded right after the tag
+  { base: { nickname: bin.string, age: bin.i32 } },
 );
 
 // Writing an Animal
 Animal.write(writer, {
-  type: 'cat', // We're specyfing which concrete type we want this object to be.
+  type: 'cat', // We're specifying which variant we want this object to be.
 
   // Base properties
   nickname: 'James',
   age: 5,
 
-  // Concrete type specific properties
+  // Variant specific properties
   striped: true,
 });
 
 // Deserializing the animal
 const animal = Animal.read(reader);
-console.log(JSON.stringify(animal)); // { "age": 5, "striped": true ... }
 
 // -- Type checking works here! --
-// animal.type => 'cat' | 'dog'
+// animal.type => 'dog' | 'cat'
 if (animal.type === 'cat') {
-  // animal.type => 'cat'
-  console.log("It's a cat!");
-  // animal.striped => bool
+  // animal.striped => boolean
   console.log(animal.striped ? 'Striped' : 'Not striped');
 } else {
-  // animal.type => 'dog'
-  console.log("It's a dog!");
   // animal.breed => string
   console.log(`More specifically, a ${animal.breed}`);
 
@@ -93,48 +101,19 @@ if (animal.type === 'cat') {
 }
 ```
 
-### Keyed by an enum (byte)
+The tag can be any schema whose values key the variants:
 
-```ts
-import bin from 'typed-binary';
+| Tag | Encoding |
+| --- | --- |
+| `bin.orderedEnum('dog', 'cat')` | The index of the value, in a single byte |
+| `bin.prefixEnum('dog', 'cat')` | The ASCII characters of the value |
+| `bin.u8`, `bin.u16`, ... | The number itself, e.g. for variants keyed by a TypeScript `enum` |
+| `bin.string` | A null-terminated string |
 
-enum AnimalType = {
-  DOG = 0,
-  CAT = 1,
-};
+The property holding the tag is called `type` by default, and can be renamed with the `key` option:
+`bin.union(tag, variants, { key: 'kind' })`.
 
-// Generic (enum) object schema
-const Animal = bin.genericEnum({
-  nickname: bin.string,
-  age: bin.i32,
-}, {
-  [AnimalType.DOG]: bin.object({ // Animal can be a dog
-    breed: bin.string,
-  }),
-  [AnimalType.CAT]: bin.object({ // Animal can be a cat
-    striped: bin.bool,
-  }),
-});
-
-// ...
-// Same as for the string keyed case
-// ...
-
-// -- Type checking works here! --
-// animal.type => AnimalType
-if (animal.type === AnimalType.CAT) {
-  // animal.type => AnimalType.CAT
-  console.log("It's a cat!");
-  // animal.striped => bool
-  console.log(animal.striped ? "Striped" : "Not striped");
-}
-else {
-  // animal.type => AnimalType.DOG
-  console.log("It's a dog!");
-  // animal.breed => string
-  console.log(`More specifically, a ${animal.breed}`);
-
-  // This would result in a type error (Static typing FTW!)
-  // console.log(`Striped: ${animal.striped}`);
-}
-```
+:::note[Migrating from `bin.generic` and `bin.genericEnum`]
+`bin.generic(base, variants)` encodes the same as `bin.union(bin.string, variants, { base })`,
+and `bin.genericEnum(base, variants)` the same as `bin.union(bin.u8, variants, { base })`.
+:::

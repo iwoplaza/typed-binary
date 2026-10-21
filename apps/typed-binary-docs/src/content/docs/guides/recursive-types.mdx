@@ -3,69 +3,154 @@ title: Recursive Types
 description: A guide on how to describe recursive types in Typed Binary
 ---
 
-If you want an object type to be able to contain one of itself (recursion), then you have to start using **keyed** types. The basic pattern is this:
+If you want a schema to be able to contain itself (recursion), reference it from inside a **getter**.
+TypeScript infers the types of getters lazily, which allows the schema's type to refer to itself:
 
 ```ts
-/**
- * Wrapping a schema with a 'bin.keyed' call allows the inner code to
- * use a reference to the type we're currently creating, instead
- * of the type itself.
- *
- * The reference variable 'Recursive' doesn't have to be called
- * the same as the actual variable we're storing the schema in,
- * but it's a neat trick that makes the schema code more readable.
- *
- * The 'recursive-key' has to uniquely identify this type in this tree.
- * There may be other distinct types using the same key, as long as they do
- * not interact with each other (one doesn't contain the other).
- * This is because references are resolved recursively once the method
- * passed as the 2nd argument to 'keyed' returns the schema.
- */
-const Recursive = bin.keyed('recursive-key', (Recursive) =>
-  bin.object({
-    value: bin.i32,
-    next: bin.optional(Recursive),
-  })
-);
+import * as bin from 'typed-binary';
+
+const LinkedList = bin.struct({
+  value: bin.i32,
+  get next() {
+    return bin.optional(LinkedList);
+  },
+});
+
+type LinkedList = bin.ExtractOut<typeof LinkedList>;
+//   ^? { value: number, next: LinkedList | undefined }
 ```
 
-### Recursive types alongside generics
+:::caution
+The getter is what makes this work. Referencing the schema directly (`next: bin.optional(LinkedList)`)
+or returning it from a regular function fails with
+_"'LinkedList' implicitly has type 'any' because it (...) is referenced directly or indirectly in its own initializer"_.
+:::
+
+Recursive schemas can nest arbitrarily deep, so their maximum size is unbounded. `LinkedList.maxSize` is `NaN`,
+and `LinkedList.measure(value)` should be used to measure concrete values instead.
+
+## Recursive tagged unions
+
+Variants of a [`bin.union`](/typed-binary/guides/objects/#tagged-unions) can reference the union through getters too:
 
 ```ts
-import bin from 'typed-binary';
+import * as bin from 'typed-binary';
 
-const Expression = bin.keyed('expression', (Expression) =>
-  bin.generic(
-    {},
-    {
-      multiply: bin.object({
-        a: Expression,
-        b: Expression,
-      }),
-      negate: bin.object({
-        inner: Expression,
-      }),
-      int_literal: bin.object({
-        value: bin.i32,
-      }),
-    }
-  )
-);
+const Expression = bin.union(bin.orderedEnum('int_literal', 'negate', 'multiply'), {
+  int_literal: { value: bin.i32 },
+  negate: {
+    get inner() {
+      return Expression;
+    },
+  },
+  multiply: {
+    get a() {
+      return Expression;
+    },
+    get b() {
+      return Expression;
+    },
+  },
+});
 
-type Expression = bin.Parsed<typeof Expression>;
+type Expression = bin.ExtractOut<typeof Expression>;
 
 const expr: Expression = {
   type: 'multiply',
-  a: {
-    type: 'negate',
-    inner: {
-      type: 'int_literal',
-      value: 15,
-    },
-  },
-  b: {
-    type: 'int_literal',
-    value: 2,
-  },
+  a: { type: 'negate', inner: { type: 'int_literal', value: 15 } },
+  b: { type: 'int_literal', value: 2 },
 };
 ```
+
+## Recursion through `bin.pipe`
+
+[`bin.pipe`](/typed-binary/guides/data-dependent-schemas/) reads a schema (the head), then decides on the schema
+of the rest of the data based on its value. It's lower-level than `bin.union`, but more flexible.
+There are two ways to make it recursive.
+
+### Variants as separate schemas
+
+Each variant is defined as its own schema, and references the union through getters.
+The `bin.pipe` action then only has to pick the right variant:
+
+```ts
+import * as bin from 'typed-binary';
+
+const IntLiteral = bin.struct({
+  type: bin.inherent('int_literal'),
+  value: bin.i32,
+});
+
+const Negate = bin.struct({
+  type: bin.inherent('negate'),
+  get inner() {
+    return Expression;
+  },
+});
+
+const Multiply = bin.struct({
+  type: bin.inherent('multiply'),
+  get a() {
+    return Expression;
+  },
+  get b() {
+    return Expression;
+  },
+});
+
+const Expression = bin.pipe(
+  bin.struct({ type: bin.orderedEnum('int_literal', 'negate', 'multiply') }),
+  (head) => {
+    if (head === bin.MaxValue) {
+      // Measuring the max size, any variant will do, as the
+      // max size of recursive schemas is unbounded anyway.
+      return Multiply;
+    }
+
+    switch (head.type) {
+      case 'int_literal':
+        return IntLiteral;
+      case 'negate':
+        return Negate;
+      case 'multiply':
+        return Multiply;
+    }
+  },
+);
+
+type Expression = bin.ExtractOut<typeof Expression>;
+
+const expr: Expression = {
+  type: 'multiply',
+  a: { type: 'negate', inner: { type: 'int_literal', value: 15 } },
+  b: { type: 'int_literal', value: 2 },
+};
+```
+
+`bin.inherent(value)` describes a value that takes up no space, because it is already known.
+Here, the `type` was already read as part of the head, so the variants only carry it over to the output.
+
+### Variants inside the action
+
+For smaller unions, the variants can be created inside the action itself, as long as the
+recursive references stay inside getters:
+
+```ts
+const Expression = bin.pipe(
+  bin.struct({ type: bin.orderedEnum('int_literal', 'negate') }),
+  (head) =>
+    head !== bin.MaxValue && head.type === 'int_literal'
+      ? bin.struct({ type: bin.inherent('int_literal'), value: bin.i32 })
+      : bin.struct({
+          type: bin.inherent('negate'),
+          get inner() {
+            return Expression;
+          },
+        }),
+);
+```
+
+:::caution
+Returning the recursive reference without a getter, e.g. `bin.struct({ inner: Expression })`,
+makes the type of `Expression` implicitly `any`.
+:::

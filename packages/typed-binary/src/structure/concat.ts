@@ -1,16 +1,27 @@
-import type { MergeRecordUnion } from '../utilityTypes.ts';
-import { type AnyObjectSchema, ObjectSchema } from './object.ts';
-import type { PropertiesOf } from './types.ts';
+import { InvalidSchemaShapeError } from '../error.ts';
+import type { MergeRecordUnion, Prettify } from '../utilityTypes.ts';
+import { struct, type Struct } from './struct.ts';
+import { toSchema, type UnwrapSchema } from './types.ts';
 
-type Concat<Objs extends AnyObjectSchema[]> = ObjectSchema<
-  MergeRecordUnion<PropertiesOf<Objs[number]>>
+type StructLike = Struct | { readonly ['~typed-binary']: { readonly schema: Struct } };
+
+type Concat<Objs extends readonly StructLike[]> = MergeRecordUnion<
+  UnwrapSchema<Objs[number]>['properties']
 >;
 
-// @__NO_SIDE_EFFECTS__
-export function concat<Objs extends AnyObjectSchema[]>(objs: Objs): Concat<Objs> {
-  return new ObjectSchema(
-    Object.fromEntries(
-      objs.flatMap(({ properties }) => Object.entries(properties)),
-    ) as unknown as Concat<Objs>['properties'],
-  );
+/*#__NO_SIDE_EFFECTS__*/
+export function concat<Objs extends readonly StructLike[]>(
+  objs: Objs,
+): Struct<Prettify<Concat<Objs>>> {
+  const properties = {};
+  for (const obj of objs) {
+    const schema = toSchema(obj) as Struct | undefined;
+    if (!schema?.properties) {
+      throw new InvalidSchemaShapeError(`bin.concat(...) expects structs, got '${String(obj)}'`);
+    }
+    // Copying property descriptors (instead of values), so that getters stay lazy,
+    // which is required for recursive references.
+    Object.defineProperties(properties, Object.getOwnPropertyDescriptors(schema.properties));
+  }
+  return struct(properties) as Struct<Concat<Objs>>;
 }

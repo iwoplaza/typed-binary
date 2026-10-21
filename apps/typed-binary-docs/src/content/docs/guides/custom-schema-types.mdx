@@ -3,29 +3,26 @@ title: Custom Schema Types
 description: A guide on how to create custom schema types in Typed Binary
 ---
 
-Custom schema types can be defined. They are, under the hood, classes that extend the `Schema<T>` base class. The generic `T` type represents what kind of data this schema serializes from and deserializes into.
+Custom schema types can be defined. A schema is any object that implements the `bin.Schema<TIn, TOut>` interface,
+where `TIn` is the type of values it accepts when writing, and `TOut` the type of values it produces when reading.
+`TOut` defaults to `TIn`, so `bin.Schema<number>` reads and writes numbers.
 
 ```ts
-import {
-  ISerialInput,
-  ISerialOutput,
-  Schema,
-  IRefResolver,
-} from 'typed-binary';
+import * as bin from 'typed-binary';
 
 /**
  * A schema storing radians with 2 bytes of precision.
  */
-class RadiansSchema extends Schema<number> {
-  read(input: ISerialInput): number {
-    const low = input.readByte();
-    const high = input.readByte();
+class RadiansSchema implements bin.Schema<number> {
+  read(input: bin.ISerialInput): number {
+    const low = input.readUint8();
+    const high = input.readUint8();
 
     const discrete = (high << 8) | low;
     return (discrete / 65535) * Math.PI;
   }
 
-  write(output: ISerialOutput, value: number): void {
+  write(output: bin.ISerialOutput, value: number): void {
     // The value will be wrapped to be in range of [0, Math.PI)
     const wrapped = ((value % Math.PI) + Math.PI) % Math.PI;
     // Quantizing the value to range of [0, 65535]
@@ -34,11 +31,11 @@ class RadiansSchema extends Schema<number> {
     const low = discrete & 0xff;
     const high = (discrete >> 8) & 0xff;
 
-    output.writeByte(low);
-    output.writeByte(high);
+    output.writeUint8(low);
+    output.writeUint8(high);
   }
 
-  measure(_: number, measurer: IMeasurer = new Measurer()): IMeasurer {
+  measure(_: number | bin.MaxValue, measurer: bin.IMeasurer = new bin.Measurer()): bin.IMeasurer {
     // The size of the data serialized by this schema
     // doesn't depend on the actual value. It's always 2 bytes.
     return measurer.add(2);
@@ -48,4 +45,96 @@ class RadiansSchema extends Schema<number> {
 // Creating a singleton instance of the schema,
 // since it has no configuration properties.
 export const radians = new RadiansSchema();
+
+// Custom schemas can be used like any other schema
+const Rotation = bin.struct({ roll: radians, pitch: radians, yaw: radians });
+```
+
+When measuring with `bin.MaxValue`, a schema should add the biggest size its values can take. If there is no upper
+bound (e.g. for variable-length data), it should mark the measurer as unbounded by returning `measurer.unbounded`.
+
+## Objects that define themselves as schemas
+
+Sometimes the thing you want to encode is already described by an object of your own, like a component definition,
+a message type or a class. Instead of keeping a separate schema next to it, the object can define itself as a schema
+by holding one under the `'~typed-binary'` key:
+
+```ts
+import * as bin from 'typed-binary';
+
+function component<TSchema extends bin.Schema>(name: string, schema: TSchema) {
+  return { name, '~typed-binary': { schema } } as const;
+}
+
+const Health = component('health', bin.u16);
+const Position = component('position', bin.struct({ x: bin.f32, y: bin.f32 }));
+
+// The components can be used anywhere a schema is expected
+const Entity = bin.struct({
+  id: bin.u32,
+  health: Health,
+  position: Position,
+});
+
+type Entity = bin.ExtractOut<typeof Entity>;
+//   ^? { id: number, health: number, position: { x: number, y: number } }
+```
+
+Such objects are accepted by every schema constructor: as struct properties, elements of `bin.array`, `bin.dynamicArray`
+and `bin.tuple`, the inner schema of `bin.optional`, the structs passed to `bin.concat`, the tag, variants and properties
+of `bin.union`, and the head of `bin.pipe` (or the schema returned by its action). `bin.ExtractIn` and `bin.ExtractOut`
+work on them as well, and the `bin.WithSchema<TIn, TOut>` type describes either a schema or an object defining itself as one.
+
+The object itself is not a schema, so reading and writing is done through the schema it holds, or through a schema
+that contains it:
+
+```ts
+const buffer = new ArrayBuffer(Entity.maxSize);
+Entity.write(new bin.BufferWriter(buffer), {
+  id: 1,
+  health: 100,
+  position: { x: 0.5, y: 0.25 },
+});
+```
+
+Classes can define themselves as schemas with a static property:
+
+```ts
+class Vec2 {
+  static readonly '~typed-binary' = {
+    schema: bin.struct({ x: bin.f32, y: bin.f32 }),
+  };
+}
+
+const Transform = bin.struct({ position: Vec2, scale: Vec2 });
+```
+
+:::note
+Values are read as plain data described by the schema. In the example above, `Transform.read(...)` produces
+`{ position: { x: number, y: number }, ... }`, not instances of `Vec2`. To produce instances, hold a
+custom schema (like the `RadiansSchema` above) that constructs them in `read`.
+:::
+
+### Recursion
+
+To reference a schema that is defined later (or the object's own schema), define `'~typed-binary'` as a getter,
+and reference the object from inside a [getter of a struct property](/typed-binary/guides/recursive-types/):
+
+```ts
+const TreeNode = {
+  kind: 'tree-node',
+  get '~typed-binary'() {
+    return { schema: TreeNodeSchema };
+  },
+};
+
+const TreeNodeSchema = bin.struct({
+  value: bin.i32,
+  get children() {
+    return bin.dynamicArray(TreeNode);
+  },
+});
+
+type TreeNode = bin.ExtractOut<typeof TreeNodeSchema>;
+//   ^? { value: number, children: TreeNode[] }
 ```

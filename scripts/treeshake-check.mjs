@@ -41,31 +41,25 @@ const cases = {
     code: `import { BufferReader, BufferWriter, getSystemEndianness, Measurer } from 'tb';
     globalThis.x = [BufferReader, BufferWriter, getSystemEndianness, Measurer];`,
   },
-  'u32 + object': {
+  'u32 + struct': {
     budget: 1500,
-    code: `import { u32, object } from 'tb'; globalThis.x = object({ a: u32 });`,
+    code: `import { u32, struct } from 'tb'; globalThis.x = struct({ a: u32 });`,
   },
-  // esbuild never tree-shakes member access on a re-exported namespace, so the
-  // esbuild budget for these is the whole library. See the rollup cases below.
-  'bin.object/bin.u32': {
-    budget: 16000,
-    code: `import bin from 'tb'; globalThis.x = bin.object({ a: bin.u32 });`,
+  // The recommended way of importing, which should cost the same as named imports.
+  'bin.struct/bin.u32': {
+    budget: 1500,
+    code: `import * as bin from 'tb'; globalThis.x = bin.struct({ a: bin.u32 });`,
   },
-  'whole default': {
+  // Using the namespace as a value (instead of accessing its members) retains the whole library.
+  'whole namespace': {
     budget: 16000,
-    code: `import bin from 'tb'; globalThis.x = bin;`,
+    code: `import * as bin from 'tb'; globalThis.x = bin;`,
   },
 };
 
-// Rollup does tree-shake namespace member access (as do Rolldown and webpack),
-// so `bin.*` users should pay about the same as named-import users.
 const rollupCases = {
-  'u32 + object': { budget: 1500, code: cases['u32 + object'].code },
-  'bin.object/bin.u32': { budget: 1500, code: cases['bin.object/bin.u32'].code },
-  '{ bin }.object/u32': {
-    budget: 1500,
-    code: `import { bin } from 'tb'; globalThis.x = bin.object({ a: bin.u32 });`,
-  },
+  'u32 + struct': cases['u32 + struct'],
+  'bin.struct/bin.u32': cases['bin.struct/bin.u32'],
 };
 
 const withEntry = (code) => code.replace(`'tb'`, JSON.stringify(entry));

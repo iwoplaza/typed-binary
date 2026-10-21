@@ -2,6 +2,93 @@
 
 ## Unreleased (v5)
 
+### TODO
+
+- [ ] Update README code images
+- [ ] Make `getSystemEndianness` part of `main-api.ts`, and since that was the only thing that wasn't part of the public API, merge `main-api.ts` into `index.ts`
+- [ ] Remove the `I` prefix from public interfaces
+- [ ] Unify names of classes to `*Impl`
+- [ ] Let schema implementations implement their interface, not the plain `Schema<...>` interface
+- [ ] Convert `TypedArraySchema` to an exported `TypedArray<T>` interface and an internal `TypedArrayImpl` class, and remove its leftover `$in`/`$out` fields
+
+v5 reworks how schemas are defined and typed, makes recursion a matter of plain getters, and adds primitives
+for data whose layout depends on previously encoded values. The binary encoding of existing schemas is unchanged.
+
+### Migrating from v4
+
+| v4                                       | v5                                                    |
+| ---------------------------------------- | ----------------------------------------------------- |
+| `bin.object({ ... })`                    | `bin.struct({ ... })`                                 |
+| `bin.arrayOf(schema, length)`            | `bin.array(schema, length)`                           |
+| `bin.dynamicArrayOf(schema)`             | `bin.dynamicArray(schema)`                            |
+| `bin.tupleOf([...])`                     | `bin.tuple([...])`                                    |
+| `bin.byte`                               | `bin.u8`                                              |
+| `bin.Parsed<typeof Schema>`              | `bin.ExtractOut<typeof Schema>` (or `bin.ExtractIn`)  |
+| `bin.keyed('key', (Self) => ...)`        | A getter referencing the schema, see below            |
+| `bin.generic(base, variants)`            | `bin.union(bin.string, variants, { base })`           |
+| `bin.genericEnum(base, variants)`        | `bin.union(bin.u8, variants, { base })`               |
+| `class X extends Schema<T>`              | `class X implements bin.Schema<T>`                    |
+| `import bin from 'typed-binary'`         | `import * as bin from 'typed-binary'`                 |
+| `import { bin } from 'typed-binary'`     | `import * as bin from 'typed-binary'`                 |
+
+The replacements in the table encode data the same way as the v4 schemas they replace.
+
+### Breaking changes
+
+- **Removed the default export and the `bin` named export.** Import the library as a namespace instead
+  (`import * as bin from 'typed-binary'`), which every bundler, including esbuild, tree-shakes as well as named imports
+  (in v4, esbuild couldn't tree-shake `bin.*` member access at all). Named imports (e.g. `import { struct, u32 } from 'typed-binary'`)
+  work too, with the renames listed in the table above.
+- **Schema classes are no longer exported** (`ObjectSchema`, `Uint8Schema`, `ArraySchema`, ...). Use the types describing each schema instead
+  (`bin.Struct`, `bin.Uint8`, `bin.Array`, ...).
+- **Schemas have separate input and output types.** `Schema<TIn, TOut>` is now an interface instead of a base class, where `TIn` is the type
+  of values accepted when writing (and measuring), and `TOut` the type of values produced when reading. `bin.Parsed` is replaced by
+  `bin.ExtractOut`, and `bin.ExtractIn` is added. Input types of structs and arrays are readonly, so readonly data can be written.
+  Custom schemas implement `bin.Schema<T>` instead of extending `Schema<T>`.
+- **Recursion is done with getters.** `bin.keyed`, along with `Ref`, `IRefResolver`, `KeyedSchema` and `UnresolvedReferenceError`,
+  is removed. A struct property (or a `bin.union` variant property) defined as a getter can reference the schema it belongs to:
+  ```ts
+  const LinkedList = bin.struct({
+    value: bin.i32,
+    get next() {
+      return bin.optional(LinkedList);
+    },
+  });
+  ```
+- **Removed `bin.generic` and `bin.genericEnum`** (and `SubTypeKey`, `GenericObjectSchema`) in favor of `bin.union`.
+  Unlike `bin.generic`, a union tagged by `bin.string` has a bounded max size, as the tag can only be one of the variants.
+- **Renamed** `bin.object` to `bin.struct`, `bin.arrayOf` to `bin.array`, `bin.dynamicArrayOf` to `bin.dynamicArray` and
+  `bin.tupleOf` to `bin.tuple`. Removed `bin.byte` (deprecated alias of `bin.u8`).
+- **Removed `readByte` and `writeByte`** from `ISerialInput`/`ISerialOutput` (deprecated aliases of `readUint8` and `writeUint8`).
+- **Removed the internal type helpers** `ISchema`, `AnySchema`, `AnySchemaWithProperties`, `ISchemaWithProperties`, `AnyObjectSchema`,
+  `IKeyedSchema`, `AnyKeyedSchema`, `Unwrap`, `UnwrapRecord`, `UnwrapArray` and `ParseUnwrapped`. Use `bin.Schema`, `bin.ExtractIn` and
+  `bin.ExtractOut` instead.
+
+### New features
+
+- `bin.union(tag, variants, options?)`: tagged unions with any schema as the tag (e.g. `bin.orderedEnum(...)`, `bin.u8` or `bin.string`),
+  optional `base` properties shared by all variants, a custom name for the tag property (`key`), and structs or property records as variants.
+  Their max size is exact, measured per variant.
+- `bin.pipe(head, action)`: reads/writes `head`, then the schema returned by `action(headValue)`, for data whose layout depends on
+  previously encoded values. `action` receives `bin.MaxValue` when the max size is being measured.
+  The max size of a pipe is an upper bound, as the head and the rest of the data are measured independently.
+  The value read by the head has to be assignable to the value it accepts, as `action` receives the written value when writing.
+- `bin.inherent(value)`: a zero-byte schema for values already known from context, e.g. carried over from the head of a `bin.pipe`.
+- `bin.orderedEnum(...values)`: a string enum encoded as the index of the value, in a single byte.
+- `bin.prefixEnum(...values)`: a string enum encoded as the ASCII characters of the value, with no terminator, independent of
+  the order of values. Values cannot be prefixes of each other.
+- Each schema has an exported type describing it (`bin.Struct`, `bin.Array`, `bin.Optional`, `bin.Int32`, `bin.Union`, ...).
+- `bin.InvalidSchemaShapeError` is thrown when a non-schema is passed where a schema is expected.
+- Objects can define themselves as schemas by holding one under the `'~typed-binary'` key
+  (`{ '~typed-binary': { schema } }`, described by `bin.WithSchema`). They are accepted wherever a schema is expected,
+  including struct properties, `bin.tuple`, `bin.concat` and the tag and variants of `bin.union`.
+- `bin.string.maxSize` (always `NaN`, as strings are unbounded).
+- `maxSize` is declared on the `bin.Array`, `bin.DynamicArray` and `bin.Optional` types (it was only available at runtime).
+
+### Fixes
+
+- Measuring the max size of recursive schemas returns `NaN` (unbounded), instead of overflowing the stack.
+
 ## Unreleased
 
 ## 4.3.5 (2026-10-27)

@@ -6,15 +6,16 @@ description: A guide on how arrays and tuples can be represented in Typed Binary
 ## Arrays
 
 The items are encoded right next to each other. No need to store length information, as that is constant (built into the schema).
+If the length depends on a value encoded earlier, see [Data-dependent Schemas](/typed-binary/guides/data-dependent-schemas/).
 
 ```ts
-const Vector2 = bin.arrayOf(bin.f32, 2);
-const Vector3 = bin.arrayOf(bin.f32, 3);
-const Vector4 = bin.arrayOf(bin.f32, 4);
+const Vector2 = bin.array(bin.f32, 2);
+const Vector3 = bin.array(bin.f32, 3);
+const Vector4 = bin.array(bin.f32, 4);
 
-type Vector2 = bin.Parsed<typeof Vector2>; // number[]
-type Vector3 = bin.Parsed<typeof Vector3>; // number[]
-type Vector4 = bin.Parsed<typeof Vector4>; // number[]
+type Vector2 = bin.ExtractOut<typeof Vector2>; // number[]
+type Vector3 = bin.ExtractOut<typeof Vector3>; // number[]
+type Vector4 = bin.ExtractOut<typeof Vector4>; // number[]
 ```
 
 ## Dynamic Arrays
@@ -22,9 +23,9 @@ type Vector4 = bin.Parsed<typeof Vector4>; // number[]
 First 4 bytes of encoding are the length of the array, then its items next to one another.
 
 ```ts
-const IntArray = bin.dynamicArrayOf(bin.i32);
+const IntArray = bin.dynamicArray(bin.i32);
 
-type IntArray = bin.Parsed<typeof IntArray>; // number[]
+type IntArray = bin.ExtractOut<typeof IntArray>; // number[]
 ```
 
 ## Tuple
@@ -32,9 +33,9 @@ type IntArray = bin.Parsed<typeof IntArray>; // number[]
 Encodes an ordered set of schemas, one next to another.
 
 ```ts
-const Vec3f = bin.tupleOf([bin.f32, bin.f32, bin.f32]);
-type Vec3f = bin.Parsed<typeof Vec3f>; // [number, number, number]
+const Vec3f = bin.tuple([bin.f32, bin.f32, bin.f32]);
+type Vec3f = bin.ExtractOut<typeof Vec3f>; // [number, number, number]
 
-const RecordEntry = bin.tupleOf([bin.string, Vec3f]);
-type RecordEntry = bin.Parsed<typeof RecordEntry>; // [string, [number, number, number]]
+const RecordEntry = bin.tuple([bin.string, Vec3f]);
+type RecordEntry = bin.ExtractOut<typeof RecordEntry>; // [string, [number, number, number]]
 ```
