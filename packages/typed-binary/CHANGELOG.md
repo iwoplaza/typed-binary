@@ -8,7 +8,7 @@
 - [x] Make `getSystemEndianness` part of `main-api.ts`, and since that was the only thing that wasn't part of the public API, merge `main-api.ts` into `index.ts`
 - [x] Remove the `I` prefix from public interfaces
 - [x] Unify names of classes to `*Impl`
-- [ ] Let schema implementations implement their interface, not the plain `Schema<...>` interface
+- [x] Let schema implementations implement their interface, not the plain `Schema<...>` interface
 - [ ] Convert `TypedArraySchema` to an exported `TypedArray<T>` interface and an internal `TypedArrayImpl` class, and remove its leftover `$in`/`$out` fields
 
 v5 reworks how schemas are defined and typed, makes recursion a matter of plain getters, and adds primitives
