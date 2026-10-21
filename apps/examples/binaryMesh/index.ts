@@ -1,5 +1,5 @@
 import fs from 'node:fs/promises';
-import bin from 'typed-binary';
+import * as bin from 'typed-binary';
 import { Mesh } from './schemas';
 
 const DEFAULT_MESH: Mesh = {

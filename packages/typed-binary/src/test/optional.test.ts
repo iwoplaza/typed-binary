@@ -1,8 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-// Importing from the public API
-import bin from '../index.ts';
-// Helpers
+import * as bin from 'typed-binary';
 import { makeIO } from './helpers/mock.ts';
 import { randIntBetween } from './random.ts';
 

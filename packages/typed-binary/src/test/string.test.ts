@@ -1,12 +1,16 @@
 import { describe, expect, it } from 'vitest';
 
 // Importing from the public API
-import bin from '../index.ts';
+import * as bin from '../index.ts';
 // Helpers
 import { encodeAndDecode } from './helpers/mock.ts';
 import { randIntBetween } from './random.ts';
 
 describe('StringSchema', () => {
+  it('has an unbounded max size', () => {
+    expect(bin.string.maxSize).toBeNaN();
+  });
+
   it('should encode and decode an empty string value', () => {
     const decoded = encodeAndDecode(bin.string, '');
 

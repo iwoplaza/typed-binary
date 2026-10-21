@@ -1,18 +1,24 @@
 import { Measurer } from '../io/measurer.ts';
 import type { IMeasurer, ISerialInput, ISerialOutput } from '../io/types.ts';
-import { MaxValue, Schema } from './types.ts';
+import { MaxValue, type Schema } from './types.ts';
 
 ////
 // BOOL
 ////
 
-export class BoolSchema extends Schema<boolean> {
+export interface Bool extends Schema<boolean> {
   /**
    * The maximum number of bytes this schema can take up.
    *
    * Alias for `.measure(MaxValue).size`
    */
-  readonly maxSize = 1;
+  readonly maxSize: 1;
+}
+
+class BoolSchema implements Bool {
+  get maxSize(): 1 {
+    return 1;
+  }
 
   read(input: ISerialInput): boolean {
     return input.readBool();
@@ -27,20 +33,34 @@ export class BoolSchema extends Schema<boolean> {
   }
 }
 
-export const bool: BoolSchema = /* @__PURE__ */ new BoolSchema();
+export const bool: Bool = /* @__PURE__ */ new BoolSchema();
 
 ////
 // STRING
 ////
 
-export class StringSchema extends Schema<string> {
-  private static _cachedEncoder: TextEncoder | undefined;
+export interface String extends Schema<string, string> {
+  /**
+   * The maximum number of bytes this schema can take up.
+   * Always `NaN`, as strings can be of any length.
+   *
+   * Alias for `.measure(MaxValue).size`
+   */
+  readonly maxSize: number;
+}
+
+class StringSchema implements String {
+  static #cachedEncoder: TextEncoder | undefined;
+
+  get maxSize(): number {
+    return Number.NaN;
+  }
 
   private static get _encoder() {
-    if (!StringSchema._cachedEncoder) {
-      StringSchema._cachedEncoder = new TextEncoder();
+    if (!StringSchema.#cachedEncoder) {
+      StringSchema.#cachedEncoder = new TextEncoder();
     }
-    return StringSchema._cachedEncoder;
+    return StringSchema.#cachedEncoder;
   }
 
   read(input: ISerialInput): string {
@@ -61,19 +81,25 @@ export class StringSchema extends Schema<string> {
   }
 }
 
-export const string: StringSchema = /* @__PURE__ */ new StringSchema();
+export const string: String = /* @__PURE__ */ new StringSchema();
 
 ////
 // i8
 ////
 
-export class Int8Schema extends Schema<number> {
+export interface Int8 extends Schema<number> {
   /**
    * The maximum number of bytes this schema can take up.
    *
    * Alias for `.measure(MaxValue).size`
    */
-  readonly maxSize = 1;
+  readonly maxSize: 1;
+}
+
+class Int8Schema implements Int8 {
+  get maxSize(): 1 {
+    return 1;
+  }
 
   read(input: ISerialInput): number {
     return input.readInt8();
@@ -88,19 +114,25 @@ export class Int8Schema extends Schema<number> {
   }
 }
 
-export const i8: Int8Schema = /* @__PURE__ */ new Int8Schema();
+export const i8: Int8 = /* @__PURE__ */ new Int8Schema();
 
 ////
 // u8
 ////
 
-export class Uint8Schema extends Schema<number> {
+export interface Uint8 extends Schema<number> {
   /**
    * The maximum number of bytes this schema can take up.
    *
    * Alias for `.measure(MaxValue).size`
    */
-  readonly maxSize = 1;
+  readonly maxSize: 1;
+}
+
+class Uint8Schema implements Uint8 {
+  get maxSize(): 1 {
+    return 1;
+  }
 
   read(input: ISerialInput): number {
     return input.readUint8();
@@ -115,24 +147,25 @@ export class Uint8Schema extends Schema<number> {
   }
 }
 
-export const u8: Uint8Schema = /* @__PURE__ */ new Uint8Schema();
-
-/**
- * Alias for `bin.u8`
- */
-export const byte: Uint8Schema = u8;
+export const u8: Uint8 = /* @__PURE__ */ new Uint8Schema();
 
 ////
 // i16
 ////
 
-export class Int16Schema extends Schema<number> {
+export interface Int16 extends Schema<number> {
   /**
    * The maximum number of bytes this schema can take up.
    *
    * Alias for `.measure(MaxValue).size`
    */
-  readonly maxSize = 2;
+  readonly maxSize: 2;
+}
+
+class Int16Schema implements Int16 {
+  get maxSize(): 2 {
+    return 2;
+  }
 
   read(input: ISerialInput): number {
     return input.readInt16();
@@ -147,19 +180,25 @@ export class Int16Schema extends Schema<number> {
   }
 }
 
-export const i16: Int16Schema = /* @__PURE__ */ new Int16Schema();
+export const i16: Int16 = /* @__PURE__ */ new Int16Schema();
 
 ////
 // u16
 ////
 
-export class Uint16Schema extends Schema<number> {
+export interface Uint16 extends Schema<number> {
   /**
    * The maximum number of bytes this schema can take up.
    *
    * Alias for `.measure(MaxValue).size`
    */
-  readonly maxSize = 2;
+  readonly maxSize: 2;
+}
+
+class Uint16Schema implements Uint16 {
+  get maxSize(): 2 {
+    return 2;
+  }
 
   read(input: ISerialInput): number {
     return input.readUint16();
@@ -174,19 +213,25 @@ export class Uint16Schema extends Schema<number> {
   }
 }
 
-export const u16: Uint16Schema = /* @__PURE__ */ new Uint16Schema();
+export const u16: Uint16 = /* @__PURE__ */ new Uint16Schema();
 
 ////
 // i32
 ////
 
-export class Int32Schema extends Schema<number> {
+export interface Int32 extends Schema<number, number> {
   /**
    * The maximum number of bytes this schema can take up.
    *
    * Alias for `.measure(MaxValue).size`
    */
-  readonly maxSize = 4;
+  readonly maxSize: 4;
+}
+
+class Int32Schema implements Int32 {
+  get maxSize(): 4 {
+    return 4;
+  }
 
   read(input: ISerialInput): number {
     return input.readInt32();
@@ -201,19 +246,25 @@ export class Int32Schema extends Schema<number> {
   }
 }
 
-export const i32: Int32Schema = /* @__PURE__ */ new Int32Schema();
+export const i32: Int32 = /* @__PURE__ */ new Int32Schema();
 
 ////
 // u32
 ////
 
-export class Uint32Schema extends Schema<number> {
+export interface Uint32 extends Schema<number> {
   /**
    * The maximum number of bytes this schema can take up.
    *
    * Alias for `.measure(MaxValue).size`
    */
-  readonly maxSize = 4;
+  readonly maxSize: 4;
+}
+
+class Uint32Schema implements Uint32 {
+  get maxSize(): 4 {
+    return 4;
+  }
 
   read(input: ISerialInput): number {
     return input.readUint32();
@@ -228,19 +279,25 @@ export class Uint32Schema extends Schema<number> {
   }
 }
 
-export const u32: Uint32Schema = /* @__PURE__ */ new Uint32Schema();
+export const u32: Uint32 = /* @__PURE__ */ new Uint32Schema();
 
 ////
 // f16
 ////
 
-export class Float16Schema extends Schema<number> {
+export interface Float16 extends Schema<number> {
   /**
    * The maximum number of bytes this schema can take up.
    *
    * Alias for `.measure(MaxValue).size`
    */
-  readonly maxSize = 2;
+  readonly maxSize: 2;
+}
+
+class Float16Schema implements Float16 {
+  get maxSize(): 2 {
+    return 2;
+  }
 
   read(input: ISerialInput): number {
     return input.readFloat16();
@@ -255,19 +312,25 @@ export class Float16Schema extends Schema<number> {
   }
 }
 
-export const f16: Float16Schema = /* @__PURE__ */ new Float16Schema();
+export const f16: Float16 = /* @__PURE__ */ new Float16Schema();
 
 ////
 // f32
 ////
 
-export class Float32Schema extends Schema<number> {
+export interface Float32 extends Schema<number> {
   /**
    * The maximum number of bytes this schema can take up.
    *
    * Alias for `.measure(MaxValue).size`
    */
-  readonly maxSize = 4;
+  readonly maxSize: 4;
+}
+
+class Float32Schema implements Float32 {
+  get maxSize(): 4 {
+    return 4;
+  }
 
   read(input: ISerialInput): number {
     return input.readFloat32();
@@ -282,4 +345,4 @@ export class Float32Schema extends Schema<number> {
   }
 }
 
-export const f32: Float32Schema = /* @__PURE__ */ new Float32Schema();
+export const f32: Float32 = /* @__PURE__ */ new Float32Schema();

@@ -1,31 +1,31 @@
+import { InvalidSchemaShapeError } from '../error.ts';
 import { Measurer } from '../io/measurer.ts';
 import type { IMeasurer, ISerialInput, ISerialOutput } from '../io/types.ts';
-import type { ParseUnwrapped } from '../utilityTypes.ts';
-import {
-  type AnySchema,
-  type IRefResolver,
-  MaxValue,
-  type PropertyDescription,
-  Schema,
-  type Unwrap,
-} from './types.ts';
+import { type ExtractIn, type ExtractOut, MaxValue, type Schema, toSchema } from './types.ts';
 
-export class DynamicArraySchema<TElement extends AnySchema> extends Schema<Unwrap<TElement>[]> {
-  public elementType: TElement;
+export interface DynamicArray<TElement> extends Schema<
+  readonly ExtractIn<TElement>[],
+  ExtractOut<TElement>[]
+> {
+  /**
+   * The maximum number of bytes this schema can take up.
+   *
+   * Is `NaN` if the schema is unbounded. If you would like to know
+   * how many bytes a particular value encoding will take up, use `.measure(value)`.
+   *
+   * Alias for `.measure(MaxValue).size`
+   */
+  readonly maxSize: number;
+}
 
-  constructor(private readonly _unstableElementType: TElement) {
-    super();
+class DynamicArraySchema<TElement> implements DynamicArray<TElement> {
+  readonly elementType: Schema;
 
-    // In case this array isn't part of a keyed chain,
-    // let's assume the inner type is stable.
-    this.elementType = _unstableElementType;
+  constructor(elementType: Schema) {
+    this.elementType = elementType;
   }
 
-  override resolveReferences(ctx: IRefResolver): void {
-    this.elementType = ctx.resolve(this._unstableElementType);
-  }
-
-  override write(output: ISerialOutput, values: ParseUnwrapped<TElement>[]): void {
+  write(output: ISerialOutput, values: readonly ExtractIn<TElement>[]): void {
     output.writeUint32(values.length);
 
     for (const value of values) {
@@ -33,13 +33,13 @@ export class DynamicArraySchema<TElement extends AnySchema> extends Schema<Unwra
     }
   }
 
-  override read(input: ISerialInput): ParseUnwrapped<TElement>[] {
-    const array: ParseUnwrapped<TElement>[] = [];
+  read(input: ISerialInput): ExtractOut<TElement>[] {
+    const array: ExtractOut<TElement>[] = [];
 
     const len = input.readUint32();
 
     for (let i = 0; i < len; ++i) {
-      array.push(this.elementType.read(input) as ParseUnwrapped<TElement>);
+      array.push(this.elementType.read(input));
     }
 
     return array;
@@ -57,8 +57,8 @@ export class DynamicArraySchema<TElement extends AnySchema> extends Schema<Unwra
     return this.measure(MaxValue).size;
   }
 
-  override measure(
-    values: ParseUnwrapped<TElement>[] | typeof MaxValue,
+  measure(
+    values: readonly ExtractIn<TElement>[] | typeof MaxValue,
     measurer: IMeasurer = new Measurer(),
   ): IMeasurer {
     if (values === MaxValue) {
@@ -76,47 +76,15 @@ export class DynamicArraySchema<TElement extends AnySchema> extends Schema<Unwra
 
     return measurer;
   }
-
-  override seekProperty(
-    reference: ParseUnwrapped<TElement>[] | MaxValue,
-    prop: number,
-  ): PropertyDescription | null {
-    if (typeof prop === 'symbol') {
-      return null;
-    }
-
-    const indexProp = Number.parseInt(String(prop), 10);
-    if (Number.isNaN(indexProp)) {
-      return null;
-    }
-
-    if (reference === MaxValue) {
-      return {
-        bufferOffset: this.elementType.measure(MaxValue).size * indexProp,
-        schema: this.elementType,
-      };
-    }
-
-    if (indexProp >= reference.length) {
-      // index out of range
-      return null;
-    }
-
-    const measurer = new Measurer();
-    for (let i = 0; i < indexProp; ++i) {
-      this.elementType.measure(reference[i], measurer);
-    }
-
-    return {
-      bufferOffset: measurer.size,
-      schema: this.elementType,
-    };
-  }
 }
 
-// @__NO_SIDE_EFFECTS__
-export function dynamicArrayOf<TSchema extends AnySchema>(
-  elementSchema: TSchema,
-): DynamicArraySchema<TSchema> {
-  return new DynamicArraySchema(elementSchema);
+/*@__NO_SIDE_EFFECTS__*/
+export function dynamicArray<TSchema>(_elementSchema: TSchema): DynamicArray<TSchema> {
+  const elementSchema = toSchema(_elementSchema);
+  if (!elementSchema) {
+    throw new InvalidSchemaShapeError(
+      `bin.dynamicArray(...) expects a schema, got '${String(_elementSchema)}'`,
+    );
+  }
+  return new DynamicArraySchema<TSchema>(elementSchema);
 }
