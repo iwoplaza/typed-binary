@@ -1,6 +1,6 @@
 import { InvalidSchemaShapeError, ValidationError } from '../error.ts';
 import { Measurer } from '../io/measurer.ts';
-import type { IMeasurer, ISerialInput, ISerialOutput } from '../io/types.ts';
+import type { SerialInput, SerialOutput } from '../io/types.ts';
 import { measureMax } from './measureMax.ts';
 import { struct, type Struct } from './struct.ts';
 import {
@@ -126,7 +126,7 @@ class UnionImpl implements Schema<Record<string, unknown>> {
     return variant;
   }
 
-  write(output: ISerialOutput, value: Record<string, unknown>): void {
+  write(output: SerialOutput, value: Record<string, unknown>): void {
     const tagValue = value[this.key];
     const variant = this.#getVariant(tagValue);
 
@@ -135,7 +135,7 @@ class UnionImpl implements Schema<Record<string, unknown>> {
     variant.write(output, value);
   }
 
-  read(input: ISerialInput): Record<string, unknown> {
+  read(input: SerialInput): Record<string, unknown> {
     const tagValue = this.tag.read(input);
     const variant = this.#getVariant(tagValue);
 
@@ -152,8 +152,8 @@ class UnionImpl implements Schema<Record<string, unknown>> {
 
   measure(
     value: Record<string, unknown> | MaxValue,
-    measurer: IMeasurer = new Measurer(),
-  ): IMeasurer {
+    measurer: Measurer = new Measurer(),
+  ): Measurer {
     if (value !== MaxValue) {
       const tagValue = value[this.key];
       const variant = this.#getVariant(tagValue);

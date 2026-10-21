@@ -6,7 +6,7 @@
 
 - [ ] Update README code images
 - [x] Make `getSystemEndianness` part of `main-api.ts`, and since that was the only thing that wasn't part of the public API, merge `main-api.ts` into `index.ts`
-- [ ] Remove the `I` prefix from public interfaces
+- [x] Remove the `I` prefix from public interfaces
 - [ ] Unify names of classes to `*Impl`
 - [ ] Let schema implementations implement their interface, not the plain `Schema<...>` interface
 - [ ] Convert `TypedArraySchema` to an exported `TypedArray<T>` interface and an internal `TypedArrayImpl` class, and remove its leftover `$in`/`$out` fields
@@ -30,6 +30,8 @@ for data whose layout depends on previously encoded values. The binary encoding 
 | `class X extends Schema<T>`              | `class X implements bin.Schema<T>`                    |
 | `import bin from 'typed-binary'`         | `import * as bin from 'typed-binary'`                 |
 | `import { bin } from 'typed-binary'`     | `import * as bin from 'typed-binary'`                 |
+| `bin.ISerialInput`, `bin.ISerialOutput`  | `bin.SerialInput`, `bin.SerialOutput`                 |
+| `bin.IMeasurer`                          | `bin.Measurer`                                        |
 
 The replacements in the table encode data the same way as the v4 schemas they replace.
 
@@ -59,7 +61,10 @@ The replacements in the table encode data the same way as the v4 schemas they re
   Unlike `bin.generic`, a union tagged by `bin.string` has a bounded max size, as the tag can only be one of the variants.
 - **Renamed** `bin.object` to `bin.struct`, `bin.arrayOf` to `bin.array`, `bin.dynamicArrayOf` to `bin.dynamicArray` and
   `bin.tupleOf` to `bin.tuple`. Removed `bin.byte` (deprecated alias of `bin.u8`).
-- **Removed `readByte` and `writeByte`** from `ISerialInput`/`ISerialOutput` (deprecated aliases of `readUint8` and `writeUint8`).
+- **Removed the `I` prefix from interfaces.** `ISerialInput`, `ISerialOutput` and `IMeasurer` are now `SerialInput`,
+  `SerialOutput` and `Measurer`. `Measurer` is both the interface and the constructor of the built-in measurer,
+  so `new bin.Measurer()` still works.
+- **Removed `readByte` and `writeByte`** from `SerialInput`/`SerialOutput` (deprecated aliases of `readUint8` and `writeUint8`).
 - **Removed the internal type helpers** `ISchema`, `AnySchema`, `AnySchemaWithProperties`, `ISchemaWithProperties`, `AnyObjectSchema`,
   `IKeyedSchema`, `AnyKeyedSchema`, `Unwrap`, `UnwrapRecord`, `UnwrapArray` and `ParseUnwrapped`. Use `bin.Schema`, `bin.ExtractIn` and
   `bin.ExtractOut` instead.

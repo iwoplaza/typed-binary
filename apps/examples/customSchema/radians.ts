@@ -4,7 +4,7 @@ import * as bin from 'typed-binary';
  * A schema storing radians with 2 bytes of precision.
  */
 class RadiansSchema implements bin.Schema<number> {
-  read(input: bin.ISerialInput): number {
+  read(input: bin.SerialInput): number {
     const low = input.readUint8();
     const high = input.readUint8();
 
@@ -12,7 +12,7 @@ class RadiansSchema implements bin.Schema<number> {
     return (discrete / 65535) * Math.PI;
   }
 
-  write(output: bin.ISerialOutput, value: number): void {
+  write(output: bin.SerialOutput, value: number): void {
     // The value will be wrapped to be in range of [0, Math.PI)
     const wrapped = ((value % Math.PI) + Math.PI) % Math.PI;
     // Clipping the value to be ints in range of [0, 65535]
@@ -25,7 +25,7 @@ class RadiansSchema implements bin.Schema<number> {
     output.writeUint8(high);
   }
 
-  measure(_: number | bin.MaxValue, measurer: bin.IMeasurer = new bin.Measurer()): bin.IMeasurer {
+  measure(_: number | bin.MaxValue, measurer: bin.Measurer = new bin.Measurer()): bin.Measurer {
     // The size of the data serialized by this schema
     // doesn't depend on the actual value. It's always 2 bytes.
     return measurer.add(2);

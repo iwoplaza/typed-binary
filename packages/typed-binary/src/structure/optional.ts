@@ -1,6 +1,6 @@
 import { InvalidSchemaShapeError } from '../error.ts';
 import { Measurer } from '../io/measurer.ts';
-import type { IMeasurer, ISerialInput, ISerialOutput } from '../io/types.ts';
+import type { SerialInput, SerialOutput } from '../io/types.ts';
 import {
   type ExtractIn,
   type ExtractOut,
@@ -35,7 +35,7 @@ class OptionalSchemaImpl<TInner> implements Optional<TInner> {
     this.#inner = inner;
   }
 
-  write(output: ISerialOutput, value: ExtractIn<TInner> | undefined): void {
+  write(output: SerialOutput, value: ExtractIn<TInner> | undefined): void {
     if (value !== undefined && value !== null) {
       output.writeBool(true);
       this.#inner.write(output, value);
@@ -44,7 +44,7 @@ class OptionalSchemaImpl<TInner> implements Optional<TInner> {
     }
   }
 
-  read(input: ISerialInput): ExtractOut<TInner> | undefined {
+  read(input: SerialInput): ExtractOut<TInner> | undefined {
     const valueExists = input.readBool();
 
     if (valueExists) {
@@ -68,8 +68,8 @@ class OptionalSchemaImpl<TInner> implements Optional<TInner> {
 
   measure(
     value: ExtractIn<TInner> | MaxValue | undefined,
-    measurer: IMeasurer = new Measurer(),
-  ): IMeasurer {
+    measurer: Measurer = new Measurer(),
+  ): Measurer {
     if (value !== undefined) {
       this.#inner.measure(value, measurer);
     }

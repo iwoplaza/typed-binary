@@ -53,5 +53,5 @@ export { Measurer } from './io/measurer.ts';
 export { getSystemEndianness } from './util.ts';
 export { ValidationError, InvalidSchemaShapeError } from './error.ts';
 
-export type { Endianness, IMeasurer, ISerialInput, ISerialOutput } from './io/types.ts';
+export type { Endianness, SerialInput, SerialOutput } from './io/types.ts';
 export type { ExtractIn, ExtractOut, Schema, WithSchema } from './structure/types.ts';

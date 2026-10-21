@@ -12,7 +12,7 @@ export type BufferView =
   | Float32Array
   | Float64Array;
 
-export interface ISerialInput {
+export interface SerialInput {
   readBool(): boolean;
   readInt8(): number;
   readUint8(): number;
@@ -30,7 +30,7 @@ export interface ISerialInput {
   readonly currentByteOffset: number;
 }
 
-export interface ISerialOutput {
+export interface SerialOutput {
   writeBool(value: boolean): void;
   writeInt8(value: number): void;
   writeUint8(value: number): void;
@@ -46,16 +46,4 @@ export interface ISerialOutput {
   skipBytes(bytes: number): void;
   readonly endianness: Endianness;
   readonly currentByteOffset: number;
-}
-
-export interface IMeasurer {
-  add(bytes: number): IMeasurer;
-  fork(): IMeasurer;
-  /**
-   * Marks the measurer as unbounded (its size becomes `NaN`), and returns it.
-   */
-  readonly unbounded: IMeasurer;
-
-  readonly size: number;
-  readonly isUnbounded: boolean;
 }
