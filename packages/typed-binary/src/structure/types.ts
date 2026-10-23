@@ -1,4 +1,3 @@
-import type { Measurer } from '../io/measurer.ts';
 import type { ByteCursor } from '../io/cursor.ts';
 
 export type MaxValue = typeof MaxValue;
@@ -13,7 +12,11 @@ export const MaxValue = /* @__PURE__ */ Symbol(
 export interface Schema<in TIn extends any = any, out TOut extends any = TIn> {
   write(cursor: ByteCursor, value: TIn): void;
   read(cursor: ByteCursor): TOut;
-  measure(value: TIn | MaxValue, measurer?: Measurer): Measurer;
+  /**
+   * Returns the number of bytes `value` takes up when encoded. Given `MaxValue`, returns the
+   * maximum number of bytes any value can take up, which is `NaN` if the schema is unbounded.
+   */
+  measure(value: TIn | MaxValue): number;
 }
 
 /**

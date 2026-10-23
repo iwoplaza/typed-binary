@@ -48,7 +48,6 @@ export {
 export { MaxValue } from './structure/types.ts';
 
 export { cursor } from './io/cursor.ts';
-export { Measurer } from './io/measurer.ts';
 export { getSystemEndianness } from './util.ts';
 export { ValidationError, InvalidSchemaShapeError } from './error.ts';
 

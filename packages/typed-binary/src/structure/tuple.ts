@@ -1,5 +1,4 @@
 import { InvalidSchemaShapeError, ValidationError } from '../error.ts';
-import { Measurer } from '../io/measurer.ts';
 import type { ByteCursor } from '../io/cursor.ts';
 import {
   type ExtractInRecord,
@@ -23,7 +22,7 @@ export interface Tuple<TSequence extends [WithSchema, ...WithSchema[]]> extends 
    * Is `NaN` if the schema is unbounded. If you would like to know
    * how many bytes a particular value encoding will take up, use `.measure(value)`.
    *
-   * Alias for `.measure(MaxValue).size`
+   * Alias for `.measure(MaxValue)`
    */
   readonly maxSize: number;
 }
@@ -56,18 +55,15 @@ class TupleImpl<TSequence extends [WithSchema, ...WithSchema[]]> implements Tupl
   }
 
   get maxSize(): number {
-    return this.measure(MaxValue).size;
+    return this.measure(MaxValue);
   }
 
-  measure(
-    values: ExtractInRecord<TSequence> | MaxValue,
-    measurer: Measurer = new Measurer(),
-  ): Measurer {
+  measure(values: ExtractInRecord<TSequence> | MaxValue): number {
+    let size = 0;
     for (let i = 0; i < this.#schemas.length; ++i) {
-      this.#schemas[i].measure(values === MaxValue ? MaxValue : values[i], measurer);
+      size += this.#schemas[i].measure(values === MaxValue ? MaxValue : values[i]);
     }
-
-    return measurer;
+    return size;
   }
 }
 

@@ -1,5 +1,4 @@
 import { ValidationError } from '../error.ts';
-import { Measurer } from '../io/measurer.ts';
 import type { ByteCursor } from '../io/cursor.ts';
 import type { MaxValue, Schema } from './types.ts';
 
@@ -34,8 +33,8 @@ class InherentImpl<T> implements Inherent<T> {
     return this.value;
   }
 
-  measure(_value: T | MaxValue, measurer: Measurer = new Measurer()): Measurer {
-    return measurer;
+  measure(_value: T | MaxValue): number {
+    return 0;
   }
 }
 

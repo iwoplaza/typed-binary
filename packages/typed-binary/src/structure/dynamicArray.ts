@@ -1,5 +1,4 @@
 import { InvalidSchemaShapeError } from '../error.ts';
-import { Measurer } from '../io/measurer.ts';
 import type { ByteCursor } from '../io/cursor.ts';
 import { u32 } from './baseTypes.ts';
 import { type ExtractIn, type ExtractOut, MaxValue, type Schema, toSchema } from './types.ts';
@@ -14,7 +13,7 @@ export interface DynamicArray<TElement> extends Schema<
    * Is `NaN` if the schema is unbounded. If you would like to know
    * how many bytes a particular value encoding will take up, use `.measure(value)`.
    *
-   * Alias for `.measure(MaxValue).size`
+   * Alias for `.measure(MaxValue)`
    */
   readonly maxSize: number;
 }
@@ -52,30 +51,27 @@ class DynamicArrayImpl<TElement> implements DynamicArray<TElement> {
    * Is `NaN` if the schema is unbounded. If you would like to know
    * how many bytes a particular value encoding will take up, use `.measure(value)`.
    *
-   * Alias for `.measure(MaxValue).size`
+   * Alias for `.measure(MaxValue)`
    */
   get maxSize(): number {
-    return this.measure(MaxValue).size;
+    return this.measure(MaxValue);
   }
 
-  measure(
-    values: readonly ExtractIn<TElement>[] | typeof MaxValue,
-    measurer: Measurer = new Measurer(),
-  ): Measurer {
+  measure(values: readonly ExtractIn<TElement>[] | typeof MaxValue): number {
     if (values === MaxValue) {
       // arrays cannot be bound
-      return measurer.unbounded;
+      return Number.NaN;
     }
 
-    // Length encoding
-    measurer.add(4); // u32
+    // Length encoding (u32)
+    let size = 4;
 
     // Values encoding
     for (const value of values) {
-      this.elementType.measure(value, measurer);
+      size += this.elementType.measure(value);
     }
 
-    return measurer;
+    return size;
   }
 }
 

@@ -1,5 +1,4 @@
 import { ValidationError } from '../error.ts';
-import { Measurer } from '../io/measurer.ts';
 import type { ByteCursor } from '../io/cursor.ts';
 import { MaxValue, Schema } from './types.ts';
 
@@ -59,14 +58,14 @@ class PrefixEnumImpl<TValues extends string> implements PrefixEnum<TValues> {
     throw new ValidationError(`Expected enum value, got ${content}`);
   }
 
-  measure(value: string | MaxValue, measurer: Measurer = new Measurer()): Measurer {
+  measure(value: string | MaxValue): number {
     if (value === MaxValue) {
-      return measurer.add(this.values.reduce((max, value) => Math.max(max, value.length), 0));
+      return this.values.reduce((max, value) => Math.max(max, value.length), 0);
     }
     if (!this.values.includes(value as TValues)) {
       throw new ValidationError(`Expected enum value, got ${value}`);
     }
-    return measurer.add(value.length);
+    return value.length;
   }
 }
 
@@ -93,7 +92,7 @@ export interface OrderedEnum<TValues extends string> extends Schema<TValues> {
   /**
    * The maximum number of bytes this schema can take up.
    *
-   * Alias for `.measure(MaxValue).size`
+   * Alias for `.measure(MaxValue)`
    */
   readonly maxSize: 1;
 }
@@ -130,11 +129,11 @@ class OrderedEnumImpl<TValues extends string> implements OrderedEnum<TValues> {
     return this.values[index] as TValues;
   }
 
-  measure(value: string | MaxValue, measurer: Measurer = new Measurer()): Measurer {
+  measure(value: string | MaxValue): number {
     if (value !== MaxValue && !this.values.includes(value as TValues)) {
       throw new ValidationError(`Expected enum value, got ${value}`);
     }
-    return measurer.add(1);
+    return 1;
   }
 }
 

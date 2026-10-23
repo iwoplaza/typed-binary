@@ -90,7 +90,7 @@ const complex: Complex = {
 // Round-tripping through binary
 
 function roundTrip<T extends bin.Schema>(schema: T, value: bin.ExtractIn<T>): bin.ExtractOut<T> {
-  const buffer = new ArrayBuffer(schema.measure(value).size);
+  const buffer = new ArrayBuffer(schema.measure(value));
   schema.write(bin.cursor(buffer), value);
   return schema.read(bin.cursor(buffer));
 }

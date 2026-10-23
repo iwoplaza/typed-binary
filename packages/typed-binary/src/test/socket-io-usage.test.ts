@@ -49,7 +49,7 @@ describe('Socket IO Usage', () => {
         ? [serverSocket, clientSocket]
         : [clientSocket, serverSocket];
 
-    const buffer = Buffer.alloc(schema.measure(value).size);
+    const buffer = Buffer.alloc(schema.measure(value));
     schema.write(bin.cursor(buffer), value);
     from.send(buffer);
 

@@ -1,5 +1,4 @@
 import type { ByteCursor } from '../io/cursor.ts';
-import { Measurer } from '../io/measurer.ts';
 import type { BufferView } from '../io/types.ts';
 import { unwrapBuffer } from '../io/unwrapBuffer.ts';
 import { getSystemEndianness } from '../util.ts';
@@ -69,8 +68,8 @@ class TypedArrayImpl<TTypedArray extends BufferView> implements TypedArray<TType
     return new this.#arrayConstructor(buffer, 0, this.elementCount);
   }
 
-  measure(_value: TTypedArray | typeof MaxValue, measurer: Measurer = new Measurer()): Measurer {
-    return measurer.add(this.byteLength);
+  measure(_value: TTypedArray | typeof MaxValue): number {
+    return this.byteLength;
   }
 }
 

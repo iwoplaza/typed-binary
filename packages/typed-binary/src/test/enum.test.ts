@@ -9,8 +9,8 @@ describe('bin.prefixEnum', () => {
       'multiply' | 'negate' | 'int_literal'
     >();
     expect(encodeAndDecode(Kind, 'negate')).toEqual('negate');
-    expect(Kind.measure('negate').size).toEqual('negate'.length);
-    expect(Kind.measure(bin.MaxValue).size).toEqual('int_literal'.length);
+    expect(Kind.measure('negate')).toEqual('negate'.length);
+    expect(Kind.measure(bin.MaxValue)).toEqual('int_literal'.length);
   });
 
   it('rejects values that are prefixes of each other', () => {
@@ -48,7 +48,7 @@ describe('bin.orderedEnum', () => {
     expect(bin.u8.read(input)).toEqual(2);
 
     expect(encodeAndDecode(Kind, 'negate')).toEqual('negate');
-    expect(Kind.measure('negate').size).toEqual(1);
+    expect(Kind.measure('negate')).toEqual(1);
     expect(Kind.maxSize).toEqual(1);
   });
 

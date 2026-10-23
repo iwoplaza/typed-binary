@@ -1,5 +1,4 @@
 import { InvalidSchemaShapeError } from '../error.ts';
-import { Measurer } from '../io/measurer.ts';
 import type { ByteCursor } from '../io/cursor.ts';
 import {
   type ExtractIn,
@@ -21,7 +20,7 @@ export interface Optional<TInner = Schema> extends Schema<
    * Is `NaN` if the schema is unbounded. If you would like to know
    * how many bytes a particular value encoding will take up, use `.measure(value)`.
    *
-   * Alias for `.measure(MaxValue).size`
+   * Alias for `.measure(MaxValue)`
    */
   readonly maxSize: number;
 }
@@ -60,21 +59,15 @@ class OptionalImpl<TInner> implements Optional<TInner> {
    * Is `NaN` if the schema is unbounded. If you would like to know
    * how many bytes a particular value encoding will take up, use `.measure(value)`.
    *
-   * Alias for `.measure(MaxValue).size`
+   * Alias for `.measure(MaxValue)`
    */
   get maxSize(): number {
-    return this.measure(MaxValue).size;
+    return this.measure(MaxValue);
   }
 
-  measure(
-    value: ExtractIn<TInner> | MaxValue | undefined,
-    measurer: Measurer = new Measurer(),
-  ): Measurer {
-    if (value !== undefined) {
-      this.#inner.measure(value, measurer);
-    }
-
-    return measurer.add(1);
+  measure(value: ExtractIn<TInner> | MaxValue | undefined): number {
+    // The extra byte encodes whether the value is present
+    return 1 + (value !== undefined ? this.#inner.measure(value) : 0);
   }
 }
 
