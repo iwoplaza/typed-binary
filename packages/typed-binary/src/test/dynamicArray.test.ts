@@ -14,15 +14,15 @@ describe('bin.dynamicArray', () => {
       values.push(randIntBetween(-10000, 10000));
     }
 
-    expect(IntArray.measure(values).size).toEqual(
-      bin.i32.measure(bin.MaxValue).size + length * bin.i32.measure(bin.MaxValue).size,
+    expect(IntArray.measure(values)).toEqual(
+      bin.i32.measure(bin.MaxValue) + length * bin.i32.measure(bin.MaxValue),
     );
   });
 
   it('should fail to estimate size of max value', () => {
     const IntArray = bin.dynamicArray(bin.i32);
 
-    expect(IntArray.measure(bin.MaxValue).isUnbounded).toEqual(true);
+    expect(IntArray.measure(bin.MaxValue)).toBeNaN();
   });
 
   it('should encode and decode a simple int array', () => {

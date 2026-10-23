@@ -3,19 +3,6 @@ import { describe, expect, it } from 'vitest';
 // Importing from the public API
 import * as bin from '../index.ts';
 
-describe('Measurer', () => {
-  it('stays unbounded once marked as unbounded', () => {
-    const measurer = new bin.Measurer();
-    measurer.add(4);
-    void measurer.unbounded;
-    measurer.add(4);
-
-    expect(measurer.size).toBeNaN();
-    expect(measurer.isUnbounded).toBe(true);
-    expect(measurer.fork().isUnbounded).toBe(true);
-  });
-});
-
 describe('unbounded max size', () => {
   it('propagates through objects', () => {
     expect(bin.struct({ a: bin.i32, b: bin.string, c: bin.i32 }).maxSize).toBeNaN();
@@ -23,9 +10,9 @@ describe('unbounded max size', () => {
   });
 
   it('propagates through other containers', () => {
-    expect(bin.optional(bin.string).measure(bin.MaxValue).size).toBeNaN();
-    expect(bin.tuple([bin.i32, bin.string]).measure(bin.MaxValue).size).toBeNaN();
-    expect(bin.array(bin.string, 2).measure(bin.MaxValue).size).toBeNaN();
+    expect(bin.optional(bin.string).measure(bin.MaxValue)).toBeNaN();
+    expect(bin.tuple([bin.i32, bin.string]).measure(bin.MaxValue)).toBeNaN();
+    expect(bin.array(bin.string, 2).measure(bin.MaxValue)).toBeNaN();
   });
 
   it('treats an unbounded sub-type as the biggest one', () => {
@@ -34,7 +21,7 @@ describe('unbounded max size', () => {
       1: { value: bin.i32 },
     });
 
-    expect(Generic.measure(bin.MaxValue).size).toBeNaN();
+    expect(Generic.measure(bin.MaxValue)).toBeNaN();
   });
 
   it('keeps bounded schemas bounded', () => {

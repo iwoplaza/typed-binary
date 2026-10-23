@@ -1,7 +1,7 @@
+import { hasProcess } from '../env.ts';
 import { ValidationError } from '../error.ts';
-import { Measurer } from '../io/measurer.ts';
 import type { ByteCursor } from '../io/cursor.ts';
-import { Schema } from './types.ts';
+import type { MaxValue, Schema } from './types.ts';
 
 export interface Chars<TLength extends number = number> extends Schema<string> {
   readonly length: TLength;
@@ -15,7 +15,7 @@ class CharsImpl<TLength extends number = number> implements Chars<TLength> {
   }
 
   write(cursor: ByteCursor, value: string): void {
-    if (value.length !== this.length) {
+    if (hasProcess && process.env.NODE_ENV !== 'production' && value.length !== this.length) {
       throw new ValidationError(
         `Expected char-string of length ${this.length}, got ${value.length}`,
       );
@@ -36,8 +36,8 @@ class CharsImpl<TLength extends number = number> implements Chars<TLength> {
     return content;
   }
 
-  measure(_: string, measurer: Measurer = new Measurer()): Measurer {
-    return measurer.add(this.length);
+  measure(_: string | MaxValue): number {
+    return this.length;
   }
 }
 

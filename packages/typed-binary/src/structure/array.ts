@@ -1,5 +1,5 @@
+import { hasProcess } from '../env.ts';
 import { InvalidSchemaShapeError, ValidationError } from '../error.ts';
-import { Measurer } from '../io/measurer.ts';
 import type { ByteCursor } from '../io/cursor.ts';
 import {
   type ExtractIn,
@@ -22,7 +22,7 @@ export interface Array<TElement> extends Schema<
    * Is `NaN` if the schema is unbounded. If you would like to know
    * how many bytes a particular value encoding will take up, use `.measure(value)`.
    *
-   * Alias for `.measure(MaxValue).size`
+   * Alias for `.measure(MaxValue)`
    */
   readonly maxSize: number;
 }
@@ -39,7 +39,7 @@ class ArrayImpl<TElement> implements Array<TElement> {
   }
 
   write(cursor: ByteCursor, values: readonly ExtractIn<TElement>[]): void {
-    if (values.length !== this.length) {
+    if (hasProcess && process.env.NODE_ENV !== 'production' && values.length !== this.length) {
       throw new ValidationError(`Expected array of length ${this.length}, got ${values.length}`);
     }
 
@@ -64,28 +64,25 @@ class ArrayImpl<TElement> implements Array<TElement> {
    * Returns `NaN` if the schema is unbounded. If you would like to know
    * how many bytes a particular value encoding will take up, use `.measure(value)`.
    *
-   * Alias for `.measure(MaxValue).size`
+   * Alias for `.measure(MaxValue)`
    */
   get maxSize(): number {
-    return this.#element.measure(MaxValue).size * this.length;
+    return this.#element.measure(MaxValue) * this.length;
   }
 
-  measure(
-    values: readonly ExtractIn<TElement>[] | MaxValue,
-    measurer: Measurer = new Measurer(),
-  ): Measurer {
+  measure(values: readonly ExtractIn<TElement>[] | MaxValue): number {
+    let size = 0;
     for (let i = 0; i < this.length; ++i) {
-      this.#element.measure(values === MaxValue ? MaxValue : values[i], measurer);
+      size += this.#element.measure(values === MaxValue ? MaxValue : values[i]);
     }
-
-    return measurer;
+    return size;
   }
 }
 
 /*#__NO_SIDE_EFFECTS__*/
 export function array<TSchema>(_elementSchema: TSchema, length: number): Array<TSchema> {
-  const elementSchema = toSchema(_elementSchema);
-  if (!elementSchema) {
+  const elementSchema = toSchema(_elementSchema) as Schema;
+  if (hasProcess && process.env.NODE_ENV !== 'production' && !elementSchema) {
     throw new InvalidSchemaShapeError(
       `bin.array(...) expects a schema, got '${String(_elementSchema)}'`,
     );

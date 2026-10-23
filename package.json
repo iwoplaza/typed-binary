@@ -49,7 +49,6 @@
     "rollup": "^4.59.0",
     "socket.io": "^4.7.5",
     "socket.io-client": "^4.7.5",
-    "tsup": "8.1.0",
     "tsx": "^4.16.2",
     "typed-binary": "workspace:*",
     "typescript": "catalog:",

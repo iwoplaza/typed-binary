@@ -1,4 +1,3 @@
-import { Measurer } from '../io/measurer.ts';
 import type { ByteCursor } from '../io/cursor.ts';
 import { MaxValue, type Schema } from './types.ts';
 
@@ -10,7 +9,7 @@ export interface Bool extends Schema<boolean> {
   /**
    * The maximum number of bytes this schema can take up.
    *
-   * Alias for `.measure(MaxValue).size`
+   * Alias for `.measure(MaxValue)`
    */
   readonly maxSize: 1;
 }
@@ -28,8 +27,8 @@ class BoolImpl implements Bool {
     cursor.view.setUint8(cursor.offset++, value ? 1 : 0);
   }
 
-  measure(_: boolean | MaxValue, measurer: Measurer = new Measurer()): Measurer {
-    return measurer.add(1);
+  measure(_: boolean | MaxValue): number {
+    return 1;
   }
 }
 
@@ -44,7 +43,7 @@ export interface String extends Schema<string, string> {
    * The maximum number of bytes this schema can take up.
    * Always `NaN`, as strings can be of any length.
    *
-   * Alias for `.measure(MaxValue).size`
+   * Alias for `.measure(MaxValue)`
    */
   readonly maxSize: number;
 }
@@ -97,13 +96,13 @@ class StringImpl implements String {
     view.setUint8(cursor.offset++, 0);
   }
 
-  measure(value: string | typeof MaxValue, measurer: Measurer = new Measurer()): Measurer {
+  measure(value: string | typeof MaxValue): number {
     if (value === MaxValue) {
       // A string cannot be bound
-      return measurer.unbounded;
+      return Number.NaN;
     }
-    const encoded = getEncoder().encode(value);
-    return measurer.add(encoded.byteLength + 1);
+    // The extra byte is the null terminator
+    return getEncoder().encode(value).byteLength + 1;
   }
 }
 
@@ -117,7 +116,7 @@ export interface Int8 extends Schema<number> {
   /**
    * The maximum number of bytes this schema can take up.
    *
-   * Alias for `.measure(MaxValue).size`
+   * Alias for `.measure(MaxValue)`
    */
   readonly maxSize: 1;
 }
@@ -135,8 +134,8 @@ class Int8Impl implements Int8 {
     cursor.view.setInt8(cursor.offset++, value);
   }
 
-  measure(_: number | MaxValue, measurer: Measurer = new Measurer()): Measurer {
-    return measurer.add(1);
+  measure(_: number | MaxValue): number {
+    return 1;
   }
 }
 
@@ -150,7 +149,7 @@ export interface Uint8 extends Schema<number> {
   /**
    * The maximum number of bytes this schema can take up.
    *
-   * Alias for `.measure(MaxValue).size`
+   * Alias for `.measure(MaxValue)`
    */
   readonly maxSize: 1;
 }
@@ -168,8 +167,8 @@ class Uint8Impl implements Uint8 {
     cursor.view.setUint8(cursor.offset++, value);
   }
 
-  measure(_: number | MaxValue, measurer: Measurer = new Measurer()): Measurer {
-    return measurer.add(1);
+  measure(_: number | MaxValue): number {
+    return 1;
   }
 }
 
@@ -183,7 +182,7 @@ export interface Int16 extends Schema<number> {
   /**
    * The maximum number of bytes this schema can take up.
    *
-   * Alias for `.measure(MaxValue).size`
+   * Alias for `.measure(MaxValue)`
    */
   readonly maxSize: 2;
 }
@@ -204,8 +203,8 @@ class Int16Impl implements Int16 {
     cursor.offset += 2;
   }
 
-  measure(_: number | MaxValue, measurer: Measurer = new Measurer()): Measurer {
-    return measurer.add(2);
+  measure(_: number | MaxValue): number {
+    return 2;
   }
 }
 
@@ -219,7 +218,7 @@ export interface Uint16 extends Schema<number> {
   /**
    * The maximum number of bytes this schema can take up.
    *
-   * Alias for `.measure(MaxValue).size`
+   * Alias for `.measure(MaxValue)`
    */
   readonly maxSize: 2;
 }
@@ -240,8 +239,8 @@ class Uint16Impl implements Uint16 {
     cursor.offset += 2;
   }
 
-  measure(_: number | MaxValue, measurer: Measurer = new Measurer()): Measurer {
-    return measurer.add(2);
+  measure(_: number | MaxValue): number {
+    return 2;
   }
 }
 
@@ -255,7 +254,7 @@ export interface Int32 extends Schema<number, number> {
   /**
    * The maximum number of bytes this schema can take up.
    *
-   * Alias for `.measure(MaxValue).size`
+   * Alias for `.measure(MaxValue)`
    */
   readonly maxSize: 4;
 }
@@ -276,8 +275,8 @@ class Int32Impl implements Int32 {
     cursor.offset += 4;
   }
 
-  measure(_: number | MaxValue, measurer: Measurer = new Measurer()): Measurer {
-    return measurer.add(4);
+  measure(_: number | MaxValue): number {
+    return 4;
   }
 }
 
@@ -291,7 +290,7 @@ export interface Uint32 extends Schema<number> {
   /**
    * The maximum number of bytes this schema can take up.
    *
-   * Alias for `.measure(MaxValue).size`
+   * Alias for `.measure(MaxValue)`
    */
   readonly maxSize: 4;
 }
@@ -312,8 +311,8 @@ class Uint32Impl implements Uint32 {
     cursor.offset += 4;
   }
 
-  measure(_: number | MaxValue, measurer: Measurer = new Measurer()): Measurer {
-    return measurer.add(4);
+  measure(_: number | MaxValue): number {
+    return 4;
   }
 }
 
@@ -327,7 +326,7 @@ export interface Float16 extends Schema<number> {
   /**
    * The maximum number of bytes this schema can take up.
    *
-   * Alias for `.measure(MaxValue).size`
+   * Alias for `.measure(MaxValue)`
    */
   readonly maxSize: 2;
 }
@@ -348,8 +347,8 @@ class Float16Impl implements Float16 {
     cursor.offset += 2;
   }
 
-  measure(_: number | MaxValue, measurer: Measurer = new Measurer()): Measurer {
-    return measurer.add(2);
+  measure(_: number | MaxValue): number {
+    return 2;
   }
 }
 
@@ -363,7 +362,7 @@ export interface Float32 extends Schema<number> {
   /**
    * The maximum number of bytes this schema can take up.
    *
-   * Alias for `.measure(MaxValue).size`
+   * Alias for `.measure(MaxValue)`
    */
   readonly maxSize: 4;
 }
@@ -384,8 +383,8 @@ class Float32Impl implements Float32 {
     cursor.offset += 4;
   }
 
-  measure(_: number | MaxValue, measurer: Measurer = new Measurer()): Measurer {
-    return measurer.add(4);
+  measure(_: number | MaxValue): number {
+    return 4;
   }
 }
 

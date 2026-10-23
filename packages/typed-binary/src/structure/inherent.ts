@@ -1,5 +1,5 @@
+import { hasProcess } from '../env.ts';
 import { ValidationError } from '../error.ts';
-import { Measurer } from '../io/measurer.ts';
 import type { ByteCursor } from '../io/cursor.ts';
 import type { MaxValue, Schema } from './types.ts';
 
@@ -23,7 +23,7 @@ class InherentImpl<T> implements Inherent<T> {
   }
 
   write(_cursor: ByteCursor, value: T): void {
-    if (value !== this.value) {
+    if (hasProcess && process.env.NODE_ENV !== 'production' && value !== this.value) {
       throw new ValidationError(
         `Expected inherent value ${String(this.value)}, got ${String(value)}`,
       );
@@ -34,8 +34,8 @@ class InherentImpl<T> implements Inherent<T> {
     return this.value;
   }
 
-  measure(_value: T | MaxValue, measurer: Measurer = new Measurer()): Measurer {
-    return measurer;
+  measure(_value: T | MaxValue): number {
+    return 0;
   }
 }
 

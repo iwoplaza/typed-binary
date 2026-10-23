@@ -1,5 +1,5 @@
+import { hasProcess } from '../env.ts';
 import { InvalidSchemaShapeError } from '../error.ts';
-import { Measurer } from '../io/measurer.ts';
 import type { ByteCursor } from '../io/cursor.ts';
 import { measureMax } from './measureMax.ts';
 import {
@@ -37,7 +37,7 @@ export interface Pipe<THeadIn, THeadOut extends THeadIn, TTail> extends Schema<
    * Is `NaN` if the schema is unbounded. If you would like to know
    * how many bytes a particular value encoding will take up, use `.measure(value)`.
    *
-   * Alias for `.measure(MaxValue).size`
+   * Alias for `.measure(MaxValue)`
    */
   readonly maxSize: number;
 }
@@ -52,8 +52,8 @@ class PipeImpl<THeadIn, THeadOut extends THeadIn, TTail> implements Pipe<THeadIn
   }
 
   #tail(headValue: THeadIn | THeadOut | MaxValue): Schema {
-    const tail = toSchema(this.action(headValue));
-    if (!tail) {
+    const tail = toSchema(this.action(headValue)) as Schema;
+    if (hasProcess && process.env.NODE_ENV !== 'production' && !tail) {
       throw new InvalidSchemaShapeError(`bin.pipe(...) action has to return a schema`);
     }
     return tail;
@@ -72,26 +72,21 @@ class PipeImpl<THeadIn, THeadOut extends THeadIn, TTail> implements Pipe<THeadIn
   }
 
   get maxSize(): number {
-    return this.measure(MaxValue).size;
+    return this.measure(MaxValue);
   }
 
-  measure(
-    value: (THeadIn & ExtractIn<TTail>) | MaxValue,
-    measurer: Measurer = new Measurer(),
-  ): Measurer {
+  measure(value: (THeadIn & ExtractIn<TTail>) | MaxValue): number {
     if (value === MaxValue) {
       // The action can return schemas that reference this pipe recursively
-      return measureMax(this, measurer, () => this.#measure(value, measurer));
+      return measureMax(this, () => this.#measure(value));
     }
-    return this.#measure(value, measurer);
+    return this.#measure(value);
   }
 
-  #measure(value: (THeadIn & ExtractIn<TTail>) | MaxValue, measurer: Measurer): Measurer {
+  #measure(value: (THeadIn & ExtractIn<TTail>) | MaxValue): number {
     // When measuring MaxValue, the head and the tail are measured independently of each other,
     // which can overestimate the max size (see `Pipe.maxSize`).
-    this.head.measure(value, measurer);
-    this.#tail(value).measure(value, measurer);
-    return measurer;
+    return this.head.measure(value) + this.#tail(value).measure(value);
   }
 }
 
@@ -111,8 +106,8 @@ export function pipe<THeadIn, THeadOut extends THeadIn, TTail>(
   _head: WithSchema<THeadIn, THeadOut>,
   action: PipeAction<THeadIn, THeadOut, TTail>,
 ): Pipe<THeadIn, THeadOut, TTail> {
-  const head = toSchema(_head) as Schema<THeadIn, THeadOut> | undefined;
-  if (!head) {
+  const head = toSchema(_head) as Schema<THeadIn, THeadOut>;
+  if (hasProcess && process.env.NODE_ENV !== 'production' && !head) {
     throw new InvalidSchemaShapeError(`bin.pipe(...) expects a schema, got '${String(_head)}'`);
   }
   return new PipeImpl(head, action);

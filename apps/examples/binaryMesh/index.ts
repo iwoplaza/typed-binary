@@ -27,7 +27,7 @@ async function loadMesh(): Promise<Mesh> {
 
 async function saveMesh(mesh: Mesh): Promise<void> {
   try {
-    const buffer = Buffer.alloc(Mesh.measure(mesh).size);
+    const buffer = Buffer.alloc(Mesh.measure(mesh));
     const writer = bin.cursor(buffer);
 
     Mesh.write(writer, mesh);

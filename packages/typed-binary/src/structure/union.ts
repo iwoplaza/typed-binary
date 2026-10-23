@@ -1,5 +1,5 @@
+import { hasProcess } from '../env.ts';
 import { InvalidSchemaShapeError, ValidationError } from '../error.ts';
-import { Measurer } from '../io/measurer.ts';
 import type { ByteCursor } from '../io/cursor.ts';
 import { measureMax } from './measureMax.ts';
 import { struct, type Struct } from './struct.ts';
@@ -83,7 +83,7 @@ export interface Union<
    * Is `NaN` if the schema is unbounded. If you would like to know
    * how many bytes a particular value encoding will take up, use `.measure(value)`.
    *
-   * Alias for `.measure(MaxValue).size`
+   * Alias for `.measure(MaxValue)`
    */
   readonly maxSize: number;
 }
@@ -151,49 +151,30 @@ class UnionImpl<TTag, TVariants, TKey extends string, TBase> implements Union<
   }
 
   get maxSize(): number {
-    return this.measure(MaxValue).size;
+    return this.measure(MaxValue);
   }
 
-  measure(
-    value: UnionIn<TKey, TBase, TVariants> | MaxValue,
-    measurer: Measurer = new Measurer(),
-  ): Measurer {
+  measure(value: UnionIn<TKey, TBase, TVariants> | MaxValue): number {
     if (value !== MaxValue) {
       const tagValue = (value as Record<string, unknown>)[this.key];
       const variant = this.#getVariant(tagValue);
 
-      this.#tag.measure(tagValue, measurer);
-      this.#base?.measure(value, measurer);
-      return variant.measure(value, measurer);
+      return (
+        this.#tag.measure(tagValue) + (this.#base?.measure(value) ?? 0) + variant.measure(value)
+      );
     }
 
     // Variants can reference this union recursively
-    return measureMax(this, measurer, () => {
-      this.#base?.measure(MaxValue, measurer);
-
+    return measureMax(this, () => {
       // Measuring each variant together with its tag, as the size of the tag
       // can depend on its value (e.g. for `bin.prefixEnum` or `bin.string`).
-      let biggest: [string, Schema] | undefined;
-      let biggestSize = -1;
+      let biggest = 0;
       for (const [tagValue, variant] of this.#variantSchemas) {
-        const forked = measurer.fork();
-        this.#tag.measure(tagValue, forked);
-        variant.measure(MaxValue, forked);
-        // An unbounded (NaN) variant is the biggest one
-        if (Number.isNaN(forked.size) || forked.size > biggestSize) {
-          biggest = [tagValue, variant];
-          biggestSize = forked.size;
-          if (Number.isNaN(biggestSize)) {
-            break;
-          }
-        }
+        // An unbounded (NaN) variant makes the union unbounded, as `Math.max` returns NaN
+        biggest = Math.max(biggest, this.#tag.measure(tagValue) + variant.measure(MaxValue));
       }
 
-      if (biggest) {
-        // Measuring for real this time
-        this.#tag.measure(biggest[0], measurer);
-        biggest[1].measure(MaxValue, measurer);
-      }
+      return (this.#base?.measure(MaxValue) ?? 0) + biggest;
     });
   }
 }
@@ -225,8 +206,8 @@ export function union<
   variants: TVariants,
   options?: UnionOptions<TKey, TBase>,
 ): Union<TTag, TVariants, TKey, TBase> {
-  const tagSchema = toSchema(tag);
-  if (!tagSchema) {
+  const tagSchema = toSchema(tag) as Schema;
+  if (hasProcess && process.env.NODE_ENV !== 'production' && !tagSchema) {
     throw new InvalidSchemaShapeError(
       `bin.union(...) expects a schema as the tag, got '${String(tag)}'`,
     );

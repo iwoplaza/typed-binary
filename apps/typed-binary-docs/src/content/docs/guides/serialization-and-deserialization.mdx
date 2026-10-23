@@ -17,9 +17,10 @@ write(cursor: ByteCursor, value: TIn): void;
 read(cursor: ByteCursor): TOut;
 
 /**
- * Estimates the size of the value (according to the schema's structure)
+ * Returns the number of bytes the value takes up when encoded. Given `MaxValue`, returns the
+ * maximum number of bytes any value can take up, which is `NaN` if the schema is unbounded.
  */
-measure(value: TIn | MaxValue, measurer?: Measurer): Measurer;
+measure(value: TIn | MaxValue): number;
 ```
 
 `TIn` is the type of values the schema accepts when writing, and `TOut` the type of values it produces when reading.
@@ -75,7 +76,7 @@ const buffer = new ArrayBuffer(1024, { maxByteLength: 64 * 1024 });
 const cursor = bin.cursor(buffer);
 
 function send(message: bin.ExtractIn<typeof Message>) {
-  const size = Message.measure(message).size;
+  const size = Message.measure(message);
   if (buffer.byteLength < cursor.offset + size) {
     buffer.resize(cursor.offset + size);
   }
@@ -108,7 +109,7 @@ const packet = {
   y: 1.6,
 } as const;
 
-const packetSize = PlayerUpdatePacket.measure(packet).size;
+const packetSize = PlayerUpdatePacket.measure(packet);
 const buffer = new ArrayBuffer(packetSize);
 ```
 
@@ -127,6 +128,14 @@ export const PlayerUpdatePacket = bin.struct({
   y: bin.f32,
 });
 
-const maxPacketSize = PlayerUpdatePacket.measure(bin.MaxValue).size; // or PlayerUpdatePacket.maxSize
+const maxPacketSize = PlayerUpdatePacket.measure(bin.MaxValue); // or PlayerUpdatePacket.maxSize
 const sharedBuffer = new ArrayBuffer(maxPacketSize);
 ```
+
+## Validation
+
+Mistakes in how schemas are defined (e.g. passing something that isn't a schema to `bin.struct`) throw an
+`InvalidSchemaShapeError`, and values that don't match their schema when writing or measuring (e.g. an array of the wrong
+length, or a value that isn't part of an enum) throw a `ValidationError`. These checks are skipped in production builds,
+where bundlers replace `process.env.NODE_ENV` with `'production'`, so that they don't add to the size of your app.
+Malformed data is still detected when reading (e.g. an unknown union variant or enum index), in production too.

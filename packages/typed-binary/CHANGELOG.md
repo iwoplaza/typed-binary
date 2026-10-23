@@ -40,7 +40,8 @@ for data whose layout depends on previously encoded values. The binary encoding 
 | `io.currentByteOffset`                   | `cursor.offset`                                       |
 | `io.seekTo(offset)`, `io.skipBytes(n)`   | `cursor.offset = offset`, `cursor.offset += n`        |
 | `io.endianness`                          | `cursor.littleEndian`                                 |
-| `bin.IMeasurer`                          | `bin.Measurer`                                        |
+| `schema.measure(value).size`             | `schema.measure(value)`                               |
+| `bin.IMeasurer`, `bin.Measurer`          | Removed, `measure()` returns a number                 |
 
 The replacements in the table encode data the same way as the v4 schemas they replace.
 
@@ -82,8 +83,15 @@ The replacements in the table encode data the same way as the v4 schemas they re
   - **Offsets are relative to the given view.** Given a typed array or a Node.js `Buffer`, `cursor.offset` counts from the start of
     that view, whereas `currentByteOffset` (and `byteOffset` in the options) counted from the start of the underlying `ArrayBuffer`.
     Reads and writes can no longer go past the end of the given view.
-- **Renamed `IMeasurer` to `Measurer`.** `Measurer` is both the interface and the constructor of the built-in measurer,
-  so `new bin.Measurer()` still works.
+- **`schema.measure(value)` returns the number of bytes** instead of a measurer, and no longer accepts a measurer to add to.
+  Given `bin.MaxValue`, it returns the maximum size, which is `NaN` for unbounded schemas (instead of `measurer.isUnbounded`).
+  `bin.Measurer` and `bin.IMeasurer` are removed. Custom schemas return a number from `measure()`.
+- **Checks of how the library is used are skipped in production.** Invalid schema definitions (`InvalidSchemaShapeError`)
+  and values that don't match their schema when writing or measuring (`ValidationError`, e.g. an array of the wrong length)
+  are only checked when `process.env.NODE_ENV !== 'production'`, which bundlers replace in production builds, removing
+  the checks and their messages. Malformed data is still detected when reading, in production too.
+- **The package is ESM-only.** The CommonJS build (`dist/index.cjs`) is removed. Node.js can still `require('typed-binary')`
+  since v20.19 and v22.12, which load ES modules synchronously.
 - **Removed the `typed-binary/index` subpath export.** Import from `typed-binary` instead.
 - **Removed the internal type helpers** `ISchema`, `AnySchema`, `AnySchemaWithProperties`, `ISchemaWithProperties`, `AnyObjectSchema`,
   `IKeyedSchema`, `AnyKeyedSchema`, `Unwrap`, `UnwrapRecord`, `UnwrapArray` and `ParseUnwrapped`. Use `bin.Schema`, `bin.ExtractIn` and

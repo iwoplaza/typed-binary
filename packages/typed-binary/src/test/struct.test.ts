@@ -10,7 +10,7 @@ describe('bin.struct', () => {
       label: bin.u8,
     });
 
-    expect(description.measure(bin.MaxValue).size).toEqual(5);
+    expect(description.measure(bin.MaxValue)).toEqual(5);
   });
 
   it('should encode and decode a simple object', () => {
@@ -60,7 +60,7 @@ describe('bin.struct', () => {
       c: 3,
     };
 
-    const { output, input } = makeIO(schema.measure(value).size);
+    const { output, input } = makeIO(schema.measure(value));
     schema.write(output, value);
 
     expect(bin.i32.read(input)).to.equal(1); // a
@@ -89,7 +89,7 @@ describe('bin.struct', () => {
       d: 4,
     };
 
-    const { output, input } = makeIO(extended.measure(value).size);
+    const { output, input } = makeIO(extended.measure(value));
     extended.write(output, value);
 
     expect(bin.i32.read(input)).to.equal(1); // a
@@ -119,7 +119,7 @@ describe('bin.struct', () => {
       d: 4,
     };
 
-    const { output, input } = makeIO(prepended.measure(value).size);
+    const { output, input } = makeIO(prepended.measure(value));
     prepended.write(output, value);
 
     expect(bin.i32.read(input)).to.equal(3); // c
