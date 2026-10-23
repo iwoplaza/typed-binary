@@ -1,17 +1,11 @@
 export class ValidationError extends Error {
-  constructor(msg = 'Value does not match its schema') {
-    super(msg);
-
-    // Set the prototype explicitly.
-    Object.setPrototypeOf(this, ValidationError.prototype);
+  constructor(message = 'Value does not match its schema') {
+    super(message);
   }
 }
 
 export class InvalidSchemaShapeError extends Error {
-  constructor(msg = 'Invalid schema') {
-    super(msg);
-
-    // Set the prototype explicitly.
-    Object.setPrototypeOf(this, InvalidSchemaShapeError.prototype);
+  constructor(message = 'Invalid schema') {
+    super(message);
   }
 }

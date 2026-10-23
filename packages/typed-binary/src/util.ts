@@ -1,17 +1,8 @@
-/**
- * @returns {Boolean} true if system is big endian
- */
-// @__NO_SIDE_EFFECTS__
-function isSystemBigEndian(): boolean {
-  const array = new Uint8Array(4);
-  const view = new Uint32Array(array.buffer);
-
-  view[0] = 1; // setting a one spanning 4 bytes
-
-  return array[0] === 0; // if zero is the left-most byte, one was encoded as big endian
-}
+let systemEndianness: 'big' | 'little' | undefined;
 
 // @__NO_SIDE_EFFECTS__
 export function getSystemEndianness(): 'big' | 'little' {
-  return isSystemBigEndian() ? 'big' : 'little';
+  // The first byte of a 1 encoded as a 16-bit integer is 1 only on little-endian systems
+  return (systemEndianness ??=
+    new Uint8Array(new Uint16Array([1]).buffer)[0] === 1 ? 'little' : 'big');
 }
