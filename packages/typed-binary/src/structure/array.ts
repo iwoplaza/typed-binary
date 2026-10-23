@@ -1,3 +1,4 @@
+import { hasProcess } from '../env.ts';
 import { InvalidSchemaShapeError, ValidationError } from '../error.ts';
 import type { ByteCursor } from '../io/cursor.ts';
 import {
@@ -39,7 +40,11 @@ class ArrayImpl<TElement> implements Array<TElement> {
 
   write(cursor: ByteCursor, values: readonly ExtractIn<TElement>[]): void {
     if (values.length !== this.length) {
-      throw new ValidationError(`Expected array of length ${this.length}, got ${values.length}`);
+      throw new ValidationError(
+        hasProcess && process.env.NODE_ENV !== 'production'
+          ? `Expected array of length ${this.length}, got ${values.length}`
+          : undefined,
+      );
     }
 
     for (const value of values) {
@@ -80,10 +85,12 @@ class ArrayImpl<TElement> implements Array<TElement> {
 
 /*#__NO_SIDE_EFFECTS__*/
 export function array<TSchema>(_elementSchema: TSchema, length: number): Array<TSchema> {
-  const elementSchema = toSchema(_elementSchema);
+  const elementSchema = toSchema(_elementSchema) as Schema;
   if (!elementSchema) {
     throw new InvalidSchemaShapeError(
-      `bin.array(...) expects a schema, got '${String(_elementSchema)}'`,
+      hasProcess && process.env.NODE_ENV !== 'production'
+        ? `bin.array(...) expects a schema, got '${String(_elementSchema)}'`
+        : undefined,
     );
   }
   return new ArrayImpl<TSchema>(elementSchema, length);

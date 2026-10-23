@@ -86,6 +86,10 @@ The replacements in the table encode data the same way as the v4 schemas they re
 - **`schema.measure(value)` returns the number of bytes** instead of a measurer, and no longer accepts a measurer to add to.
   Given `bin.MaxValue`, it returns the maximum size, which is `NaN` for unbounded schemas (instead of `measurer.isUnbounded`).
   `bin.Measurer` and `bin.IMeasurer` are removed. Custom schemas return a number from `measure()`.
+- **Error messages are left out of production builds.** `InvalidSchemaShapeError` and `ValidationError` only have detailed
+  messages when `process.env.NODE_ENV !== 'production'`, which bundlers replace in production builds, removing the messages.
+  The checks still run in production, and throw errors with a generic message.
+- **Invalid enum definitions throw `InvalidSchemaShapeError`** (e.g. duplicate values), instead of `ValidationError`.
 - **Removed the `typed-binary/index` subpath export.** Import from `typed-binary` instead.
 - **Removed the internal type helpers** `ISchema`, `AnySchema`, `AnySchemaWithProperties`, `ISchemaWithProperties`, `AnyObjectSchema`,
   `IKeyedSchema`, `AnyKeyedSchema`, `Unwrap`, `UnwrapRecord`, `UnwrapArray` and `ParseUnwrapped`. Use `bin.Schema`, `bin.ExtractIn` and

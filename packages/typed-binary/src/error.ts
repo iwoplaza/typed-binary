@@ -1,5 +1,5 @@
 export class ValidationError extends Error {
-  constructor(msg: string) {
+  constructor(msg = 'Value does not match its schema') {
     super(msg);
 
     // Set the prototype explicitly.
@@ -8,7 +8,7 @@ export class ValidationError extends Error {
 }
 
 export class InvalidSchemaShapeError extends Error {
-  constructor(msg: string) {
+  constructor(msg = 'Invalid schema') {
     super(msg);
 
     // Set the prototype explicitly.

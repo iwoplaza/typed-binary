@@ -131,3 +131,14 @@ export const PlayerUpdatePacket = bin.struct({
 const maxPacketSize = PlayerUpdatePacket.measure(bin.MaxValue); // or PlayerUpdatePacket.maxSize
 const sharedBuffer = new ArrayBuffer(maxPacketSize);
 ```
+
+## Validation
+
+Mistakes in how schemas are defined (e.g. passing something that isn't a schema to `bin.struct`) throw an
+`InvalidSchemaShapeError`. Values that don't match their schema when writing or measuring (e.g. an array of the wrong
+length, or a value that isn't part of an enum), and malformed data when reading (e.g. an unknown union variant or enum
+index), throw a `ValidationError`.
+
+These checks run in production too, but their detailed messages are left out of production builds (where bundlers replace
+`process.env.NODE_ENV` with `'production'`), so that they don't add to the size of your app. The errors then have a
+generic message instead.

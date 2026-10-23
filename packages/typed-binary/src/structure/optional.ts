@@ -1,3 +1,4 @@
+import { hasProcess } from '../env.ts';
 import { InvalidSchemaShapeError } from '../error.ts';
 import type { ByteCursor } from '../io/cursor.ts';
 import {
@@ -73,10 +74,12 @@ class OptionalImpl<TInner> implements Optional<TInner> {
 
 /*#__NO_SIDE_EFFECTS__*/
 export function optional<TSchema extends any>(_inner: TSchema): Optional<TSchema> {
-  const inner = toSchema(_inner);
+  const inner = toSchema(_inner) as Schema;
   if (!inner) {
     throw new InvalidSchemaShapeError(
-      `bin.optional(...) expects a schema, got '${String(_inner)}'`,
+      hasProcess && process.env.NODE_ENV !== 'production'
+        ? `bin.optional(...) expects a schema, got '${String(_inner)}'`
+        : undefined,
     );
   }
 

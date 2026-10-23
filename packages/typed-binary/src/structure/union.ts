@@ -1,3 +1,4 @@
+import { hasProcess } from '../env.ts';
 import { InvalidSchemaShapeError, ValidationError } from '../error.ts';
 import type { ByteCursor } from '../io/cursor.ts';
 import { measureMax } from './measureMax.ts';
@@ -121,9 +122,11 @@ class UnionImpl<TTag, TVariants, TKey extends string, TBase> implements Union<
     const variant = this.#variantSchemas.get(String(tagValue));
     if (!variant) {
       throw new ValidationError(
-        `Unknown variant '${String(tagValue)}', expected one of ${JSON.stringify([
-          ...this.#variantSchemas.keys(),
-        ])}`,
+        hasProcess && process.env.NODE_ENV !== 'production'
+          ? `Unknown variant '${String(tagValue)}', expected one of ${JSON.stringify([
+              ...this.#variantSchemas.keys(),
+            ])}`
+          : undefined,
       );
     }
     return variant;
@@ -205,10 +208,12 @@ export function union<
   variants: TVariants,
   options?: UnionOptions<TKey, TBase>,
 ): Union<TTag, TVariants, TKey, TBase> {
-  const tagSchema = toSchema(tag);
+  const tagSchema = toSchema(tag) as Schema;
   if (!tagSchema) {
     throw new InvalidSchemaShapeError(
-      `bin.union(...) expects a schema as the tag, got '${String(tag)}'`,
+      hasProcess && process.env.NODE_ENV !== 'production'
+        ? `bin.union(...) expects a schema as the tag, got '${String(tag)}'`
+        : undefined,
     );
   }
 

@@ -1,3 +1,4 @@
+import { hasProcess } from '../env.ts';
 import { InvalidSchemaShapeError } from '../error.ts';
 import type { ByteCursor } from '../io/cursor.ts';
 import { measureMax } from './measureMax.ts';
@@ -51,9 +52,13 @@ class PipeImpl<THeadIn, THeadOut extends THeadIn, TTail> implements Pipe<THeadIn
   }
 
   #tail(headValue: THeadIn | THeadOut | MaxValue): Schema {
-    const tail = toSchema(this.action(headValue));
+    const tail = toSchema(this.action(headValue)) as Schema;
     if (!tail) {
-      throw new InvalidSchemaShapeError(`bin.pipe(...) action has to return a schema`);
+      throw new InvalidSchemaShapeError(
+        hasProcess && process.env.NODE_ENV !== 'production'
+          ? `bin.pipe(...) action has to return a schema`
+          : undefined,
+      );
     }
     return tail;
   }
@@ -105,9 +110,13 @@ export function pipe<THeadIn, THeadOut extends THeadIn, TTail>(
   _head: WithSchema<THeadIn, THeadOut>,
   action: PipeAction<THeadIn, THeadOut, TTail>,
 ): Pipe<THeadIn, THeadOut, TTail> {
-  const head = toSchema(_head) as Schema<THeadIn, THeadOut> | undefined;
+  const head = toSchema(_head) as Schema<THeadIn, THeadOut>;
   if (!head) {
-    throw new InvalidSchemaShapeError(`bin.pipe(...) expects a schema, got '${String(_head)}'`);
+    throw new InvalidSchemaShapeError(
+      hasProcess && process.env.NODE_ENV !== 'production'
+        ? `bin.pipe(...) expects a schema, got '${String(_head)}'`
+        : undefined,
+    );
   }
   return new PipeImpl(head, action);
 }

@@ -1,3 +1,4 @@
+import { hasProcess } from '../env.ts';
 import { InvalidSchemaShapeError } from '../error.ts';
 import type { ByteCursor } from '../io/cursor.ts';
 import { u32 } from './baseTypes.ts';
@@ -77,10 +78,12 @@ class DynamicArrayImpl<TElement> implements DynamicArray<TElement> {
 
 /*@__NO_SIDE_EFFECTS__*/
 export function dynamicArray<TSchema>(_elementSchema: TSchema): DynamicArray<TSchema> {
-  const elementSchema = toSchema(_elementSchema);
+  const elementSchema = toSchema(_elementSchema) as Schema;
   if (!elementSchema) {
     throw new InvalidSchemaShapeError(
-      `bin.dynamicArray(...) expects a schema, got '${String(_elementSchema)}'`,
+      hasProcess && process.env.NODE_ENV !== 'production'
+        ? `bin.dynamicArray(...) expects a schema, got '${String(_elementSchema)}'`
+        : undefined,
     );
   }
   return new DynamicArrayImpl<TSchema>(elementSchema);
