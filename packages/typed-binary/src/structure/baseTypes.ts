@@ -49,26 +49,21 @@ export interface String extends Schema<string, string> {
   readonly maxSize: number;
 }
 
-class StringImpl implements String {
-  static #cachedEncoder: TextEncoder | undefined;
-  static #cachedDecoder: TextDecoder | undefined;
+// Created on first use, so that defining the `string` schema doesn't have side effects
+let cachedEncoder: TextEncoder | undefined;
+let cachedDecoder: TextDecoder | undefined;
 
+function getEncoder(): TextEncoder {
+  return (cachedEncoder ??= new TextEncoder());
+}
+
+function getDecoder(): TextDecoder {
+  return (cachedDecoder ??= new TextDecoder(undefined, { fatal: true }));
+}
+
+class StringImpl implements String {
   get maxSize(): number {
     return Number.NaN;
-  }
-
-  private static get _encoder() {
-    if (!StringImpl.#cachedEncoder) {
-      StringImpl.#cachedEncoder = new TextEncoder();
-    }
-    return StringImpl.#cachedEncoder;
-  }
-
-  private static get _decoder() {
-    if (!StringImpl.#cachedDecoder) {
-      StringImpl.#cachedDecoder = new TextDecoder(undefined, { fatal: true });
-    }
-    return StringImpl.#cachedDecoder;
   }
 
   read(cursor: ByteCursor): string {
@@ -81,7 +76,7 @@ class StringImpl implements String {
       }
     }
 
-    const result = StringImpl._decoder.decode(
+    const result = getDecoder().decode(
       new Uint8Array(view.buffer, view.byteOffset + cursor.offset, strLength - 1),
     );
 
@@ -92,7 +87,7 @@ class StringImpl implements String {
 
   write<T extends string>(cursor: ByteCursor, value: T): void {
     const { view } = cursor;
-    const result = StringImpl._encoder.encodeInto(
+    const result = getEncoder().encodeInto(
       value,
       new Uint8Array(view.buffer, view.byteOffset + cursor.offset, view.byteLength - cursor.offset),
     );
@@ -107,7 +102,7 @@ class StringImpl implements String {
       // A string cannot be bound
       return measurer.unbounded;
     }
-    const encoded = StringImpl._encoder.encode(value);
+    const encoded = getEncoder().encode(value);
     return measurer.add(encoded.byteLength + 1);
   }
 }
