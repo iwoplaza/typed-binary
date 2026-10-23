@@ -1,9 +1,8 @@
 import type { ByteCursor } from '../io/cursor.ts';
 
 export type MaxValue = typeof MaxValue;
-export const MaxValue = /* @__PURE__ */ Symbol(
-  'The biggest (in amount of bytes needed) value a schema can represent',
-);
+/** The biggest (in amount of bytes needed) value a schema can represent. */
+export const MaxValue = /* @__PURE__ */ Symbol('MaxValue');
 
 /**
  * @param TIn the JavaScript type accepted by the schema for parsing.
