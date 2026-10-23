@@ -1,3 +1,4 @@
+import { hasProcess } from '../env.ts';
 import { InvalidSchemaShapeError, ValidationError } from '../error.ts';
 import type { ByteCursor } from '../io/cursor.ts';
 import { measureMax } from './measureMax.ts';
@@ -205,8 +206,8 @@ export function union<
   variants: TVariants,
   options?: UnionOptions<TKey, TBase>,
 ): Union<TTag, TVariants, TKey, TBase> {
-  const tagSchema = toSchema(tag);
-  if (!tagSchema) {
+  const tagSchema = toSchema(tag) as Schema;
+  if (hasProcess && process.env.NODE_ENV !== 'production' && !tagSchema) {
     throw new InvalidSchemaShapeError(
       `bin.union(...) expects a schema as the tag, got '${String(tag)}'`,
     );

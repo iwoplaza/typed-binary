@@ -1,3 +1,4 @@
+import { hasProcess } from '../env.ts';
 import { InvalidSchemaShapeError } from '../error.ts';
 import type { ByteCursor } from '../io/cursor.ts';
 import { MutableRecord, Prettify } from '../utilityTypes.ts';
@@ -46,8 +47,8 @@ class StructImpl<out TProps extends Record<string, WithSchema>> implements Struc
   get #properties(): [string, Schema][] {
     if (!this.#resolvedProperties) {
       this.#resolvedProperties = Object.entries(this.properties).map(([key, property]) => {
-        const schema = toSchema(property);
-        if (!schema) {
+        const schema = toSchema(property) as Schema;
+        if (hasProcess && process.env.NODE_ENV !== 'production' && !schema) {
           throw new InvalidSchemaShapeError(
             `bin.struct(...) expects property '${key}' to be a schema, got '${String(property)}'`,
           );

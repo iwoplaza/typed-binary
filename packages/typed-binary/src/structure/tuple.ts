@@ -1,3 +1,4 @@
+import { hasProcess } from '../env.ts';
 import { InvalidSchemaShapeError, ValidationError } from '../error.ts';
 import type { ByteCursor } from '../io/cursor.ts';
 import {
@@ -37,7 +38,11 @@ class TupleImpl<TSequence extends [WithSchema, ...WithSchema[]]> implements Tupl
   }
 
   write(cursor: ByteCursor, values: ExtractInRecord<TSequence>): void {
-    if (values.length !== this.#schemas.length) {
+    if (
+      hasProcess &&
+      process.env.NODE_ENV !== 'production' &&
+      values.length !== this.#schemas.length
+    ) {
       throw new ValidationError(
         `Expected tuple of length ${this.#schemas.length}, got ${values.length}`,
       );
@@ -73,8 +78,8 @@ export function tuple<TSchema extends [WithSchema, ...WithSchema[]]>(
 ): Tuple<TSchema> {
   return new TupleImpl<TSchema>(
     schemas.map((element, idx) => {
-      const schema = toSchema(element);
-      if (!schema) {
+      const schema = toSchema(element) as Schema;
+      if (hasProcess && process.env.NODE_ENV !== 'production' && !schema) {
         throw new InvalidSchemaShapeError(
           `bin.tuple(...) expects element ${idx} to be a schema, got '${String(element)}'`,
         );

@@ -1,3 +1,4 @@
+import { hasProcess } from '../env.ts';
 import { ValidationError } from '../error.ts';
 import type { ByteCursor } from '../io/cursor.ts';
 import { MaxValue, Schema } from './types.ts';
@@ -15,22 +16,28 @@ class PrefixEnumImpl<TValues extends string> implements PrefixEnum<TValues> {
 
   constructor(values: readonly TValues[]) {
     this.values = values;
-    // Each character is encoded as a single byte
-    const nonAscii = values.find((value) => [...value].some((char) => char.charCodeAt(0) > 0x7f));
-    if (nonAscii !== undefined) {
-      throw new ValidationError(`Enum values can only contain ASCII characters, got '${nonAscii}'`);
-    }
-    if (
-      this.values.some((value, i) =>
-        this.values.some((otherValue, j) => i !== j && value.startsWith(otherValue)),
-      )
-    ) {
-      throw new ValidationError(`Enum values must be unique, and cannot be prefixes of each other`);
+    if (hasProcess && process.env.NODE_ENV !== 'production') {
+      // Each character is encoded as a single byte
+      const nonAscii = values.find((value) => [...value].some((char) => char.charCodeAt(0) > 0x7f));
+      if (nonAscii !== undefined) {
+        throw new ValidationError(
+          `Enum values can only contain ASCII characters, got '${nonAscii}'`,
+        );
+      }
+      if (
+        this.values.some((value, i) =>
+          this.values.some((otherValue, j) => i !== j && value.startsWith(otherValue)),
+        )
+      ) {
+        throw new ValidationError(
+          `Enum values must be unique, and cannot be prefixes of each other`,
+        );
+      }
     }
   }
 
   write(cursor: ByteCursor, value: TValues): void {
-    if (!this.values.includes(value)) {
+    if (hasProcess && process.env.NODE_ENV !== 'production' && !this.values.includes(value)) {
       throw new ValidationError(`Expected enum value, got ${value}`);
     }
 
@@ -62,7 +69,11 @@ class PrefixEnumImpl<TValues extends string> implements PrefixEnum<TValues> {
     if (value === MaxValue) {
       return this.values.reduce((max, value) => Math.max(max, value.length), 0);
     }
-    if (!this.values.includes(value as TValues)) {
+    if (
+      hasProcess &&
+      process.env.NODE_ENV !== 'production' &&
+      !this.values.includes(value as TValues)
+    ) {
       throw new ValidationError(`Expected enum value, got ${value}`);
     }
     return value.length;
@@ -105,17 +116,21 @@ class OrderedEnumImpl<TValues extends string> implements OrderedEnum<TValues> {
 
   constructor(values: readonly TValues[]) {
     this.values = values;
-    if (new Set(values).size !== values.length) {
-      throw new ValidationError(`Enum values must be unique`);
-    }
-    if (values.length > 256) {
-      throw new ValidationError(`Ordered enums can have at most 256 values, got ${values.length}`);
+    if (hasProcess && process.env.NODE_ENV !== 'production') {
+      if (new Set(values).size !== values.length) {
+        throw new ValidationError(`Enum values must be unique`);
+      }
+      if (values.length > 256) {
+        throw new ValidationError(
+          `Ordered enums can have at most 256 values, got ${values.length}`,
+        );
+      }
     }
   }
 
   write(cursor: ByteCursor, value: TValues): void {
     const index = this.values.indexOf(value);
-    if (index === -1) {
+    if (hasProcess && process.env.NODE_ENV !== 'production' && index === -1) {
       throw new ValidationError(`Expected enum value, got ${value}`);
     }
     cursor.view.setUint8(cursor.offset++, index);
@@ -130,7 +145,12 @@ class OrderedEnumImpl<TValues extends string> implements OrderedEnum<TValues> {
   }
 
   measure(value: string | MaxValue): number {
-    if (value !== MaxValue && !this.values.includes(value as TValues)) {
+    if (
+      hasProcess &&
+      process.env.NODE_ENV !== 'production' &&
+      value !== MaxValue &&
+      !this.values.includes(value as TValues)
+    ) {
       throw new ValidationError(`Expected enum value, got ${value}`);
     }
     return 1;

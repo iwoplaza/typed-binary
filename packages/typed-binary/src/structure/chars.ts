@@ -1,3 +1,4 @@
+import { hasProcess } from '../env.ts';
 import { ValidationError } from '../error.ts';
 import type { ByteCursor } from '../io/cursor.ts';
 import type { MaxValue, Schema } from './types.ts';
@@ -14,7 +15,7 @@ class CharsImpl<TLength extends number = number> implements Chars<TLength> {
   }
 
   write(cursor: ByteCursor, value: string): void {
-    if (value.length !== this.length) {
+    if (hasProcess && process.env.NODE_ENV !== 'production' && value.length !== this.length) {
       throw new ValidationError(
         `Expected char-string of length ${this.length}, got ${value.length}`,
       );
