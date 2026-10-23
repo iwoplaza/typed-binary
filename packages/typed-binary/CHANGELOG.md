@@ -90,6 +90,8 @@ The replacements in the table encode data the same way as the v4 schemas they re
   messages when `process.env.NODE_ENV !== 'production'`, which bundlers replace in production builds, removing the messages.
   The checks still run in production, and throw errors with a generic message.
 - **Invalid enum definitions throw `InvalidSchemaShapeError`** (e.g. duplicate values), instead of `ValidationError`.
+- **The package is ESM-only.** The CommonJS build (`dist/index.cjs`) is removed. Node.js can still `require('typed-binary')`
+  since v20.19 and v22.12, which load ES modules synchronously.
 - **Removed the `typed-binary/index` subpath export.** Import from `typed-binary` instead.
 - **Removed the internal type helpers** `ISchema`, `AnySchema`, `AnySchemaWithProperties`, `ISchemaWithProperties`, `AnyObjectSchema`,
   `IKeyedSchema`, `AnyKeyedSchema`, `Unwrap`, `UnwrapRecord`, `UnwrapArray` and `ParseUnwrapped`. Use `bin.Schema`, `bin.ExtractIn` and
