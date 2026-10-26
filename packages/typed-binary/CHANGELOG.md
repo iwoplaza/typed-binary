@@ -110,6 +110,8 @@ The replacements in the table encode data the same way as the v4 schemas they re
 - `bin.orderedEnum(...values)`: a string enum encoded as the index of the value, in a single byte.
 - `bin.prefixEnum(...values)`: a string enum encoded as the ASCII characters of the value, with no terminator, independent of
   the order of values. Values cannot be prefixes of each other.
+- `bin.i64` and `bin.u64`: 64-bit signed and unsigned integers, read and written as `bigint` values (described by `bin.Int64`
+  and `bin.Uint64`). Like the other integer schemas, values outside of their range wrap around.
 - Each schema has an exported type describing it (`bin.Struct`, `bin.Array`, `bin.Optional`, `bin.Int32`, `bin.Union`, ...).
 - `bin.InvalidSchemaShapeError` is thrown when a non-schema is passed where a schema is expected.
 - Objects can define themselves as schemas by holding one under the `'~typed-binary'` key
