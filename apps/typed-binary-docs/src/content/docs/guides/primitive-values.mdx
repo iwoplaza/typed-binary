@@ -14,12 +14,18 @@ There are a few primitives to choose from:
 | `bin.u16`    | `number`         | 2 bytes  | 16-bit unsigned integer                       |
 | `bin.i32`    | `number`         | 4 bytes  | 32-bit signed integer                         |
 | `bin.u32`    | `number`         | 4 bytes  | 32-bit unsigned integer                       |
+| `bin.i64`    | `bigint`         | 8 bytes  | 64-bit signed integer                         |
+| `bin.u64`    | `bigint`         | 8 bytes  | 64-bit unsigned integer                       |
 | `bin.f16`    | `number`         | 2 bytes  | 16-bit (half precision) floating-point number |
 | `bin.f32`    | `number`         | 4 bytes  | 32-bit floating-point number                  |
 | `bin.string` | `string`         | variable | UTF-8 characters, followed by a `\0` character |
 
 Multi-byte values are encoded in the endianness of the `bin.cursor()` they are written to or read from,
 which defaults to the endianness of the system.
+
+Integers outside of the range of a schema wrap around, e.g. writing `2n ** 63n` with `bin.i64` reads back as `-(2n ** 63n)`,
+and writing `-1n` with `bin.u64` reads back as `2n ** 64n - 1n`. The 64-bit schemas take `bigint` values, as a `number` can't
+represent every 64-bit integer exactly.
 
 ```ts
 import * as bin from 'typed-binary';
