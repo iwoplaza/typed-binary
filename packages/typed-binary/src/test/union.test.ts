@@ -37,7 +37,7 @@ describe('bin.union', () => {
   });
 
   it('measures values and the exact max size', () => {
-    expect(Shape.measure({ type: 'circle', radius: 2 }).size).toEqual(1 + 4);
+    expect(Shape.measure({ type: 'circle', radius: 2 })).toEqual(1 + 4);
     expect(Shape.maxSize).toEqual(1 + 8);
   });
 
@@ -138,7 +138,7 @@ describe('bin.union recursion', () => {
       a: { type: 'neg', inner: { type: 'lit', value: 15 } },
       b: { type: 'lit', value: 2 },
     };
-    expect(Expr.measure(value).size).toEqual(1 + (1 + (1 + 4)) + (1 + 4));
+    expect(Expr.measure(value)).toEqual(1 + (1 + (1 + 4)) + (1 + 4));
     expect(encodeAndDecode(Expr, value)).toEqual(value);
     expect(Expr.maxSize).toBeNaN();
   });
@@ -181,7 +181,7 @@ describe('bin.union compatibility with v4 generic objects', () => {
     );
 
     const value = { type: 0 as const, connections: [1, 2], leftId: 3, rightId: 4 };
-    const { output, input } = makeIO(Union.measure(value).size);
+    const { output, input } = makeIO(Union.measure(value));
     Union.write(output, value);
 
     // Tag, then base properties, then sub-type properties
@@ -191,7 +191,7 @@ describe('bin.union compatibility with v4 generic objects', () => {
     expect(bin.i32.read(input)).toEqual(2);
     expect(bin.i32.read(input)).toEqual(3);
     expect(bin.i32.read(input)).toEqual(4);
-    expect(input.offset).toEqual(Union.measure(value).size);
+    expect(input.offset).toEqual(Union.measure(value));
   });
 
   it('encodes like v4 bin.generic when the tag is bin.string', () => {
@@ -205,14 +205,14 @@ describe('bin.union compatibility with v4 generic objects', () => {
     );
 
     const value = { type: 'core:movement' as const, sharedValue: 100, speed: 0.5 };
-    const { output, input } = makeIO(Union.measure(value).size);
+    const { output, input } = makeIO(Union.measure(value));
     Union.write(output, value);
 
     // Tag, then base properties, then sub-type properties
     expect(bin.string.read(input)).toEqual('core:movement');
     expect(bin.i32.read(input)).toEqual(100);
     expect(bin.f32.read(input)).toEqual(0.5);
-    expect(input.offset).toEqual(Union.measure(value).size);
+    expect(input.offset).toEqual(Union.measure(value));
 
     // The tag can only be one of the known variants, so the max size is bounded,
     // unlike with v4 bin.generic. Both tags are equally long, 'core:movement' has

@@ -19,15 +19,11 @@ const entry = resolve(pkgDir, 'dist/index.js'); // the ESM entry from package.js
 const cases = {
   'nothing used': {
     budget: 50,
-    code: `import { Measurer } from 'tb'; globalThis.x = 1;`,
+    code: `import { struct } from 'tb'; globalThis.x = 1;`,
   },
   getSystemEndianness: {
     budget: 200,
     code: `import { getSystemEndianness } from 'tb'; globalThis.x = getSystemEndianness;`,
-  },
-  Measurer: {
-    budget: 600,
-    code: `import { Measurer } from 'tb'; globalThis.x = Measurer;`,
   },
   cursor: {
     budget: 550,
@@ -35,8 +31,8 @@ const cases = {
   },
   'TypeGPU set': {
     budget: 800,
-    code: `import { cursor, getSystemEndianness, Measurer } from 'tb';
-    globalThis.x = [cursor, getSystemEndianness, Measurer];`,
+    code: `import { cursor, getSystemEndianness } from 'tb';
+    globalThis.x = [cursor, getSystemEndianness];`,
   },
   'u32 + struct': {
     budget: 1700,

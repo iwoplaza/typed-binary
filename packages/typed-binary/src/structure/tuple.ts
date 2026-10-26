@@ -1,5 +1,5 @@
+import { hasProcess } from '../env.ts';
 import { InvalidSchemaShapeError, ValidationError } from '../error.ts';
-import { Measurer } from '../io/measurer.ts';
 import type { ByteCursor } from '../io/cursor.ts';
 import {
   type ExtractInRecord,
@@ -23,7 +23,7 @@ export interface Tuple<TSequence extends [WithSchema, ...WithSchema[]]> extends 
    * Is `NaN` if the schema is unbounded. If you would like to know
    * how many bytes a particular value encoding will take up, use `.measure(value)`.
    *
-   * Alias for `.measure(MaxValue).size`
+   * Alias for `.measure(MaxValue)`
    */
   readonly maxSize: number;
 }
@@ -40,7 +40,9 @@ class TupleImpl<TSequence extends [WithSchema, ...WithSchema[]]> implements Tupl
   write(cursor: ByteCursor, values: ExtractInRecord<TSequence>): void {
     if (values.length !== this.#schemas.length) {
       throw new ValidationError(
-        `Expected tuple of length ${this.#schemas.length}, got ${values.length}`,
+        hasProcess && process.env.NODE_ENV !== 'production'
+          ? `Expected tuple of length ${this.#schemas.length}, got ${values.length}`
+          : undefined,
       );
     }
 
@@ -56,18 +58,15 @@ class TupleImpl<TSequence extends [WithSchema, ...WithSchema[]]> implements Tupl
   }
 
   get maxSize(): number {
-    return this.measure(MaxValue).size;
+    return this.measure(MaxValue);
   }
 
-  measure(
-    values: ExtractInRecord<TSequence> | MaxValue,
-    measurer: Measurer = new Measurer(),
-  ): Measurer {
+  measure(values: ExtractInRecord<TSequence> | MaxValue): number {
+    let size = 0;
     for (let i = 0; i < this.#schemas.length; ++i) {
-      this.#schemas[i].measure(values === MaxValue ? MaxValue : values[i], measurer);
+      size += this.#schemas[i].measure(values === MaxValue ? MaxValue : values[i]);
     }
-
-    return measurer;
+    return size;
   }
 }
 
@@ -77,10 +76,12 @@ export function tuple<TSchema extends [WithSchema, ...WithSchema[]]>(
 ): Tuple<TSchema> {
   return new TupleImpl<TSchema>(
     schemas.map((element, idx) => {
-      const schema = toSchema(element);
+      const schema = toSchema(element) as Schema;
       if (!schema) {
         throw new InvalidSchemaShapeError(
-          `bin.tuple(...) expects element ${idx} to be a schema, got '${String(element)}'`,
+          hasProcess && process.env.NODE_ENV !== 'production'
+            ? `bin.tuple(...) expects element ${idx} to be a schema, got '${String(element)}'`
+            : undefined,
         );
       }
       return schema;
