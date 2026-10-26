@@ -20,7 +20,7 @@ describe('bin.pipe', () => {
 
   it('encodes and decodes data dependent on the head', () => {
     const value: bin.ExtractOut<typeof Foo> = { length: 2, data: [0.5, 0.25] };
-    expect(Foo.measure(value).size).toEqual(1 + 2 * 4);
+    expect(Foo.measure(value)).toEqual(1 + 2 * 4);
     expect(encodeAndDecode(Foo, value)).toEqual(value);
   });
 
@@ -83,8 +83,8 @@ describe('bin.pipe', () => {
       read(input) {
         return BigInt(bin.u8.read(input));
       },
-      measure(_, measurer = new bin.Measurer()) {
-        return measurer.add(1);
+      measure() {
+        return 1;
       },
     };
 

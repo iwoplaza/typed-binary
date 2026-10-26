@@ -39,7 +39,7 @@ import * as bin from 'typed-binary';
 
 // Define a schema
 const Vec2f = bin.tuple([bin.f32, bin.f32]);
-const Vec2fSize = Vec2f.measure(bin.MaxValue).size;
+const Vec2fSize = Vec2f.measure(bin.MaxValue);
 
 const buffer = new ArrayBuffer(Vec2fSize);
 Vec2f.write(bin.cursor(buffer), [0.5, 3.14]);
@@ -55,7 +55,7 @@ import * as bin from 'typed-binary';
 
 // Define a schema
 const Vec2f = bin.tuple([bin.f32, bin.f32]);
-const Vec2fSize = Vec2f.measure(bin.MaxValue).size;
+const Vec2fSize = Vec2f.measure(bin.MaxValue);
 
 const buffer = Buffer.alloc(Vec2fSize);
 Vec2f.write(bin.cursor(buffer), [0.5, 3.14]);

@@ -5,7 +5,7 @@ import { encodeAndDecode } from './helpers/mock.ts';
 describe('unbounded max size', () => {
   it('propagates through containers', () => {
     expect(bin.struct({ a: bin.i32, b: bin.string, c: bin.i32 }).maxSize).toBeNaN();
-    expect(bin.optional(bin.string).measure(bin.MaxValue).size).toBeNaN();
+    expect(bin.optional(bin.string).measure(bin.MaxValue)).toBeNaN();
     expect(bin.tuple([bin.i32, bin.string]).maxSize).toBeNaN();
   });
 
@@ -29,7 +29,7 @@ describe('recursive struct', () => {
 
   it('measures concrete values', () => {
     const value = { value: 1, next: { value: 2, next: undefined } };
-    expect(List.measure(value).size).toEqual(4 + 1 + 4 + 1);
+    expect(List.measure(value)).toEqual(4 + 1 + 4 + 1);
     expect(encodeAndDecode(List, value)).toEqual(value);
   });
 });
@@ -80,7 +80,7 @@ describe('recursive pipe', () => {
       a: { type: 'lit', value: 2 },
       b: { type: 'mul', a: { type: 'lit', value: 3 }, b: { type: 'lit', value: 4 } },
     };
-    expect(Expr.measure(value).size).toEqual(1 + (1 + 4) + (1 + (1 + 4) + (1 + 4)));
+    expect(Expr.measure(value)).toEqual(1 + (1 + 4) + (1 + (1 + 4) + (1 + 4)));
     expect(encodeAndDecode(Expr, value)).toEqual(value);
     expect(Expr.maxSize).toBeNaN();
   });
