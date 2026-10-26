@@ -2,11 +2,10 @@ import { describe, expect, it } from 'vitest';
 
 import * as bin from 'typed-binary';
 import { makeIO } from './helpers/mock.ts';
-import { randIntBetween } from './random.ts';
 
 describe('bin.optional', () => {
   it('should encode and decode an optional int, with a value', () => {
-    const innerValue = randIntBetween(-10000, 10000);
+    const innerValue = -1234;
 
     const description = bin.optional(bin.i32);
 
