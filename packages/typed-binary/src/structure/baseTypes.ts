@@ -319,58 +319,74 @@ class Uint32Impl implements Uint32 {
 export const u32: Uint32 = /* @__PURE__ */ new Uint32Impl();
 
 ////
-// BigInt64
+// i64, u64
 ////
 
-export class BigInt64Schema extends Schema<bigint> {
+export interface Int64 extends Schema<bigint> {
   /**
    * The maximum number of bytes this schema can take up.
    *
-   * Alias for `.measure(MaxValue).size`
+   * Alias for `.measure(MaxValue)`
    */
-  readonly maxSize = 8;
-
-  read(input: ISerialInput): bigint {
-    return input.readBigInt64();
-  }
-
-  write(output: ISerialOutput, value: bigint): void {
-    output.writeBigInt64(value);
-  }
-
-  measure(_: bigint | MaxValue, measurer: IMeasurer = new Measurer()): IMeasurer {
-    return measurer.add(8);
-  }
+  readonly maxSize: 8;
 }
 
-export const bigint: BigInt64Schema = new BigInt64Schema();
-
-////
-// BigUint64
-////
-
-export class BigUint64Schema extends Schema<bigint> {
+export interface Uint64 extends Schema<bigint> {
   /**
    * The maximum number of bytes this schema can take up.
    *
-   * Alias for `.measure(MaxValue).size`
+   * Alias for `.measure(MaxValue)`
    */
-  readonly maxSize = 8;
+  readonly maxSize: 8;
+}
 
-  read(input: ISerialInput): bigint {
-    return input.readBigUint64();
+// Shared by `i64` and `u64`, which only differ in how they interpret the bits
+class Int64Impl implements Int64, Uint64 {
+  readonly #signed: boolean;
+
+  constructor(signed: boolean) {
+    this.#signed = signed;
   }
 
-  write(output: ISerialOutput, value: bigint): void {
-    output.writeBigUint64(value);
+  get maxSize(): 8 {
+    return 8;
   }
 
-  measure(_: bigint | MaxValue, measurer: IMeasurer = new Measurer()): IMeasurer {
-    return measurer.add(8);
+  read(cursor: ByteCursor): bigint {
+    const { view } = cursor;
+    const value = this.#signed
+      ? view.getBigInt64(cursor.offset, cursor.littleEndian)
+      : view.getBigUint64(cursor.offset, cursor.littleEndian);
+    cursor.offset += 8;
+    return value;
+  }
+
+  write(cursor: ByteCursor, value: bigint): void {
+    const { view } = cursor;
+    if (this.#signed) {
+      view.setBigInt64(cursor.offset, value, cursor.littleEndian);
+    } else {
+      view.setBigUint64(cursor.offset, value, cursor.littleEndian);
+    }
+    cursor.offset += 8;
+  }
+
+  measure(_: bigint | MaxValue): number {
+    return 8;
   }
 }
 
-export const biguint: BigUint64Schema = new BigUint64Schema();
+/**
+ * A 64-bit signed integer, as a `bigint`.
+ * Values outside of the range [-2^63, 2^63 - 1] wrap around (modulo 2^64).
+ */
+export const i64: Int64 = /* @__PURE__ */ new Int64Impl(true);
+
+/**
+ * A 64-bit unsigned integer, as a `bigint`.
+ * Values outside of the range [0, 2^64 - 1] wrap around (modulo 2^64).
+ */
+export const u64: Uint64 = /* @__PURE__ */ new Int64Impl(false);
 
 ////
 // f16

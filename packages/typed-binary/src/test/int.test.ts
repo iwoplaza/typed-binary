@@ -98,46 +98,74 @@ describe('bin.u32', () => {
   });
 });
 
-describe('BigInt64Schema', () => {
-  it('should encode and decode an bigint value', () => {
+describe('bin.i64', () => {
+  it('should encode and decode an int64 value', () => {
     const value = BigInt(randIntBetween(-100, 100));
-    const decoded = encodeAndDecode(bin.bigint, value);
+    const decoded = encodeAndDecode(bin.i64, value);
 
     expect(decoded).to.equal(value);
   });
 
-  it('should encode and decode the max bigint value', () => {
-    const value = BigInt(2 ** 63) - 1n;
-    const decoded = encodeAndDecode(bin.bigint, value);
+  it('should encode and decode the max int64 value', () => {
+    const value = 2n ** 63n - 1n;
+    const decoded = encodeAndDecode(bin.i64, value);
 
     expect(decoded).to.equal(value);
   });
 
-  it('max + 1 should overflow into 0', () => {
-    const decoded = encodeAndDecode(bin.bigint, BigInt(2 ** 64));
+  it('should encode and decode the min int64 value', () => {
+    const value = -(2n ** 63n);
+    const decoded = encodeAndDecode(bin.i64, value);
 
-    expect(decoded).to.equal(0n);
+    expect(decoded).to.equal(value);
+  });
+
+  it('max + 1 should overflow into min', () => {
+    const decoded = encodeAndDecode(bin.i64, 2n ** 63n);
+
+    expect(decoded).to.equal(-(2n ** 63n));
+  });
+
+  it('should take up 8 bytes', () => {
+    expect(bin.i64.maxSize).to.equal(8);
+    expect(bin.i64.measure(0n)).to.equal(8);
   });
 });
 
-describe('BigUint64Schema', () => {
-  it('should encode and decode an bigint value', () => {
+describe('bin.u64', () => {
+  it('should encode and decode a uint64 value', () => {
     const value = BigInt(randIntBetween(0, 100));
-    const decoded = encodeAndDecode(bin.biguint, value);
+    const decoded = encodeAndDecode(bin.u64, value);
 
     expect(decoded).to.equal(value);
   });
 
-  it('should encode and decode the max biguint value', () => {
-    const value = BigInt(2 ** 64) - 1n;
-    const decoded = encodeAndDecode(bin.biguint, value);
+  it('should encode and decode the max uint64 value', () => {
+    const value = 2n ** 64n - 1n;
+    const decoded = encodeAndDecode(bin.u64, value);
 
     expect(decoded).to.equal(value);
   });
 
   it('max + 1 should overflow into 0', () => {
-    const decoded = encodeAndDecode(bin.biguint, BigInt(2 ** 64));
+    const decoded = encodeAndDecode(bin.u64, 2n ** 64n);
 
     expect(decoded).to.equal(0n);
+  });
+
+  it('negative values should wrap around', () => {
+    const decoded = encodeAndDecode(bin.u64, -1n);
+
+    expect(decoded).to.equal(2n ** 64n - 1n);
+  });
+
+  it('should respect the endianness of the cursor', () => {
+    const buffer = new ArrayBuffer(8);
+    bin.u64.write(bin.cursor(buffer, { endianness: 'big' }), 0x0102030405060708n);
+
+    expect([...new Uint8Array(buffer)]).to.deep.equal([1, 2, 3, 4, 5, 6, 7, 8]);
+    expect(bin.u64.read(bin.cursor(buffer, { endianness: 'little' }))).to.equal(
+      0x0807060504030201n,
+    );
   });
 });
