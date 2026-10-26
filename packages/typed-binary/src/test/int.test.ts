@@ -2,32 +2,28 @@ import { describe, expect, it } from 'vitest';
 
 import * as bin from 'typed-binary';
 import { encodeAndDecode } from './helpers/mock.ts';
-import { randIntBetween } from './random.ts';
 
 describe('bin.i8', () => {
-  it('should encode and decode a signed int8 value', () => {
-    const value = randIntBetween(-128, 127);
-    const decoded = encodeAndDecode(bin.i8, value);
-
-    expect(decoded).to.equal(value);
+  it('should encode and decode signed int8 values', () => {
+    for (const value of [-128, -1, 0, 1, 127]) {
+      expect(encodeAndDecode(bin.i8, value)).to.equal(value);
+    }
   });
 });
 
 describe('bin.u8', () => {
-  it('should encode and decode a byte value', () => {
-    const value = randIntBetween(0, 256);
-    const decoded = encodeAndDecode(bin.u8, value);
-
-    expect(decoded).to.equal(value);
+  it('should encode and decode byte values', () => {
+    for (const value of [0, 1, 128, 255]) {
+      expect(encodeAndDecode(bin.u8, value)).to.equal(value);
+    }
   });
 });
 
 describe('bin.i16', () => {
-  it('should encode and decode an int value', () => {
-    const value = randIntBetween(-100, 100);
-    const decoded = encodeAndDecode(bin.i16, value);
-
-    expect(decoded).to.equal(value);
+  it('should encode and decode int values', () => {
+    for (const value of [-(2 ** 15), -1, 0, 1, 1234]) {
+      expect(encodeAndDecode(bin.i16, value)).to.equal(value);
+    }
   });
 
   it('should encode and decode the max pos int value', () => {
@@ -39,11 +35,10 @@ describe('bin.i16', () => {
 });
 
 describe('bin.u16', () => {
-  it('should encode and decode an uint16 value', () => {
-    const value = randIntBetween(0, 100);
-    const decoded = encodeAndDecode(bin.u16, value);
-
-    expect(decoded).to.equal(value);
+  it('should encode and decode uint16 values', () => {
+    for (const value of [0, 1, 1234]) {
+      expect(encodeAndDecode(bin.u16, value)).to.equal(value);
+    }
   });
 
   it('should encode and decode the max uint16 value', () => {
@@ -61,11 +56,10 @@ describe('bin.u16', () => {
 });
 
 describe('bin.i32', () => {
-  it('should encode and decode an int value', () => {
-    const value = randIntBetween(-100, 100);
-    const decoded = encodeAndDecode(bin.i32, value);
-
-    expect(decoded).to.equal(value);
+  it('should encode and decode int values', () => {
+    for (const value of [-(2 ** 31), -1, 0, 1, 123456]) {
+      expect(encodeAndDecode(bin.i32, value)).to.equal(value);
+    }
   });
 
   it('should encode and decode the max pos int value', () => {
@@ -77,11 +71,10 @@ describe('bin.i32', () => {
 });
 
 describe('bin.u32', () => {
-  it('should encode and decode an uint value', () => {
-    const value = randIntBetween(0, 100);
-    const decoded = encodeAndDecode(bin.u32, value);
-
-    expect(decoded).to.equal(value);
+  it('should encode and decode uint values', () => {
+    for (const value of [0, 1, 123456]) {
+      expect(encodeAndDecode(bin.u32, value)).to.equal(value);
+    }
   });
 
   it('should encode and decode the max uint value', () => {
@@ -99,11 +92,10 @@ describe('bin.u32', () => {
 });
 
 describe('bin.i64', () => {
-  it('should encode and decode an int64 value', () => {
-    const value = BigInt(randIntBetween(-100, 100));
-    const decoded = encodeAndDecode(bin.i64, value);
-
-    expect(decoded).to.equal(value);
+  it('should encode and decode int64 values', () => {
+    for (const value of [-1n, 0n, 1n, 123456n]) {
+      expect(encodeAndDecode(bin.i64, value)).to.equal(value);
+    }
   });
 
   it('should encode and decode the max int64 value', () => {
@@ -133,11 +125,10 @@ describe('bin.i64', () => {
 });
 
 describe('bin.u64', () => {
-  it('should encode and decode a uint64 value', () => {
-    const value = BigInt(randIntBetween(0, 100));
-    const decoded = encodeAndDecode(bin.u64, value);
-
-    expect(decoded).to.equal(value);
+  it('should encode and decode uint64 values', () => {
+    for (const value of [0n, 1n, 123456n]) {
+      expect(encodeAndDecode(bin.u64, value)).to.equal(value);
+    }
   });
 
   it('should encode and decode the max uint64 value', () => {
