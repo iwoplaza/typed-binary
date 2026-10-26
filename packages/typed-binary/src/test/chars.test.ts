@@ -2,23 +2,12 @@ import { describe, expect, it } from 'vitest';
 
 import * as bin from 'typed-binary';
 import { encodeAndDecode } from './helpers/mock.ts';
-import { randIntBetween } from './random.ts';
 
 describe('bin.chars', () => {
-  it('should encode and decode fixed-size char array', () => {
-    const length = randIntBetween(0, 100);
-    let value = '';
-    const ranges = [
-      ['A', 'Z'],
-      ['a', 'z'],
-      ['0', '9'],
-    ];
-    for (let i = 0; i < length; ++i) {
-      const range = ranges[randIntBetween(0, ranges.length) % ranges.length];
-      value += String.fromCharCode(randIntBetween(range[0].charCodeAt(0), range[1].charCodeAt(0)));
+  it('should encode and decode fixed-size char arrays', () => {
+    for (const value of ['', 'A', 'ABCXYZabcxyz0123456789']) {
+      const description = bin.chars(value.length);
+      expect(encodeAndDecode(description, value)).to.equal(value);
     }
-
-    const description = bin.chars(value.length);
-    expect(encodeAndDecode(description, value)).to.equal(value);
   });
 });

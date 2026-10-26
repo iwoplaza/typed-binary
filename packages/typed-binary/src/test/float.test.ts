@@ -2,18 +2,22 @@ import { describe, expect, it } from 'vitest';
 
 import * as bin from 'typed-binary';
 import { encodeAndDecode } from './helpers/mock.ts';
-import { randBetween } from './random.ts';
 
 describe('bin.f32', () => {
   it('has a max size of 4 bytes', () => {
     expect(bin.f32.maxSize).toEqual(4);
   });
 
-  it('should encode and decode a f32 value', () => {
-    const value = randBetween(-100, 100);
-    const decoded = encodeAndDecode(bin.f32, value);
+  it('should encode and decode exactly representable f32 values', () => {
+    for (const value of [0, 1, -42.25, 100, 2 ** -20]) {
+      expect(encodeAndDecode(bin.f32, value)).toEqual(value);
+    }
+  });
 
-    expect(decoded).to.closeTo(value, 0.01);
+  it('should round f32 values to the nearest representable value', () => {
+    for (const value of [0.1, -3.14159, 99.99]) {
+      expect(encodeAndDecode(bin.f32, value)).toEqual(Math.fround(value));
+    }
   });
 });
 

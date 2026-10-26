@@ -2,7 +2,6 @@ import { Buffer } from 'node:buffer';
 
 import { describe, expect, it } from 'vitest';
 import { f32, f64Array, f32Array, i32, i32Array, u8, u8Array, u32, u32Array } from '../index.ts';
-import { randBetween, randIntBetween } from '../test/random.ts';
 import { getSystemEndianness } from '../util.ts';
 import { cursor } from './cursor.ts';
 
@@ -68,10 +67,7 @@ describe('cursor', () => {
   });
 
   it('should encode and decode int sequence', () => {
-    const intList: number[] = [];
-    for (let i = 0; i < randIntBetween(1, 10); ++i) {
-      intList.push(randIntBetween(-100, 100));
-    }
+    const intList = [-100, -1, 0, 1, 42, 99];
 
     const buffer = Buffer.alloc(intList.length * 4);
 
@@ -88,10 +84,7 @@ describe('cursor', () => {
   });
 
   it('should encode and decode f32 sequence', () => {
-    const floatList: number[] = [];
-    for (let i = 0; i < randIntBetween(1, 10); ++i) {
-      floatList.push(randBetween(-100, 100));
-    }
+    const floatList = [-100, -0.5, 0, 1.5, 3.14159, 99.99];
 
     const buffer = Buffer.alloc(floatList.length * 4);
 
