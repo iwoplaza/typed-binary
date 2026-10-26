@@ -8,16 +8,16 @@ describe('bin.tuple', () => {
   it('should estimate an [i32, bool] encoding size', () => {
     const Schema = bin.tuple([bin.i32, bin.bool]);
 
-    expect(Schema.measure([123, false]).size).toEqual(
-      bin.i32.measure(bin.MaxValue).size + bin.bool.measure(bin.MaxValue).size,
+    expect(Schema.measure([123, false])).toEqual(
+      bin.i32.measure(bin.MaxValue) + bin.bool.measure(bin.MaxValue),
     );
   });
 
   it('should properly estimate size of max value', () => {
     const Schema = bin.tuple([bin.i32, bin.bool]);
 
-    expect(Schema.measure(bin.MaxValue).size).toEqual(
-      bin.i32.measure(bin.MaxValue).size + bin.bool.measure(bin.MaxValue).size,
+    expect(Schema.measure(bin.MaxValue)).toEqual(
+      bin.i32.measure(bin.MaxValue) + bin.bool.measure(bin.MaxValue),
     );
   });
 

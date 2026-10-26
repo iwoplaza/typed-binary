@@ -1,5 +1,5 @@
+import { hasProcess } from '../env.ts';
 import { InvalidSchemaShapeError } from '../error.ts';
-import { Measurer } from '../io/measurer.ts';
 import type { ByteCursor } from '../io/cursor.ts';
 import { MutableRecord, Prettify } from '../utilityTypes.ts';
 import { measureMax } from './measureMax.ts';
@@ -27,7 +27,7 @@ export interface Struct<
    * Is `NaN` if the schema is unbounded. If you would like to know
    * how many bytes a particular value encoding will take up, use `.measure(value)`.
    *
-   * Alias for `.measure(MaxValue).size`
+   * Alias for `.measure(MaxValue)`
    */
   readonly maxSize: number;
 }
@@ -47,10 +47,12 @@ class StructImpl<out TProps extends Record<string, WithSchema>> implements Struc
   get #properties(): [string, Schema][] {
     if (!this.#resolvedProperties) {
       this.#resolvedProperties = Object.entries(this.properties).map(([key, property]) => {
-        const schema = toSchema(property);
+        const schema = toSchema(property) as Schema;
         if (!schema) {
           throw new InvalidSchemaShapeError(
-            `bin.struct(...) expects property '${key}' to be a schema, got '${String(property)}'`,
+            hasProcess && process.env.NODE_ENV !== 'production'
+              ? `bin.struct(...) expects property '${key}' to be a schema, got '${String(property)}'`
+              : undefined,
           );
         }
         return [key, schema];
@@ -79,25 +81,25 @@ class StructImpl<out TProps extends Record<string, WithSchema>> implements Struc
   }
 
   get maxSize(): number {
-    return this.measure(MaxValue).size;
+    return this.measure(MaxValue);
   }
 
-  measure(value: TIn<TProps> | typeof MaxValue, measurer: Measurer = new Measurer()): Measurer {
+  measure(value: TIn<TProps> | typeof MaxValue): number {
     if (value === MaxValue) {
       // Properties can be getters that reference this schema recursively
-      return measureMax(this, measurer, () => this.#measureProperties(value, measurer));
+      return measureMax(this, () => this.#measureProperties(value));
     }
-    return this.#measureProperties(value, measurer);
+    return this.#measureProperties(value);
   }
 
-  #measureProperties(value: TIn<TProps> | typeof MaxValue, measurer: Measurer): Measurer {
+  #measureProperties(value: TIn<TProps> | typeof MaxValue): number {
     type Property = keyof TIn<TProps>;
 
+    let size = 0;
     for (const [key, property] of this.#properties) {
-      property.measure(value === MaxValue ? MaxValue : value[key as Property], measurer);
+      size += property.measure(value === MaxValue ? MaxValue : value[key as Property]);
     }
-
-    return measurer;
+    return size;
   }
 }
 

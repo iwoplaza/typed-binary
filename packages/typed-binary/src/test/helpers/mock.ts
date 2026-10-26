@@ -16,7 +16,7 @@ export function encodeAndDecode<T extends Schema>(
   schema: T,
   value: bin.ExtractIn<T>,
 ): bin.ExtractOut<T> {
-  const buffer = new ArrayBuffer(schema.measure(value).size);
+  const buffer = new ArrayBuffer(schema.measure(value));
   schema.write(cursor(buffer), value);
   return schema.read(cursor(buffer));
 }

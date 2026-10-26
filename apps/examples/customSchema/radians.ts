@@ -25,10 +25,10 @@ class RadiansSchema implements bin.Schema<number> {
     bin.u8.write(cursor, high);
   }
 
-  measure(_: number | bin.MaxValue, measurer: bin.Measurer = new bin.Measurer()): bin.Measurer {
+  measure(_: number | bin.MaxValue): number {
     // The size of the data serialized by this schema
     // doesn't depend on the actual value. It's always 2 bytes.
-    return measurer.add(2);
+    return 2;
   }
 }
 
