@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+## 4.3.5 (2026-10-27)
+
 - Fixed: `maxSize`/`.measure(MaxValue)` of schemas containing an unbounded schema
   (e.g. `string` or `dynamicArrayOf(...)`) is now `NaN`. Previously, containers like `object`,
   `optional` or `tupleOf` ignored the unboundedness of their members, and reported only the
