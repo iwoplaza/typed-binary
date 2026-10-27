@@ -1,5 +1,7 @@
 import starlight from '@astrojs/starlight';
 import { defineConfig } from 'astro/config';
+import ecTwoSlash from 'expressive-code-twoslash';
+import typegpu from 'unplugin-typegpu/vite';
 
 // https://astro.build/config
 export default defineConfig({
@@ -8,6 +10,28 @@ export default defineConfig({
   integrations: [
     starlight({
       title: 'Typed Binary',
+      customCss: [
+        '@fontsource-variable/ibm-plex-sans',
+        '@fontsource-variable/jetbrains-mono',
+        './src/styles/theme.css',
+      ],
+      components: {
+        Hero: './src/components/Hero.astro',
+        Footer: './src/components/Footer.astro',
+      },
+      expressiveCode: {
+        // Interactive type information in code blocks marked with `twoslash`
+        plugins: [ecTwoSlash({ tsConfigPath: './tsconfig.json' })],
+        styleOverrides: {
+          borderRadius: '0px',
+          borderColor: 'var(--sl-color-hairline)',
+          codeFontFamily: 'var(--__sl-font-mono)',
+          uiFontFamily: 'var(--__sl-font-mono)',
+          frames: {
+            frameBoxShadowCssValue: 'none',
+          },
+        },
+      },
       logo: {
         light: '/public/logo-light.svg',
         dark: '/public/logo-dark.svg',
@@ -49,4 +73,7 @@ export default defineConfig({
       ],
     }),
   ],
+  vite: {
+    plugins: [typegpu()],
+  },
 });

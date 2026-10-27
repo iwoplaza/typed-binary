@@ -1,0 +1,93 @@
+---
+import Default from '@astrojs/starlight/components/Hero.astro';
+---
+
+<div class="tb-hero">
+  <div class="tb-hero-backdrop" aria-hidden="true">
+    <canvas class="tb-hero-canvas"></canvas>
+  </div>
+  <div class="tb-hero-content">
+    <Default />
+  </div>
+</div>
+
+<script>
+  const canvas = document.querySelector<HTMLCanvasElement>('.tb-hero-canvas');
+  // Only download the effect when the browser can actually run it
+  if (canvas && navigator.gpu) {
+    import('./hero/bitField')
+      .then(({ startBitField }) => startBitField(canvas))
+      .then((stop) => {
+        if (stop) {
+          canvas.dataset.ready = '';
+        }
+      })
+      .catch((error: unknown) => {
+        // The effect is decorative, the page works without it
+        console.warn('Hero effect unavailable:', error);
+      });
+  }
+</script>
+
+<style>
+  :global(body:has(.tb-hero)) {
+    overflow-x: clip;
+  }
+
+  .tb-hero {
+    position: relative;
+    isolation: isolate;
+  }
+
+  .tb-hero-backdrop {
+    position: absolute;
+    z-index: -1;
+    top: calc(-1 * var(--sl-nav-height) - 2rem);
+    bottom: 0;
+    left: 50%;
+    width: 100vw;
+    transform: translateX(-50%);
+    overflow: hidden;
+    pointer-events: none;
+    mask-image:
+      linear-gradient(to bottom, transparent, #000 18%, #000 70%, transparent),
+      radial-gradient(ellipse 38% 60% at 50% 50%, rgb(0 0 0 / 0.16) 40%, #000);
+    mask-composite: intersect;
+  }
+
+  .tb-hero-canvas {
+    display: block;
+    width: 100%;
+    height: 100%;
+    opacity: 0;
+    transition: opacity 1.2s ease-out;
+  }
+
+  .tb-hero-canvas[data-ready] {
+    opacity: 1;
+  }
+
+  /* Center the hero copy and actions on wide screens too */
+  .tb-hero :global(.hero) {
+    grid-template-columns: 100%;
+  }
+
+  .tb-hero :global(.stack) {
+    text-align: center;
+  }
+
+  .tb-hero :global(.copy) {
+    align-items: center;
+  }
+
+  .tb-hero :global(.actions) {
+    justify-content: center;
+  }
+
+  @media (max-width: 50rem) {
+    .tb-hero-backdrop {
+      mask-image: linear-gradient(to bottom, transparent, rgb(0 0 0 / 0.55) 20%, rgb(0 0 0 / 0.55) 70%, transparent);
+      mask-composite: add;
+    }
+  }
+</style>

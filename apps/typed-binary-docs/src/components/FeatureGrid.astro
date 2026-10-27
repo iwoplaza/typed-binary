@@ -1,0 +1,135 @@
+---
+import { Icon } from '@astrojs/starlight/components';
+import type { ComponentProps } from 'astro/types';
+
+type IconName = ComponentProps<typeof Icon>['name'];
+
+interface Feature {
+  icon: IconName;
+  title: string;
+  body: string;
+}
+
+const features: Feature[] = [
+  {
+    icon: 'seti:typescript',
+    title: 'Single source of truth',
+    body: 'Types are inferred from the schemas themselves. Change a schema, and every read and write is checked against it.',
+  },
+  {
+    icon: 'pencil',
+    title: 'No DSL, no codegen',
+    body: 'Schemas are plain TypeScript. No interface files to compile, so the IDE gives instant feedback as you type.',
+  },
+  {
+    icon: 'puzzle',
+    title: 'Composable',
+    body: 'Build structures out of primitives, structs, arrays, tuples, optionals, tagged unions and recursive types.',
+  },
+  {
+    icon: 'laptop',
+    title: 'Runs anywhere',
+    body: 'Environment agnostic. Share the same schemas between the browser and Node.js, over any ArrayBuffer.',
+  },
+  {
+    icon: 'rocket',
+    title: 'Small and tree-shakable',
+    body: 'Only named exports, so bundlers include just the schemas you use, even through a namespace import.',
+  },
+  {
+    icon: 'setting',
+    title: 'Extensible',
+    body: 'Define custom schema types for anything the built-ins do not cover, with the same inference.',
+  },
+];
+---
+
+<ul class="tb-features not-content" role="list">
+  {
+    features.map((feature) => (
+      <li class="tb-feature">
+        <Icon name={feature.icon} size="1.5rem" class="tb-feature-icon" />
+        <h3>{feature.title}</h3>
+        <p>{feature.body}</p>
+      </li>
+    ))
+  }
+</ul>
+
+<style>
+  .tb-features {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 1px;
+    margin-block: 1.5rem 0;
+    padding: 1px;
+    list-style: none;
+    background: var(--sl-color-hairline);
+  }
+
+  @media (min-width: 40rem) {
+    .tb-features {
+      grid-template-columns: repeat(2, 1fr);
+    }
+  }
+
+  @media (min-width: 64rem) {
+    .tb-features {
+      grid-template-columns: repeat(3, 1fr);
+    }
+  }
+
+  .tb-feature {
+    position: relative;
+    margin: 0;
+    padding: 1.5rem;
+    background: var(--sl-color-black);
+    transition: background-color 0.15s ease-out;
+  }
+
+  .tb-feature::before {
+    content: '';
+    position: absolute;
+    inset: -1px;
+    border: 1px solid var(--sl-color-accent);
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.15s ease-out;
+  }
+
+  .tb-feature:hover {
+    background: color-mix(in srgb, var(--sl-color-accent) 5%, var(--sl-color-black));
+  }
+
+  .tb-feature:hover::before {
+    opacity: 1;
+  }
+
+  .tb-feature :global(.tb-feature-icon) {
+    display: block;
+    margin-bottom: 1rem;
+    color: var(--sl-color-accent);
+  }
+
+  h3 {
+    margin: 0 0 0.5rem;
+    font-size: var(--sl-text-lg);
+    font-weight: 600;
+    line-height: 1.3;
+    color: var(--sl-color-white);
+  }
+
+  p {
+    margin: 0;
+    font-size: var(--sl-text-sm);
+    line-height: 1.6;
+    color: var(--sl-color-gray-2);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .tb-feature,
+    .tb-feature::before {
+      transition: none;
+    }
+  }
+</style>

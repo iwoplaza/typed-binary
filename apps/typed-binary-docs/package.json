@@ -12,8 +12,18 @@
   "dependencies": {
     "@astrojs/check": "^0.9.12",
     "@astrojs/starlight": "^0.42.7",
+    "@fontsource-variable/ibm-plex-sans": "^5.3.0",
+    "@fontsource-variable/jetbrains-mono": "^5.3.0",
+    "@typegpu/sdf": "^0.12.2",
     "astro": "^7.4.2",
+    "expressive-code-twoslash": "^0.6.1",
     "sharp": "^0.35.5",
-    "typescript": "catalog:"
+    "typed-binary": "workspace:*",
+    "typegpu": "^0.12.9",
+    "typescript": "npm:tsover@^6.0.2"
+  },
+  "devDependencies": {
+    "@webgpu/types": "^0.1.74",
+    "unplugin-typegpu": "^0.12.7"
   }
 }

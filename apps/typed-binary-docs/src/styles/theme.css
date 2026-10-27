@@ -1,0 +1,249 @@
+/*
+ * Typed Binary docs theme.
+ * Rectangular like the logo's bits, neutral blue-gray surfaces, cyan/blue accents.
+ */
+
+:root {
+  --sl-font: 'IBM Plex Sans Variable';
+  --sl-font-mono: 'JetBrains Mono Variable';
+
+  --tb-cyan: hsl(189, 90%, 52%);
+  --tb-blue: hsl(222, 95%, 64%);
+  --tb-gradient: linear-gradient(110deg, var(--tb-cyan), var(--tb-blue));
+  --tb-hard-shadow: 4px 4px 0 0 var(--tb-blue);
+
+  /* Keep "note" asides in the blue/cyan family */
+  --sl-hue-blue: 206;
+
+  /* Dark mode */
+  --sl-color-white: hsl(210, 40%, 98%);
+  --sl-color-gray-1: hsl(213, 27%, 90%);
+  --sl-color-gray-2: hsl(214, 17%, 76%);
+  --sl-color-gray-3: hsl(215, 12%, 57%);
+  --sl-color-gray-4: hsl(216, 12%, 37%);
+  --sl-color-gray-5: hsl(217, 17%, 21%);
+  --sl-color-gray-6: hsl(218, 23%, 12%);
+  --sl-color-black: hsl(220, 27%, 7%);
+
+  --sl-color-accent-low: hsl(196, 70%, 14%);
+  --sl-color-accent: hsl(189, 90%, 48%);
+  --sl-color-accent-high: hsl(188, 90%, 76%);
+
+  --sl-color-bg-nav: hsl(220, 27%, 7%, 0.82);
+  --sl-color-bg-sidebar: var(--sl-color-black);
+  --sl-color-hairline: var(--sl-color-gray-5);
+  --sl-color-hairline-light: var(--sl-color-gray-5);
+}
+
+:root[data-theme='light'] {
+  --tb-cyan: hsl(191, 95%, 38%);
+  --tb-blue: hsl(222, 85%, 52%);
+
+  --sl-color-white: hsl(221, 39%, 11%);
+  --sl-color-gray-1: hsl(218, 25%, 18%);
+  --sl-color-gray-2: hsl(216, 17%, 27%);
+  --sl-color-gray-3: hsl(215, 12%, 40%);
+  --sl-color-gray-4: hsl(215, 12%, 58%);
+  --sl-color-gray-5: hsl(214, 20%, 84%);
+  --sl-color-gray-6: hsl(212, 30%, 94%);
+  --sl-color-gray-7: hsl(210, 33%, 97%);
+  --sl-color-black: hsl(0, 0%, 100%);
+
+  --sl-color-accent-low: hsl(192, 85%, 91%);
+  --sl-color-accent: hsl(196, 95%, 38%);
+  --sl-color-accent-high: hsl(214, 85%, 30%);
+
+  --sl-color-bg-nav: hsl(0, 0%, 100%, 0.82);
+  --sl-color-bg-sidebar: var(--sl-color-black);
+  --sl-color-hairline: var(--sl-color-gray-5);
+  --sl-color-hairline-light: var(--sl-color-gray-5);
+}
+
+/* Square corners everywhere, like the bits in the logo */
+*,
+*::before,
+*::after {
+  border-radius: 0;
+}
+
+::selection {
+  background: color-mix(in srgb, var(--tb-cyan) 35%, transparent);
+}
+
+/* Header */
+.header {
+  backdrop-filter: blur(10px);
+}
+
+header.header,
+.page > header {
+  border-bottom: 1px solid var(--sl-color-hairline);
+}
+
+/* Search trigger */
+site-search button[data-open-modal] {
+  border: 1px solid var(--sl-color-gray-5);
+  background: transparent;
+  font-family: var(--__sl-font-mono);
+  font-size: var(--sl-text-xs);
+}
+
+site-search button[data-open-modal]:hover {
+  border-color: var(--sl-color-accent);
+}
+
+/* Buttons */
+.sl-link-button {
+  font-family: var(--__sl-font-mono);
+  font-weight: 500;
+  letter-spacing: -0.01em;
+  transition:
+    transform 0.12s ease-out,
+    box-shadow 0.12s ease-out,
+    border-color 0.12s ease-out;
+}
+
+.sl-link-button.primary {
+  background: var(--sl-color-accent);
+  border-color: var(--sl-color-accent);
+  color: var(--sl-color-black);
+  box-shadow: var(--tb-hard-shadow);
+}
+
+:root[data-theme='light'] .sl-link-button.primary {
+  color: hsl(0, 0%, 100%);
+}
+
+.sl-link-button.primary:hover {
+  color: var(--sl-color-black);
+  transform: translate(-2px, -2px);
+  box-shadow: 6px 6px 0 0 var(--tb-blue);
+}
+
+:root[data-theme='light'] .sl-link-button.primary:hover {
+  color: hsl(0, 0%, 100%);
+}
+
+.sl-link-button.primary:active {
+  transform: translate(2px, 2px);
+  box-shadow: 2px 2px 0 0 var(--tb-blue);
+}
+
+.sl-link-button.secondary {
+  border-color: var(--sl-color-gray-4);
+  background: color-mix(in srgb, var(--sl-color-black) 70%, transparent);
+}
+
+.sl-link-button.secondary:hover {
+  border-color: var(--sl-color-accent);
+  color: var(--sl-color-white);
+}
+
+/* Landing page hero */
+.hero h1 {
+  font-weight: 650;
+  letter-spacing: -0.035em;
+}
+
+.hero .tb-handshake {
+  display: inline-block;
+  width: 0.82em;
+  height: 0.82em;
+  margin-inline: 0.06em;
+  vertical-align: -0.06em;
+  color: var(--sl-color-accent);
+}
+
+.hero .tagline strong {
+  color: var(--sl-color-white);
+  font-weight: 600;
+  box-shadow: inset 0 -0.35em 0 color-mix(in srgb, var(--tb-cyan) 28%, transparent);
+}
+
+/* Sidebar */
+nav.sidebar a {
+  border-inline-start: 2px solid transparent;
+}
+
+nav.sidebar a[aria-current='page'],
+nav.sidebar a[aria-current='page']:hover,
+nav.sidebar a[aria-current='page']:focus {
+  background: color-mix(in srgb, var(--sl-color-accent) 12%, transparent);
+  border-inline-start-color: var(--sl-color-accent);
+  color: var(--sl-color-white);
+  font-weight: 600;
+}
+
+nav.sidebar summary .large {
+  font-family: var(--__sl-font-mono);
+  font-size: var(--sl-text-xs);
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--sl-color-gray-3);
+}
+
+/* Page content */
+.sl-markdown-content :is(h2, h3) {
+  letter-spacing: -0.02em;
+}
+
+.sl-markdown-content h2::before {
+  content: '';
+  display: inline-block;
+  width: 0.36em;
+  height: 0.36em;
+  margin-inline-end: 0.45em;
+  vertical-align: 0.18em;
+  background: var(--tb-gradient);
+}
+
+.sl-markdown-content a:not(.sl-link-button) {
+  text-decoration-thickness: 1px;
+  text-underline-offset: 0.2em;
+}
+
+.sl-markdown-content :not(pre) > code {
+  border: 1px solid var(--sl-color-hairline);
+  padding: 0.1em 0.35em;
+}
+
+.sl-markdown-content blockquote {
+  border-inline-start: 3px solid var(--sl-color-accent);
+}
+
+/* Tabs */
+starlight-tabs [role='tab'][aria-selected='true'] {
+  border-color: var(--sl-color-accent);
+}
+
+/* Asides */
+.starlight-aside {
+  border-inline-start-width: 3px;
+}
+
+/* Previous / next links */
+.pagination-links a {
+  box-shadow: none;
+  border-color: var(--sl-color-hairline);
+  transition: border-color 0.12s ease-out;
+}
+
+.pagination-links a:hover {
+  border-color: var(--sl-color-accent);
+}
+
+.pagination-links .link-title {
+  color: var(--sl-color-white);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .sl-link-button {
+    transition: none;
+  }
+
+  .sl-link-button.primary:hover,
+  .sl-link-button.primary:active {
+    transform: none;
+  }
+}
