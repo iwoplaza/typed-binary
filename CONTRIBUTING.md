@@ -10,6 +10,14 @@ pnpm fix    # lint & format
 pnpm check  # lint, tests, build and bundle size budgets
 ```
 
+Browser compatibility tests (`*.browser.test.ts`) run in Chromium, Firefox and WebKit via
+[Vitest browser mode](https://vitest.dev/guide/browser/). To run them locally:
+
+```sh
+pnpm exec playwright install chromium firefox webkit  # once
+pnpm test:browser
+```
+
 If your change affects users, add an entry to the `Unreleased` section of
 [`packages/typed-binary/CHANGELOG.md`](./packages/typed-binary/CHANGELOG.md).
 

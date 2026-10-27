@@ -32,19 +32,21 @@
     "check": "pnpm lint && pnpm test && pnpm -r check",
     "lint": "oxlint && oxfmt --check",
     "fix": "oxlint --fix && oxfmt",
-    "test": "vitest run",
+    "test": "vitest run --project unit",
+    "test:browser": "vitest run --project browser",
     "build": "pnpm -r build",
     "dev": "pnpm -r dev",
-    "dev:test": "vitest",
+    "dev:test": "vitest --project unit",
     "ts-version": "tsc -v"
   },
   "devDependencies": {
     "@types/node": "^20.14.11",
+    "@vitest/browser-playwright": "^4.1.12",
     "arg": "^5.0.2",
-    "cypress": "^15.11.0",
     "esbuild": "^0.27.3",
     "oxfmt": "^0.36.0",
     "oxlint": "^1.51.0",
+    "playwright": "^1.64.1",
     "rolldown": "^1.2.15",
     "rollup": "^4.59.0",
     "socket.io": "^4.7.5",
@@ -52,7 +54,7 @@
     "tsx": "^4.16.2",
     "typed-binary": "workspace:*",
     "typescript": "catalog:",
-    "vitest": "^4.0.18",
+    "vitest": "^4.1.12",
     "zod": "^3.24.1"
   },
   "packageManager": "pnpm@10.30.3+sha512.c961d1e0a2d8e354ecaa5166b822516668b7f44cb5bd95122d590dd81922f606f5473b6d23ec4a5be05e7fcd18e8488d47d978bbe981872f1145d06e9a740017"

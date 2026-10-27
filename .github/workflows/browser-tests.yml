@@ -7,8 +7,8 @@ on:
     branches: [main]
 
 jobs:
-  cypress-run:
-    runs-on: ubuntu-22.04
+  browser-tests:
+    runs-on: ubuntu-latest
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -18,9 +18,17 @@ jobs:
         with:
           run_install: false
 
-      - name: Cypress run
-        uses: cypress-io/github-action@v6
+      - name: Use Node.js
+        uses: actions/setup-node@v4
         with:
-          install-command: pnpm i --frozen-lockfile
-          build: pnpm build
-          command: pnpm cypress run
+          node-version: 24.x
+          cache: 'pnpm'
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Install Playwright browsers
+        run: pnpm exec playwright install --with-deps chromium firefox webkit
+
+      - name: Run browser tests
+        run: pnpm test:browser
