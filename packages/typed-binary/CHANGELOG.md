@@ -1,6 +1,8 @@
 # Changelog
 
-## Unreleased (v5)
+## Unreleased
+
+## 5.0.0-alpha.0 (2026-10-27)
 
 v5 reworks how schemas are defined and typed, makes recursion a matter of plain getters, replaces the buffer reader and
 writer with a lightweight cursor, and adds primitives for data whose layout depends on previously encoded values.
@@ -111,8 +113,6 @@ The replacements in the table encode data the same way as the v4 APIs they repla
 ### Fixes
 
 - Measuring the max size of a recursive schema returns `NaN` (unbounded), instead of overflowing the stack.
-
-## Unreleased
 
 ## 4.3.5 (2026-10-27)
 
