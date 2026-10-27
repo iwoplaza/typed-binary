@@ -1,3 +1,4 @@
+import { describe, expect, it } from 'vitest';
 import { cursor, i32Array, string, u32, u32Array } from 'typed-binary';
 
 describe('cursor', () => {
@@ -6,7 +7,7 @@ describe('cursor', () => {
     const u32View = new Uint32Array(buffer);
     u32View[0] = 256;
 
-    expect(u32.read(cursor(buffer))).to.equal(256);
+    expect(u32.read(cursor(buffer))).toBe(256);
   });
 
   it('reads an int32 array from an ArrayBuffer', () => {
@@ -17,7 +18,7 @@ describe('cursor', () => {
     i32View[1] = 2;
     i32View[2] = 3;
 
-    expect([...i32Array(3).read(cursor(buffer))]).to.deep.eq([1, 2, 3]);
+    expect([...i32Array(3).read(cursor(buffer))]).toStrictEqual([1, 2, 3]);
   });
 
   it('writes a uint32 to an ArrayBuffer', () => {
@@ -25,7 +26,7 @@ describe('cursor', () => {
     u32.write(cursor(buffer), 256);
 
     const u32View = new Uint32Array(buffer);
-    expect(u32View[0]).to.equal(256);
+    expect(u32View[0]).toBe(256);
   });
 
   it('writes an int32 array to an ArrayBuffer', () => {
@@ -33,9 +34,9 @@ describe('cursor', () => {
     i32Array(3).write(cursor(buffer), new Int32Array([1, 2, 3]));
 
     const i32View = new Int32Array(buffer);
-    expect(i32View[0]).to.equal(1);
-    expect(i32View[1]).to.equal(2);
-    expect(i32View[2]).to.equal(3);
+    expect(i32View[0]).toBe(1);
+    expect(i32View[1]).toBe(2);
+    expect(i32View[2]).toBe(3);
   });
 
   it('writes a uint32 array to an ArrayBuffer', () => {
@@ -43,15 +44,15 @@ describe('cursor', () => {
     u32Array(3).write(cursor(buffer), new Uint32Array([1, 2, 3]));
 
     const u32View = new Uint32Array(buffer);
-    expect(u32View[0]).to.equal(1);
-    expect(u32View[1]).to.equal(2);
-    expect(u32View[2]).to.equal(3);
+    expect(u32View[0]).toBe(1);
+    expect(u32View[1]).toBe(2);
+    expect(u32View[2]).toBe(3);
   });
 
   it('roundtrips a string', () => {
     const buffer = new ArrayBuffer(64);
     string.write(cursor(buffer), 'Hello, 世界');
 
-    expect(string.read(cursor(buffer))).to.equal('Hello, 世界');
+    expect(string.read(cursor(buffer))).toBe('Hello, 世界');
   });
 });

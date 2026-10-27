@@ -6,9 +6,14 @@ on:
   pull_request:
     branches: [main]
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
-  cypress-run:
-    runs-on: ubuntu-22.04
+  browser-tests:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -18,9 +23,33 @@ jobs:
         with:
           run_install: false
 
-      - name: Cypress run
-        uses: cypress-io/github-action@v6
+      - name: Use Node.js
+        uses: actions/setup-node@v4
         with:
-          install-command: pnpm i --frozen-lockfile
-          build: pnpm build
-          command: pnpm cypress run
+          node-version: 24.x
+          cache: 'pnpm'
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Get Playwright version
+        id: playwright-version
+        run: echo "version=$(pnpm exec playwright --version | awk '{print $2}')" >> "$GITHUB_OUTPUT"
+
+      - name: Cache Playwright browsers
+        id: playwright-cache
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/ms-playwright
+          key: playwright-${{ runner.os }}-${{ steps.playwright-version.outputs.version }}
+
+      - name: Install Playwright browsers
+        if: steps.playwright-cache.outputs.cache-hit != 'true'
+        run: pnpm exec playwright install chromium firefox webkit
+
+      # System libraries live outside the cache dir, so they're installed every run
+      - name: Install Playwright system dependencies
+        run: pnpm exec playwright install-deps chromium firefox webkit
+
+      - name: Run browser tests
+        run: pnpm test:browser
