@@ -10,7 +10,9 @@
   --tb-cyan: hsl(189, 90%, 52%);
   --tb-blue: hsl(222, 95%, 64%);
   --tb-gradient: linear-gradient(110deg, var(--tb-cyan), var(--tb-blue));
-  --tb-hard-shadow: 4px 4px 0 0 var(--tb-blue);
+  --tb-shadow-color: var(--tb-blue);
+  --tb-hard-shadow: 4px 4px 0 0 var(--tb-shadow-color);
+  --tb-button-bg: var(--sl-color-accent);
 
   /* Keep "note" asides in the blue/cyan family */
   --sl-hue-blue: 206;
@@ -38,6 +40,9 @@
 :root[data-theme='light'] {
   --tb-cyan: hsl(191, 95%, 38%);
   --tb-blue: hsl(222, 85%, 52%);
+  /* Darker shadow and lighter button fill, so the two don't blend together */
+  --tb-shadow-color: hsl(224, 80%, 34%);
+  --tb-button-bg: hsl(194, 88%, 45%);
 
   --sl-color-white: hsl(221, 39%, 11%);
   --sl-color-gray-1: hsl(218, 25%, 18%);
@@ -104,8 +109,8 @@ site-search button[data-open-modal]:hover {
 }
 
 .sl-link-button.primary {
-  background: var(--sl-color-accent);
-  border-color: var(--sl-color-accent);
+  background: var(--tb-button-bg);
+  border-color: var(--tb-button-bg);
   color: var(--sl-color-black);
   box-shadow: var(--tb-hard-shadow);
 }
@@ -117,7 +122,7 @@ site-search button[data-open-modal]:hover {
 .sl-link-button.primary:hover {
   color: var(--sl-color-black);
   transform: translate(-2px, -2px);
-  box-shadow: 6px 6px 0 0 var(--tb-blue);
+  box-shadow: 6px 6px 0 0 var(--tb-shadow-color);
 }
 
 :root[data-theme='light'] .sl-link-button.primary:hover {
@@ -126,7 +131,7 @@ site-search button[data-open-modal]:hover {
 
 .sl-link-button.primary:active {
   transform: translate(2px, 2px);
-  box-shadow: 2px 2px 0 0 var(--tb-blue);
+  box-shadow: 2px 2px 0 0 var(--tb-shadow-color);
 }
 
 .sl-link-button.secondary {
